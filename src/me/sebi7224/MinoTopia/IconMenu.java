@@ -18,12 +18,12 @@ public class IconMenu implements Listener {
     private final String name;
     private final int size;
     private OptionClickEventHandler handler;
-    private Plugin plugin;
+    private MainClass plugin;
 
     private String[] optionNames;
     private ItemStack[] optionIcons;
 
-    public IconMenu(String name, int size, OptionClickEventHandler handler, Plugin plugin) {
+    public IconMenu(String name, int size, OptionClickEventHandler handler, MainClass plugin) {
         this.name = name;
 
         this.size = size;
@@ -64,7 +64,7 @@ public class IconMenu implements Listener {
             event.setCancelled(true);
             int slot = event.getRawSlot();
             if (slot >= 0 && slot < size && optionNames[slot] != null) {
-                Plugin plugin = this.plugin;
+                MainClass plugin = this.plugin;
                 OptionClickEvent e = new OptionClickEvent((Player) event.getWhoClicked(), slot, optionNames[slot]);
                 handler.onOptionClick(e);
                 if (e.willClose()) {

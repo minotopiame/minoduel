@@ -2,7 +2,7 @@ name: 1vs1
 version: 0.1
 author: sebi7224
 
-main: me.sebi7224.MinoTopia.Plugin
+main: me.sebi7224.MinoTopia.MainClass
 
 commands:
     1vs1:

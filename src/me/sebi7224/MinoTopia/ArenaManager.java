@@ -11,41 +11,42 @@ import java.util.Set;
 public class ArenaManager {
 
     public static void createArena(String arena_name) {
-        Plugin.config.set("arenas." + arena_name + ".ready", false);
-        Plugin.plugin.saveConfig();
+        MainClass.config.set("arenas." + arena_name + ".ready", false);
+        MainClass.plugin.saveConfig();
     }
 
     public static Set<String> getArenas() {
-        try {
-            return Plugin.config.getConfigurationSection("arenas.").getKeys(false);
-        } catch (NullPointerException NPE) {
+        if (MainClass.config.getConfigurationSection("arenas.") != null) {
+            return MainClass.config.getConfigurationSection("arenas.").getKeys(false);
+        } else {
             return null;
         }
     }
 
     public static void removeArena(String arena_name) {
-        Plugin.config.set("arenas." + arena_name, null);
-        Plugin.plugin.saveConfig();
+        MainClass.config.set("arenas." + arena_name, null);
+        MainClass.plugin.saveConfig();
     }
 
-    public static boolean Arena_exists(String arena_name) {
-        return Plugin.config.contains("arenas." + arena_name);
+    public static boolean Arenaexists(String arena_name) {
+        return MainClass.config.contains("arenas." + arena_name);
     }
 
     public static boolean isArenaReady(String arena_name) {
-        return Plugin.config.getBoolean("arenas." + arena_name + ".ready");
-
+        return MainClass.config.getBoolean("arenas." + arena_name + ".ready");
     }
 
     public static void setArenaReady(String arena_name, boolean ready) {
-        Plugin.config.set("arenas." + arena_name + ".ready", ready);
-        Plugin.plugin.saveConfig();
+        MainClass.config.set("arenas." + arena_name + ".ready", ready);
+        MainClass.plugin.saveConfig();
     }
 
     public static List<String> getReadyArenas() {
         Set<String> arenas = getArenas();
-        if (arenas == null) return null;
-        List<String> ready_arenas = new ArrayList<String>();
+        if (arenas == null) {
+            return null;
+        }
+        List<String> ready_arenas = new ArrayList<>();
 
         for (String arena : arenas) {
             if (isArenaReady(arena)) ready_arenas.add(arena);
@@ -54,29 +55,45 @@ public class ArenaManager {
         return ready_arenas;
     }
 
-    public static int ready_arenas() {
+    public static int getReadyArenasSize() {
         List<String> ready_arenas = getReadyArenas();
-        if (ready_arenas == null) return 0;
-        else return getReadyArenas().size();
+        if (ready_arenas == null) {
+            return 0;
+        } else {
+            return getReadyArenas().size();
+        }
     }
 
-    public static void setItem(String arena_name, Material material) {
-        Plugin.config.set("arenas." + arena_name + ".icon", material.name());
-        Plugin.plugin.saveConfig();
+    public static void setArenaItem(String arena_name, Material material) {
+        MainClass.config.set("arenas." + arena_name + ".icon", material.name());
+        MainClass.plugin.saveConfig();
     }
 
-    public static Material getItem(String arena_name) {
-        return Material.getMaterial(Plugin.config.getString("arenas." + arena_name + ".icon"));
+    public static Material getArenaItem(String arena_name) {
+        return Material.getMaterial(MainClass.config.getString("arenas." + arena_name + ".icon"));
     }
 
     public static void saveLocation(String path, Location loc) {
-        Plugin.config.set(path, loc.getWorld().getName() + "_" + loc.getX() + "_" + loc.getY() + "_" + loc.getZ() + "_" + loc.getYaw() + "_" + loc.getPitch());
-        Plugin.plugin.saveConfig();
+        MainClass.config.set(path + ".world", loc.getWorld().getName());
+        MainClass.config.set(path + ".x", loc.getX());
+        MainClass.config.set(path + ".y", loc.getY());
+        MainClass.config.set(path + ".z", loc.getZ());
+        MainClass.config.set(path + ".yaw", loc.getYaw());
+        MainClass.config.set(path + ".pitch", loc.getPitch());
+        MainClass.plugin.saveConfig();
     }
 
     public static Location getLocation(String path) {
-        if (Plugin.config.get(path) == null) return null;
-        String[] split = Plugin.config.getString(path).split("_");
-        return new Location(Bukkit.getWorld(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]), Float.parseFloat(split[4]), Float.parseFloat(split[5]));
+        if (MainClass.config.get(path) == null) {
+            return null;
+        }
+        String world = MainClass.config.getString(path + ".world");
+        double x = MainClass.config.getDouble(path + ".x");
+        double y = MainClass.config.getDouble(path + ".y");
+        double z = MainClass.config.getDouble(path + ".z");
+        float yaw = Float.parseFloat(MainClass.config.getString(path + ".pitch"));
+        float pitch = Float.parseFloat(MainClass.config.getString(path + ".pitch"));
+
+        return new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
     }
 }

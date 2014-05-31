@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="1vs1:jar">
+    <output-path>$USER_HOME$/Desktop</output-path>
+    <root id="archive" name="1vs1.jar">
+      <element id="module-output" name="1vs1" />
+    </root>
+  </artifact>
+</component>

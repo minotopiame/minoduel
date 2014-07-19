@@ -1,4 +1,4 @@
-package main.java.me.sebi7224.MinoTopia;
+package me.sebi7224.MinoTopia;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,34 +11,34 @@ import java.util.Set;
 public class ArenaManager {
 
     public static void createArena(String arena_name) {
-        MainClass.config.set("arenas." + arena_name + ".ready", false);
-        MainClass.plugin.saveConfig();
+        MainClass.instance().getConfig().set("arenas." + arena_name + ".ready", false);
+        MainClass.instance().saveConfig();
     }
 
     public static Set<String> getArenas() {
-        if (MainClass.config.getConfigurationSection("arenas.") != null) {
-            return MainClass.config.getConfigurationSection("arenas.").getKeys(false);
+        if (MainClass.instance().getConfig().getConfigurationSection("arenas.") != null) {
+            return MainClass.instance().getConfig().getConfigurationSection("arenas.").getKeys(false);
         } else {
             return null;
         }
     }
 
     public static void removeArena(String arena_name) {
-        MainClass.config.set("arenas." + arena_name, null);
-        MainClass.plugin.saveConfig();
+        MainClass.instance().getConfig().set("arenas." + arena_name, null);
+        MainClass.instance().saveConfig();
     }
 
     public static boolean Arenaexists(String arena_name) {
-        return MainClass.config.contains("arenas." + arena_name);
+        return MainClass.instance().getConfig().contains("arenas." + arena_name);
     }
 
     public static boolean isArenaReady(String arena_name) {
-        return MainClass.config.getBoolean("arenas." + arena_name + ".ready");
+        return MainClass.instance().getConfig().getBoolean("arenas." + arena_name + ".ready");
     }
 
     public static void setArenaReady(String arena_name, boolean ready) {
-        MainClass.config.set("arenas." + arena_name + ".ready", ready);
-        MainClass.plugin.saveConfig();
+        MainClass.instance().getConfig().set("arenas." + arena_name + ".ready", ready);
+        MainClass.instance().saveConfig();
     }
 
     public static List<String> getReadyArenas() {
@@ -65,34 +65,34 @@ public class ArenaManager {
     }
 
     public static void setArenaItem(String arena_name, Material material) {
-        MainClass.config.set("arenas." + arena_name + ".icon", material.name());
-        MainClass.plugin.saveConfig();
+        MainClass.instance().getConfig().set("arenas." + arena_name + ".icon", material.name());
+        MainClass.instance().saveConfig();
     }
 
     public static Material getArenaItem(String arena_name) {
-        return Material.getMaterial(MainClass.config.getString("arenas." + arena_name + ".icon"));
+        return Material.getMaterial(MainClass.instance().getConfig().getString("arenas." + arena_name + ".icon"));
     }
 
     public static void saveLocation(String path, Location loc) {
-        MainClass.config.set(path + ".world", loc.getWorld().getName());
-        MainClass.config.set(path + ".x", loc.getX());
-        MainClass.config.set(path + ".y", loc.getY());
-        MainClass.config.set(path + ".z", loc.getZ());
-        MainClass.config.set(path + ".yaw", loc.getYaw());
-        MainClass.config.set(path + ".pitch", loc.getPitch());
-        MainClass.plugin.saveConfig();
+        MainClass.instance().getConfig().set(path + ".world", loc.getWorld().getName());
+        MainClass.instance().getConfig().set(path + ".x", loc.getX());
+        MainClass.instance().getConfig().set(path + ".y", loc.getY());
+        MainClass.instance().getConfig().set(path + ".z", loc.getZ());
+        MainClass.instance().getConfig().set(path + ".yaw", loc.getYaw());
+        MainClass.instance().getConfig().set(path + ".pitch", loc.getPitch());
+        MainClass.instance().saveConfig();
     }
 
     public static Location getLocation(String path) {
-        if (MainClass.config.get(path) == null) {
+        if (MainClass.instance().getConfig().get(path) == null) {
             return null;
         }
-        String world = MainClass.config.getString(path + ".world");
-        double x = MainClass.config.getDouble(path + ".x");
-        double y = MainClass.config.getDouble(path + ".y");
-        double z = MainClass.config.getDouble(path + ".z");
-        float yaw = Float.parseFloat(MainClass.config.getString(path + ".pitch"));
-        float pitch = Float.parseFloat(MainClass.config.getString(path + ".pitch"));
+        String world = MainClass.instance().getConfig().getString(path + ".world");
+        double x = MainClass.instance().getConfig().getDouble(path + ".x");
+        double y = MainClass.instance().getConfig().getDouble(path + ".y");
+        double z = MainClass.instance().getConfig().getDouble(path + ".z");
+        float yaw = Float.parseFloat(MainClass.instance().getConfig().getString(path + ".pitch"));
+        float pitch = Float.parseFloat(MainClass.instance().getConfig().getString(path + ".pitch"));
 
         return new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
     }

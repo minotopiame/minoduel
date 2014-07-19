@@ -1,4 +1,4 @@
-package main.java.me.sebi7224.MinoTopia;
+package me.sebi7224.MinoTopia;
 
 import com.avaje.ebean.validation.NotNull;
 import org.apache.commons.lang.Validate;

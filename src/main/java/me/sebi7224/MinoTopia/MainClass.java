@@ -1,9 +1,8 @@
-package main.java.me.sebi7224.MinoTopia;
+package me.sebi7224.MinoTopia;
 
-import org.bukkit.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -17,33 +16,28 @@ public class MainClass extends JavaPlugin {
     public static final HashMap<Player, Location> PlayerslastLocation = new HashMap<>();
     public static final HashMap<Player, Float> PlayerssavedEXP = new HashMap<>();
     public static String prefix = "§6[§a1vs1§6] ";
-    public static FileConfiguration config;
-    public static MainClass plugin;
+    private static MainClass instance;
 
-    public static void setWinnerandLooser(Player winner, Player looser) {
-
-        String winnermessage = ChatColor.translateAlternateColorCodes('&', config.getString("message.winner"));
-        winnermessage += winnermessage.replace("%name%", winner.getName());
-        String loosermessage = ChatColor.translateAlternateColorCodes('&', config.getString("message.looser"));
-        winnermessage += winnermessage.replace("%name%", looser.getName());
-        winner.sendMessage(MainClass.prefix + winnermessage);
-        looser.sendMessage(MainClass.prefix + loosermessage);
-
+    public static void setWinnerandLooser(Player winner, Player looser, String arena) {
+        int taskid = MainCommands.runningTasks.get(arena);
+        Bukkit.getScheduler().cancelTask(taskid);
+        MainCommands.runningTasks.remove(arena);
+        Bukkit.broadcastMessage(prefix + "§a" + winner.getName() + " §7hat gegen §c" + looser.getName() + " §7im 1vs1 gewonnen! (Arena §6" + arena + "§7)");
         PlayersinFight.remove(looser);
 
         winner.teleport(MainClass.PlayerslastLocation.get(winner));
         winner.getInventory().clear();
 
-        int item = config.getInt("item.typeid");
-        int amount = config.getInt("item.amount");
+        int item = MainClass.instance().getConfig().getInt("item.typeid");
+        int amount = MainClass.instance().getConfig().getInt("item.amount");
         ItemStack item1;
         item1 = new ItemStack(Material.getMaterial(Integer.valueOf(item)));
 
         ItemStackFactory factory = new ItemStackFactory(item1);
         factory.displayName("§b§l1vs1 §6§lBelohnung");
         factory.amount(amount);
-        if (config.get("item.data") != null) {
-            factory.materialData((MaterialData) config.get("item.data"));
+        if (MainClass.instance().getConfig().get("item.data") != null) {
+            factory.materialData((MaterialData) MainClass.instance().getConfig().get("item.data"));
         }
 
         winner.setExp(MainClass.PlayerssavedEXP.get(winner));
@@ -55,30 +49,22 @@ public class MainClass extends JavaPlugin {
         winner.getInventory().setChestplate(new ItemStack(Material.AIR));
         winner.getInventory().setLeggings(new ItemStack(Material.AIR));
         winner.getInventory().setBoots(new ItemStack(Material.AIR));
+
+    }
+
+    public static MainClass instance() {
+        return MainClass.instance;
     }
 
     public void onEnable() {
-        config = this.getConfig();
-        config.options().copyDefaults(true);
-        plugin = this;
+        instance = this;
         this.getServer().getPluginManager().registerEvents(new MainEvents(), this);
         this.getCommand("1vs1").setExecutor(new MainCommands());
-
         MainCommands.registerArenaMenu();
-
-        loadConfig();
     }
 
     public void onDisable() {
 
-
-    }
-
-    private void loadConfig() {
-        config.options().copyDefaults(true);
-        config.options().header("1vs1 by Sebi7224");
-        config.options().copyHeader(true);
-        this.saveConfig();
 
     }
 }

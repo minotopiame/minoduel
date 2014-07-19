@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class ArenaManager {
+public final class ArenaManager {
+
+    private ArenaManager() {
+
+    }
 
     public static void createArena(String arena_name) {
         MainClass.instance().getConfig().set("arenas." + arena_name + ".ready", false);

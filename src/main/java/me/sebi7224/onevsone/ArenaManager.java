@@ -96,7 +96,7 @@ public final class ArenaManager {
     }
 
     public static Location getLocation(String path) {
-        if (MainClass.instance().getConfig().contains(path)) {
+        if (!MainClass.instance().getConfig().contains(path)) {
             return null;
         }
         String world = MainClass.instance().getConfig().getString(path + ".world");

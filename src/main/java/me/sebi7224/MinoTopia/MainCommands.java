@@ -11,10 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MainCommands implements CommandExecutor {
 
@@ -395,10 +392,8 @@ public class MainCommands implements CommandExecutor {
     }
 
     boolean isEmpty(Player player) {
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null)
-                return false;
-        }
-        return true;
+        return Arrays.asList(player.getInventory().getContents()).stream()
+                .filter(is -> is != null && !is.getType().equals(Material.AIR))
+                .findAny().isPresent();
     }
 }

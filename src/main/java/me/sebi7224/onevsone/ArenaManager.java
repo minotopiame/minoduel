@@ -3,6 +3,7 @@ package me.sebi7224.onevsone;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,26 +87,47 @@ public final class ArenaManager {
     }
 
     public static void saveLocation(String path, Location loc) {
-        MainClass.instance().getConfig().set(path + ".world", loc.getWorld().getName());
-        MainClass.instance().getConfig().set(path + ".x", loc.getX());
-        MainClass.instance().getConfig().set(path + ".y", loc.getY());
-        MainClass.instance().getConfig().set(path + ".z", loc.getZ());
-        MainClass.instance().getConfig().set(path + ".yaw", loc.getYaw());
-        MainClass.instance().getConfig().set(path + ".pitch", loc.getPitch());
+        saveLocation(MainClass.instance().getConfig().getConfigurationSection(path), loc);
         MainClass.instance().saveConfig();
     }
 
-    public static Location getLocation(String path) {
-        if (!MainClass.instance().getConfig().contains(path)) {
+    public static void saveLocation(ConfigurationSection section, Location loc) {
+        section.set("world", loc.getWorld().getName());
+        section.set("x", loc.getX());
+        section.set("y", loc.getY());
+        section.set("z", loc.getZ());
+        section.set("yaw", loc.getYaw());
+        section.set("pitch", loc.getPitch());
+    }
+
+    public static Location getLocation(ConfigurationSection section) {
+        if (section == null) {
             return null;
         }
-        String world = MainClass.instance().getConfig().getString(path + ".world");
-        double x = MainClass.instance().getConfig().getDouble(path + ".x");
-        double y = MainClass.instance().getConfig().getDouble(path + ".y");
-        double z = MainClass.instance().getConfig().getDouble(path + ".z");
-        float yaw = Float.parseFloat(MainClass.instance().getConfig().getString(path + ".pitch"));
-        float pitch = Float.parseFloat(MainClass.instance().getConfig().getString(path + ".pitch"));
+
+        String world = section.getString("world");
+        double x = section.getDouble("x");
+        double y = section.getDouble("y");
+        double z = section.getDouble("z");
+        float pitch = getFloat(section.getString("pitch"));
+        float yaw = getFloat(section.getString("yaw"));
 
         return new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
+    }
+
+    public static Location getLocation(String path) {
+        return getLocation(MainClass.instance().getConfig().getConfigurationSection(path));
+    }
+
+    private static float getFloat(String floatString) {
+        if (floatString == null) {
+            return 0F;
+        }
+
+        try {
+            return Float.parseFloat(floatString);
+        } catch (NumberFormatException e) {
+            return 0F;
+        }
     }
 }

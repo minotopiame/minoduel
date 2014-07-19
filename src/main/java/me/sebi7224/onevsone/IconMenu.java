@@ -1,4 +1,4 @@
-package me.sebi7224.MinoTopia;
+package me.sebi7224.onevsone;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

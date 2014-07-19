@@ -1,4 +1,4 @@
-package me.sebi7224.MinoTopia;
+package me.sebi7224.onevsone;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -28,12 +28,20 @@ public class ArenaManager {
         MainClass.instance().saveConfig();
     }
 
-    public static boolean Arenaexists(String arena_name) {
+    public static boolean exists(String arena_name) {
         return MainClass.instance().getConfig().contains("arenas." + arena_name);
     }
 
     public static boolean isArenaReady(String arena_name) {
         return MainClass.instance().getConfig().getBoolean("arenas." + arena_name + ".ready");
+    }
+
+    public static List getReward(String arena_name) {
+        if (MainClass.instance().getConfig().contains("arenas." + arena_name + ".rewards")) {
+            return MainClass.instance().getConfig().getList("arenas." + arena_name + ".rewards");
+        } else {
+            return MainClass.instance().getConfig().getList("globalRewards");
+        }
     }
 
     public static void setArenaReady(String arena_name, boolean ready) {
@@ -64,12 +72,12 @@ public class ArenaManager {
         }
     }
 
-    public static void setArenaItem(String arena_name, Material material) {
+    public static void setArenaIconItem(String arena_name, Material material) {
         MainClass.instance().getConfig().set("arenas." + arena_name + ".icon", material.name());
         MainClass.instance().saveConfig();
     }
 
-    public static Material getArenaItem(String arena_name) {
+    public static Material getArenaIconItem(String arena_name) {
         return Material.getMaterial(MainClass.instance().getConfig().getString("arenas." + arena_name + ".icon"));
     }
 
@@ -84,7 +92,7 @@ public class ArenaManager {
     }
 
     public static Location getLocation(String path) {
-        if (MainClass.instance().getConfig().get(path) == null) {
+        if (MainClass.instance().getConfig().contains(path)) {
             return null;
         }
         String world = MainClass.instance().getConfig().getString(path + ".world");

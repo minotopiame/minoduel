@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.List;
 
-public class MainEvents implements Listener {
+public class MainListener implements Listener {
 
     @SuppressWarnings({"rawtypes", "deprecation"})
     @EventHandler
@@ -22,11 +22,11 @@ public class MainEvents implements Listener {
                 victim.setHealth(victim.getMaxHealth());
                 victim.setFoodLevel(10);
                 String arena = MainClass.getPlayersinFight().get(e.getEntity());
-                List<Player> PlayerinArena = MainCommands.getArenaPlayers(arena);
+                List<Player> PlayerinArena = Command1vs1.getArenaPlayers(arena);
                 PlayerinArena.remove(victim);
-                MainClass.setWinnerandLoser(PlayerinArena.get(0), victim, arena);
-                victim.teleport(MainClass.getPlayerslastLocation().get(victim));
-                MainClass.getPlayerslastLocation().remove(victim);
+                MainClass.setGameResult(PlayerinArena.get(0), victim, arena);
+                victim.teleport(MainClass.getSavedLocations().get(victim));
+                MainClass.getSavedLocations().remove(victim);
             }
         }
     }
@@ -37,15 +37,15 @@ public class MainEvents implements Listener {
         if (MainClass.getPlayersinFight().containsKey(e.getPlayer())) {
             String arenaName = MainClass.getPlayersinFight().get(e.getPlayer());
             MainClass.getPlayersinFight().remove(e.getPlayer());
-            e.getPlayer().teleport(MainClass.getPlayerslastLocation().get(e.getPlayer()));
+            e.getPlayer().teleport(MainClass.getSavedLocations().get(e.getPlayer()));
             e.getPlayer().getInventory().clear();
-            e.getPlayer().setExp(MainClass.getPlayerssavedEXP().get(e.getPlayer()));
+            e.getPlayer().setExp(MainClass.getSavedExperience().get(e.getPlayer()));
             e.getPlayer().updateInventory();
-            MainClass.getPlayerssavedEXP().remove(e.getPlayer());
-            MainClass.getPlayerslastLocation().remove(e.getPlayer());
-            List<Player> playerInArena = MainCommands.getArenaPlayers(arenaName);
+            MainClass.getSavedExperience().remove(e.getPlayer());
+            MainClass.getSavedLocations().remove(e.getPlayer());
+            List<Player> playerInArena = Command1vs1.getArenaPlayers(arenaName);
             playerInArena.remove(e.getPlayer());
-            MainClass.setWinnerandLoser(playerInArena.get(0), e.getPlayer(), arenaName);
+            MainClass.setGameResult(playerInArena.get(0), e.getPlayer(), arenaName);
         }
     }
 
@@ -55,15 +55,15 @@ public class MainEvents implements Listener {
         if (MainClass.getPlayersinFight().containsKey(e.getPlayer())) {
             String arenaName = MainClass.getPlayersinFight().get(e.getPlayer());
             MainClass.getPlayersinFight().remove(e.getPlayer());
-            e.getPlayer().teleport(MainClass.getPlayerslastLocation().get(e.getPlayer()));
+            e.getPlayer().teleport(MainClass.getSavedLocations().get(e.getPlayer()));
             e.getPlayer().getInventory().clear();
-            e.getPlayer().setExp(MainClass.getPlayerssavedEXP().get(e.getPlayer()));
+            e.getPlayer().setExp(MainClass.getSavedExperience().get(e.getPlayer()));
             e.getPlayer().updateInventory();
-            MainClass.getPlayerssavedEXP().remove(e.getPlayer());
-            MainClass.getPlayerslastLocation().remove(e.getPlayer());
-            List<Player> playerInArena = MainCommands.getArenaPlayers(arenaName);
+            MainClass.getSavedExperience().remove(e.getPlayer());
+            MainClass.getSavedLocations().remove(e.getPlayer());
+            List<Player> playerInArena = Command1vs1.getArenaPlayers(arenaName);
             playerInArena.remove(e.getPlayer());
-            MainClass.setWinnerandLoser(playerInArena.get(0), e.getPlayer(), arenaName);
+            MainClass.setGameResult(playerInArena.get(0), e.getPlayer(), arenaName);
         }
     }
 
@@ -84,9 +84,9 @@ public class MainEvents implements Listener {
     public void onRespawn(PlayerRespawnEvent e) {
         if (MainClass.getPlayersinFight().containsKey(e.getPlayer())) {
             e.getPlayer().getInventory().clear();
-            e.getPlayer().setExp(MainClass.getPlayerssavedEXP().get(e.getPlayer()));
-            MainClass.getPlayerssavedEXP().remove(e.getPlayer());
-            MainClass.getPlayerslastLocation().remove(e.getPlayer());
+            e.getPlayer().setExp(MainClass.getSavedExperience().get(e.getPlayer()));
+            MainClass.getSavedExperience().remove(e.getPlayer());
+            MainClass.getSavedLocations().remove(e.getPlayer());
             e.getPlayer().updateInventory();
         }
     }

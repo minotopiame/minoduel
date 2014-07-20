@@ -1,5 +1,8 @@
 package me.sebi7224.onevsone;
 
+import io.github.xxyy.common.util.CommandHelper;
+import me.sebi7224.onevsone.arena.ArenaManager;
+import me.sebi7224.onevsone.util.IconMenu;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class MainCommands implements CommandExecutor {
+public class Command1vs1 implements CommandExecutor {
 
     public static HashMap<Player, Location> waitingPlayers = new HashMap<>();
     public static HashMap<String, Integer> runningTasks = new HashMap<>();
@@ -36,7 +39,6 @@ public class MainCommands implements CommandExecutor {
         }
 
         arenaMenu = new IconMenu("§8Wähle eine Arena!", slots, new IconMenu.OptionClickEventHandler() {
-            @SuppressWarnings({"deprecation", "rawtypes"})
             @Override
             public void onOptionClick(IconMenu.OptionClickEvent event) {
                 final Player player = event.getPlayer();
@@ -45,22 +47,23 @@ public class MainCommands implements CommandExecutor {
                 name = name.replace("§6", "");
                 if (getArenaPlayers(name).size() == 2) {
 
-                    player.sendMessage(MainClass.getPrefix() + "§eDiese Arena ist bereits voll!");
+                    player.sendMessage(MainClass.getPrefix() + "§eDiese Arena ist bereits voll!"); //TODO queue
+                    //TODO Message: Die gewählte Arena ist bereits voll! Du bist nun in der Warteschlange. (Position: %)
+                    // [Andere Arena wählen] [Die Arena ist mir egal] [Abbrechen]
 
                 } else if (getArenaPlayers(name).size() == 1) {
 
-                    for (final Map.Entry entry : MainClass.getPlayersinFight().entrySet()) {
+                    for (final Map.Entry<Player, String> entry : MainClass.getPlayersinFight().entrySet()) {
                         if (entry.getValue().equals(name)) {
-
-                            final Player player1 = ((Player) entry.getKey());
+                            final Player player1 = entry.getKey();
 
                             MainClass.getPlayersinFight().put(player, name);
 
-                            waitingPlayers.put(player, player.getLocation());
+                            waitingPlayers.put(player, player.getLocation()); //plsno
                             waitingPlayers.put(player1, player1.getLocation());
 
                             player.sendMessage(MainClass.getPrefix() + "§eIn 3 Sekunden wirst du in die Arena teleportiert...");
-                            player1.sendMessage(MainClass.getPrefix() + "§eEs wurde ein Spieler gefunden in 3 Sekunden wirst du teleportiert...");
+                            player1.sendMessage(MainClass.getPrefix() + "§eEs wurde ein Spieler gefunden! In 3 Sekunden wirst du teleportiert...");
 
                             final String finalName = name;
                             final Location locationPlayer = waitingPlayers.get(player);
@@ -78,10 +81,10 @@ public class MainCommands implements CommandExecutor {
                                                 player1.sendMessage(MainClass.getPrefix() + "§eDer Spieler §6" + player.getName() + "§e hat die Arena betreten!");
                                                 player1.sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
 
-                                                for (Player player2 : MainCommands.getArenaPlayers(finalName)) {
+                                                for (Player player2 : Command1vs1.getArenaPlayers(finalName)) {
 
-                                                    MainClass.getPlayerslastLocation().put(player2, player2.getLocation());
-                                                    MainClass.getPlayerssavedEXP().put(player2, player2.getExp());
+                                                    MainClass.getSavedLocations().put(player2, player2.getLocation());
+                                                    MainClass.getSavedExperience().put(player2, player2.getExp());
 
                                                     player2.setFireTicks(0);
                                                     player2.setHealth(20);
@@ -118,10 +121,10 @@ public class MainCommands implements CommandExecutor {
                                                             player1.sendMessage(MainClass.getPrefix() + "§7Noch §e" + countdown + " §7Sekunden!");
                                                         }
                                                         if (countdown == 0) {
-                                                            MainClass.setWinnerandLoser(player, player1, finalName);
+                                                            MainClass.setGameResult(player, player1, finalName);
                                                             this.cancel();
-                                                            player1.teleport(MainClass.getPlayerslastLocation().get(player1));
-                                                            MainClass.getPlayerslastLocation().remove(player1);
+                                                            player1.teleport(MainClass.getSavedLocations().get(player1));
+                                                            MainClass.getSavedLocations().remove(player1);
                                                             runningTasks.remove(finalName);
                                                         }
                                                     }
@@ -163,7 +166,7 @@ public class MainCommands implements CommandExecutor {
             if (slot > 53) {
                 return;
             }
-            String lore = "§7Klicke um in die Arena§6 " + arenas + " §7zu Joinen!";
+            String lore = "§7Klicke, um die Arena§6 " + arenas + " §7zu wählen!";
             if (getArenaPlayers(arenas).size() == 1) {
                 lore = lore + "§c" + getArenaPlayers(arenas).get(0).getName() + " §avs. " + "§a<Unbekannt>";
             }
@@ -177,11 +180,10 @@ public class MainCommands implements CommandExecutor {
     }
 
     public static List<Player> getArenaPlayers(String arena) {
-        List<Player> ArenaPlayers = MainClass.getPlayersinFight().entrySet().stream()
+        return MainClass.getPlayersinFight().entrySet().stream()
                 .filter(e -> e.getValue().equals(arena))
-                .map(e -> (Player) e.getKey())
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        return ArenaPlayers;
     }
 
     @Override
@@ -209,22 +211,23 @@ public class MainCommands implements CommandExecutor {
             Player player = (Player) sender;
             switch (args[0].toLowerCase()) {
                 case "create":
-                    if (player.hasPermission("1vs1.create")) {
-                        if (args.length < 2) {
-                            player.sendMessage("§cDer Arenaname ist ungültig!");
-                            return true;
-                        }
-                        if (ArenaManager.exists(args[1])) {
-                            player.sendMessage(MainClass.getPrefix() + "§cDie Arena §4" + args[1] + " §cexistiert bereits!");
-                            return true;
-                        }
-                        ArenaManager.createArena(args[1]);
-                        player.sendMessage(MainClass.getPrefix() + "§7Du hast die Arena §6" + args[1] + " §7erfolgreich erstellt!");
-                        return true;
-                    } else {
-                        player.sendMessage(noperm);
+                    if (!CommandHelper.checkPermAndMsg(player, "1vs1.create", commandLabel)) {
                         return true;
                     }
+
+                    if (args.length < 2) {
+                        player.sendMessage("§cZu wenige Argumente übergeben! /1vs1 help");
+                        return true;
+                    }
+
+                    if (ArenaManager.exists(args[1])) {
+                        player.sendMessage(MainClass.getPrefix() + "§cDie Arena §4" + args[1] + " §cexistiert bereits!");
+                        return true;
+                    }
+
+                    ArenaManager.createArena(args[1]);
+                    player.sendMessage(MainClass.getPrefix() + "§7Du hast die Arena §6" + args[1] + " §7erfolgreich erstellt!");
+                    return true;
                 case "remove":
                     if (player.hasPermission("1vs1.remove")) {
                         if (args.length < 2) {

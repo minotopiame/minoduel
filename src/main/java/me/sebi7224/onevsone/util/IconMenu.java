@@ -1,5 +1,7 @@
-package me.sebi7224.onevsone;
+package me.sebi7224.onevsone.util;
 
+import io.github.xxyy.common.util.inventory.InventoryHelper;
+import me.sebi7224.onevsone.MainClass;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -64,16 +66,10 @@ public class IconMenu implements Listener {
             event.setCancelled(true);
             int slot = event.getRawSlot();
             if (slot >= 0 && slot < size && optionNames[slot] != null) {
-                MainClass plugin = this.plugin;
                 OptionClickEvent e = new OptionClickEvent((Player) event.getWhoClicked(), slot, optionNames[slot]);
                 handler.onOptionClick(e);
                 if (e.willClose()) {
-                    final Player p = (Player) event.getWhoClicked();
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-                        public void run() {
-                            p.closeInventory();
-                        }
-                    }, 1);
+                    InventoryHelper.closeInventoryLater(event.getWhoClicked(), this.plugin);
                 }
                 if (e.willDestroy()) {
                     destroy();

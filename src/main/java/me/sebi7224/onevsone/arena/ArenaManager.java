@@ -1,23 +1,29 @@
-package me.sebi7224.onevsone;
+package me.sebi7224.onevsone.arena;
 
+import io.github.xxyy.common.util.inventory.ItemStackFactory;
+import me.sebi7224.onevsone.MainClass;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 public final class ArenaManager {
 
+    private static List<ItemStack> defaultRewards;
+
     private ArenaManager() {
 
     }
 
+    @Deprecated
     public static void createArena(String arena_name) {
-        MainClass.instance().getConfig().set("arenas." + arena_name + ".ready", false);
-        MainClass.instance().saveConfig();
+
     }
 
     public static Set<String> getArenas() {
@@ -45,8 +51,23 @@ public final class ArenaManager {
         if (MainClass.instance().getConfig().contains("arenas." + arena_name + ".rewards")) {
             return MainClass.instance().getConfig().getList("arenas." + arena_name + ".rewards");
         } else {
-            return MainClass.instance().getConfig().getList("globalRewards");
+            return getDefaultRewards();
         }
+    }
+
+    public static List<ItemStack> getDefaultRewards() {
+        if(defaultRewards == null) {
+            //noinspection unchecked
+            defaultRewards = (List<ItemStack>) MainClass.instance().getConfig().getList("default-rewards");
+
+            if(defaultRewards == null || defaultRewards.isEmpty()) {
+                defaultRewards = Arrays.asList(new ItemStackFactory(Material.DIAMOND).displayName("§61vs1-Belohnung!").produce());
+                MainClass.instance().getConfig().set("default-rewards", defaultRewards);
+                MainClass.instance().saveConfig();
+            }
+        }
+
+        return defaultRewards;
     }
 
     public static void setArenaReady(String arena_name, boolean ready) {

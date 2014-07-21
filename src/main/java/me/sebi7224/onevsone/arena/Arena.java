@@ -2,8 +2,9 @@ package me.sebi7224.onevsone.arena;
 
 import com.google.common.base.Objects;
 import io.github.xxyy.common.collections.CaseInsensitiveMap;
+import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
-import me.sebi7224.onevsone.Command1vs1;
+import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 import me.sebi7224.onevsone.MainClass;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -38,25 +39,45 @@ public class Arena {
     private Location secondSpawn;
     private ItemStack iconStack;
     private List<ItemStack> specificRewards;
-    private PlayerInfo[] currentPlayers = null;
+
+    private Couple<PlayerInfo> currentPlayers = null;
+    private RunnableArenaTick tickTask = new RunnableArenaTick();
 
     public Arena(ConfigurationSection storageBackend) {
         this.name = storageBackend.getName();
         this.configSection = storageBackend;
     }
 
+    /**
+     * Ends this game, gives the winner their reward (if applicable)
+     *
+     * @param winner The winner of the game or NULL if no winner could be determined.
+     */
     public void endGame(PlayerInfo winner) {
-        Validate.isTrue(winner.getArena().equals(this));
-        //Clean up
+        Validate.isTrue(winner == null || winner.getArena().equals(this));
+        Validate.isTrue(currentPlayers != null);
 
-        Bukkit.getScheduler().cancelTask(Command1vs1.runningTasks.remove(arena.getName())); //remove() returns the previous value TODO: the Arena class should take care of this
+        //Clean up players - teleport them back etc
+        currentPlayers.forEach(PlayerInfo::invalidate);
 
-        Bukkit.broadcastMessage(getPrefix() + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7 gewonnen! (Arena §6" + arena + "§7)");
-        // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
+        tickTask.reset();
+        Bukkit.getScheduler().cancelTask(tickTask.getTaskId());
 
-        //Treat winner nicely
-        arena.getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
-                .forEach(winner.getInventory()::addItem);
+        if (winner != null) {
+            PlayerInfo loser = currentPlayers.getOther(winner);
+
+            Bukkit.broadcastMessage(MainClass.getPrefix() + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
+            // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
+
+            //Treat winner nicely
+            getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
+                    .forEach(winner.getPlayer().getInventory()::addItem);
+        } /*else {
+            Bukkit.broadcastMessage(MainClass.getPrefix() + "§a" +
+                    currentPlayers.getLeft().getPlayer().getName() +
+                    "§7 und §a" + currentPlayers.getRight().getPlayer().getName() +
+                    " §7 haben! (§6" + this.getName() + "§7)"); TODO: I can't think of a proper message atm so um think of one pls
+        }*/
     }
 
     ///////////// GETTERS //////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +94,7 @@ public class Arena {
         return currentPlayers != null;
     }
 
-    public PlayerInfo[] getCurrentPlayers() {
+    public Couple<PlayerInfo> getCurrentPlayers() {
         return currentPlayers;
     }
 
@@ -92,10 +113,7 @@ public class Arena {
     /////// SETTERS ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void setPlayers(Player plr1, Player plr2) {
-        this.currentPlayers = new PlayerInfo[]{
-                new PlayerInfo(plr1),
-                new PlayerInfo(plr2)
-        };
+        this.currentPlayers = new Couple<>(new PlayerInfo(plr1), new PlayerInfo(plr2));
     }
 
     public void setFirstSpawn(Location firstSpawn) {
@@ -238,6 +256,42 @@ public class Arena {
                 .toString();
     }
 
+    ///////////// BEST RUNNABLE ////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Runnable which ticks Arenas every 5 seconds.
+     */
+    private class RunnableArenaTick extends NonAsyncBukkitRunnable {
+        private static final int TICKS_IN_A_GAME = 60; //Ticks every 5 seconds
+        private int ticksLeft = 0;
+
+        public void start() {
+            this.ticksLeft = TICKS_IN_A_GAME;
+            this.runTaskTimer(MainClass.instance(), 20L * 5L, 20L * 5L); //This task so far only announces time left and the smallest interval is 5 seconds
+        }
+
+        public void reset() {
+            this.ticksLeft = 0;
+            this.tryCancel();
+        }
+
+        @Override
+        public void run() {
+            ticksLeft--; //Ticks, as in 1vs1 ticks, not to be confused with game ticks
+
+            //Announce full minutes
+            if (ticksLeft % 12 == 0) { //every minute
+                getCurrentPlayers().stream()
+                        .forEach(pi -> pi.getPlayer().sendMessage(MainClass.getPrefix() + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
+            } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
+                getCurrentPlayers().stream()
+                        .forEach(pi -> pi.getPlayer().sendMessage(MainClass.getPrefix() + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
+            } else if (ticksLeft == 0) {
+                Arena.this.endGame(null);
+            }
+        }
+    }
+
     //////////// LE INNER CLASS ////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -276,10 +330,21 @@ public class Arena {
         /**
          * This gets the Arena object associated with this PlayerInfo.
          * This always returns NULL if {@link #isValid()} returns FALSE.
+         *
          * @return the associated Arena or NULL if none.
          */
         public Arena getArena() {
             return isValid() ? Arena.this : null;
+        }
+
+        /**
+         * Returns the Player object backing this PlayerInfo.
+         * This returns NULL if {@link #isValid()} returns FALSE.
+         *
+         * @return the associated Player object or NULL if none.
+         */
+        public Player getPlayer() {
+            return isValid() ? player : null;
         }
 
         /**

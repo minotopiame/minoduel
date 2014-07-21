@@ -224,7 +224,7 @@ public class Arena {
      * @param name Name of the Arena to get.
      * @return An Arena with the given name or NULL if none exists.
      */
-    public static Arena fromName(String name) {
+    public static Arena byName(String name) {
         Arena arena = arenaCache.get(name);
 
         if (arena == null && MainClass.instance().getConfig().contains(CONFIG_PATH + "." + name)) {

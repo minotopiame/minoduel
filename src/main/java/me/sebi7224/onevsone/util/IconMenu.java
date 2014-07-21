@@ -2,6 +2,7 @@ package me.sebi7224.onevsone.util;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import me.sebi7224.onevsone.MainClass;
+import me.sebi7224.onevsone.arena.Arena;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,9 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.Arrays;
 
 public class IconMenu implements Listener {
 
@@ -22,7 +20,7 @@ public class IconMenu implements Listener {
     private OptionClickEventHandler handler;
     private MainClass plugin;
 
-    private String[] optionNames;
+    private Arena[] optionArenas;
     private ItemStack[] optionIcons;
 
     public IconMenu(String name, int size, OptionClickEventHandler handler, MainClass plugin) {
@@ -31,14 +29,15 @@ public class IconMenu implements Listener {
         this.size = size;
         this.handler = handler;
         this.plugin = plugin;
-        this.optionNames = new String[size];
         this.optionIcons = new ItemStack[size];
+        this.optionArenas = new Arena[size];
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public IconMenu setOption(int position, ItemStack icon, String name, String... info) {
-        optionNames[position] = name;
-        optionIcons[position] = setItemNameAndLore(icon, name, info);
+    public IconMenu setArena(int position, Arena arena) {
+        optionArenas[position] = arena;
+        optionIcons[position] = arena.getIconStack();
+
         return this;
     }
 
@@ -52,12 +51,12 @@ public class IconMenu implements Listener {
         player.openInventory(inventory);
     }
 
-    void destroy() {
+    public void destroy() {
         HandlerList.unregisterAll(this);
         handler = null;
         plugin = null;
-        optionNames = null;
         optionIcons = null;
+        optionArenas = null;
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -65,25 +64,14 @@ public class IconMenu implements Listener {
         if (event.getInventory().getTitle().equals(name)) {
             event.setCancelled(true);
             int slot = event.getRawSlot();
-            if (slot >= 0 && slot < size && optionNames[slot] != null) {
-                OptionClickEvent e = new OptionClickEvent((Player) event.getWhoClicked(), slot, optionNames[slot]);
+            if (slot >= 0 && slot < size && optionArenas[slot] != null) {
+                OptionClickEvent e = new OptionClickEvent((Player) event.getWhoClicked(), slot, optionArenas[slot]);
                 handler.onOptionClick(e);
                 if (e.willClose()) {
                     InventoryHelper.closeInventoryLater(event.getWhoClicked(), this.plugin);
                 }
-                if (e.willDestroy()) {
-                    destroy();
-                }
             }
         }
-    }
-
-    private ItemStack setItemNameAndLore(ItemStack item, String name, String[] lore) {
-        ItemMeta im = item.getItemMeta();
-        im.setDisplayName(name);
-        im.setLore(Arrays.asList(lore));
-        item.setItemMeta(im);
-        return item;
     }
 
     public interface OptionClickEventHandler {
@@ -93,16 +81,14 @@ public class IconMenu implements Listener {
     public class OptionClickEvent {
         private final Player player;
         private final int position;
-        private final String name;
+        private final Arena arena;
         private boolean close;
-        private boolean destroy;
 
-        public OptionClickEvent(Player player, int position, String name) {
+        public OptionClickEvent(Player player, int position, Arena arena) {
             this.player = player;
             this.position = position;
-            this.name = name;
+            this.arena = arena;
             this.close = true;
-            this.destroy = false;
         }
 
         public Player getPlayer() {
@@ -113,24 +99,16 @@ public class IconMenu implements Listener {
             return position;
         }
 
-        public String getName() {
-            return name;
+        public Arena getArena() {
+            return arena;
         }
 
         public boolean willClose() {
             return close;
         }
 
-        public boolean willDestroy() {
-            return destroy;
-        }
-
         public void setWillClose(boolean close) {
             this.close = close;
-        }
-
-        public void setWillDestroy(boolean destroy) {
-            this.destroy = destroy;
         }
     }
 

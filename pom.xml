@@ -30,7 +30,7 @@
         <dependency>
             <groupId>io.github.xxyy</groupId>
             <artifactId>common</artifactId>
-            <version>2.3.5-SNAPSHOT</version>
+            <version>2.3.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -42,6 +42,34 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>io.github.xxyy:common</include>
+                            <include>${project.groupId}:${project.artifactId}</include>
+                        </includes>
+                    </artifactSet>
+                    <relocations>
+                        <relocation>
+                            <pattern>io.github.xxyy.common</pattern>
+                            <shadedPattern>me.sebi7224.lib.xyc</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
             </plugin>
         </plugins>

@@ -8,16 +8,16 @@ import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 import me.sebi7224.onevsone.MainClass;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents an 1vs1 arena as loaded from configuration.
@@ -31,6 +31,8 @@ public class Arena {
     private static final String SECOND_SPAWN_PATH = "spawn2";
     private static final String ICON_STACK_PATH = "icon";
     private static final String SPECIFIC_REWARD_PATH = "rewards";
+    private static final String INVENTORY_KIT_PATH = "items";
+    private static final String ARMOR_KIT_PATH = "armor";
     private static final Map<String, Arena> arenaCache = new CaseInsensitiveMap<>();
 
     private final String name;
@@ -39,6 +41,8 @@ public class Arena {
     private Location secondSpawn;
     private ItemStack iconStack;
     private List<ItemStack> specificRewards;
+    private ItemStack[] inventoryKit;
+    private ItemStack[] armorKit;
 
     private Couple<PlayerInfo> currentPlayers = null;
     private RunnableArenaTick tickTask = new RunnableArenaTick();
@@ -46,6 +50,32 @@ public class Arena {
     public Arena(ConfigurationSection storageBackend) {
         this.name = storageBackend.getName();
         this.configSection = storageBackend;
+    }
+
+    public void startGame(Player plr1, Player plr2) {
+        Validate.isTrue(currentPlayers == null);
+
+        this.currentPlayers = new Couple<>(new PlayerInfo(plr1), new PlayerInfo(plr2));
+
+        this.currentPlayers.getLeft().getPlayer().teleport(getFirstSpawn());
+        this.currentPlayers.getRight().getPlayer().teleport(getSecondSpawn());
+
+        this.currentPlayers.forEach(PlayerInfo::sendStartMessage);
+
+        this.currentPlayers.forEach(pi -> {
+            Player plr = pi.getPlayer();
+            plr.setFireTicks(0);
+            plr.setHealth(plr.getMaxHealth());
+            plr.setFoodLevel(20);
+            plr.getInventory().setContents(getInventoryKit());
+            plr.getInventory().setArmorContents(getArmorKit());
+            plr.setGameMode(GameMode.SURVIVAL);
+            //noinspection deprecation
+            plr.updateInventory();
+            plr.closeInventory();
+            plr.setFlying(false);
+            plr.playSound(plr.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
+        });
     }
 
     /**
@@ -61,9 +91,8 @@ public class Arena {
         currentPlayers.forEach(PlayerInfo::invalidate);
 
         tickTask.reset();
-        Bukkit.getScheduler().cancelTask(tickTask.getTaskId());
 
-        if (winner != null) {
+        if (winner != null) { //A winner has been determined
             PlayerInfo loser = currentPlayers.getOther(winner);
 
             Bukkit.broadcastMessage(MainClass.getPrefix() + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
@@ -72,12 +101,14 @@ public class Arena {
             //Treat winner nicely
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
                     .forEach(winner.getPlayer().getInventory()::addItem);
-        } /*else {
-            Bukkit.broadcastMessage(MainClass.getPrefix() + "§a" +
+        } else {
+            Bukkit.broadcastMessage(MainClass.getPrefix() + "§7Der Kampf zwischen §a" +
                     currentPlayers.getLeft().getPlayer().getName() +
                     "§7 und §a" + currentPlayers.getRight().getPlayer().getName() +
-                    " §7 haben! (§6" + this.getName() + "§7)"); TODO: I can't think of a proper message atm so um think of one pls
-        }*/
+                    " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
+        }
+
+        currentPlayers = null;
     }
 
     ///////////// GETTERS //////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,13 +138,25 @@ public class Arena {
     }
 
     public ItemStack getIconStack() {
-        return iconStack;
+        return iconStack.clone();
+    }
+
+    public ItemStack[] getInventoryKit() {
+        return inventoryKit;
+    }
+
+    public ItemStack[] getArmorKit() {
+        return armorKit;
     }
 
     /////// SETTERS ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setPlayers(Player plr1, Player plr2) {
-        this.currentPlayers = new Couple<>(new PlayerInfo(plr1), new PlayerInfo(plr2));
+    public void setArmorKit(ItemStack[] armorKit) {
+        this.armorKit = armorKit;
+    }
+
+    public void setInventoryKit(ItemStack[] inventoryKit) {
+        this.inventoryKit = inventoryKit;
     }
 
     public void setFirstSpawn(Location firstSpawn) {
@@ -141,12 +184,22 @@ public class Arena {
     }
 
     // private utility methods
+    @SuppressWarnings("unchecked")
     private void updateFromConfig() {
         this.firstSpawn = ArenaManager.getLocation(configSection.getConfigurationSection("spawn1"));
         this.secondSpawn = ArenaManager.getLocation(configSection.getConfigurationSection("spawn2"));
         this.iconStack = configSection.getItemStack(ICON_STACK_PATH);
-        //noinspection unchecked
         this.specificRewards = (List<ItemStack>) configSection.getList(SPECIFIC_REWARD_PATH, new ArrayList<ItemStack>());
+
+        if(configSection.contains(INVENTORY_KIT_PATH)) {
+            List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(INVENTORY_KIT_PATH);
+            this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[InventoryType.PLAYER.getDefaultSize()]);
+        }
+
+        if(configSection.contains(ARMOR_KIT_PATH)) {
+            List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(ARMOR_KIT_PATH);
+            this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[4]);
+        }
     }
 
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,8 +274,15 @@ public class Arena {
                     existingArena.configSection = section;
                     existingArena.updateFromConfig();
                     arenaCache.put(key, existingArena);
+                    existingArenas.remove(key);
                 }
             }
+        }
+
+        for (Arena removedArena : existingArenas.values()) {
+            removedArena.getCurrentPlayers()
+                    .forEach(pi -> pi.getPlayer().sendMessage("§cDeine Arena wurde entfernt. Bitte entschuldige die Unannehmlichkeiten!"));
+            removedArena.endGame(null);
         }
     }
 
@@ -303,11 +363,13 @@ public class Arena {
     public class PlayerInfo {
         private final int previousExperience;
         private final Location previousLocation;
+        private final String name;
         private Player player;
         private boolean valid = true;
 
-        public PlayerInfo(Player plr) {
+        protected PlayerInfo(Player plr) {
             this.player = plr;
+            this.name = plr.getName();
             this.previousExperience = plr.getTotalExperience();
             this.previousLocation = plr.getLocation();
         }
@@ -348,10 +410,25 @@ public class Arena {
         }
 
         /**
+         * Returns the initial name of the wrapped player. Still works if {@link #isValid()} returns FALSE.
+         *
+         * @return The name of the wrapped Player.
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
          * @return whether this information is still valid, i.e. the player is still playing in that arena.
          */
         public boolean isValid() {
             return valid;
+        }
+
+        protected void sendStartMessage() {
+            getPlayer().sendMessage(MainClass.getPrefix() + "§eDu kämpfst jetzt gegen §a" +
+                    Arena.this.getCurrentPlayers().getOther(this).getName() + "§6 (" + Arena.this.getName() + ")");
+            getPlayer().sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
         }
     }
 }

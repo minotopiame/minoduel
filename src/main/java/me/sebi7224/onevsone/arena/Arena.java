@@ -1,12 +1,14 @@
 package me.sebi7224.onevsone.arena;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import io.github.xxyy.common.collections.CaseInsensitiveMap;
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 import me.sebi7224.onevsone.MainClass;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.RandomUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -53,7 +55,9 @@ public class Arena {
     }
 
     public void startGame(Player plr1, Player plr2) {
-        Validate.isTrue(currentPlayers == null);
+        Validate.isTrue(currentPlayers == null, "A game is currently running in this arena!");
+        Validate.notNull(plr1, "Player one is null");
+        Validate.notNull(plr2, "Player two is null");
 
         this.currentPlayers = new Couple<>(new PlayerInfo(plr1), new PlayerInfo(plr2));
 
@@ -233,6 +237,25 @@ public class Arena {
         }
 
         return arena;
+    }
+
+    /**
+     * Gets a semi-random Arena object from the collection of know Arenas.
+     * @return Any Arena object
+     * @throws java.lang.IllegalStateException If no arenas are known
+     */
+    public static Arena any() {
+        Validate.isTrue(!arenaCache.isEmpty(), "No arenas known!");
+        return arenaCache.values().stream()
+                .skip(RandomUtils.nextInt(arenaCache.size()))
+                .findFirst().get();
+    }
+
+    /**
+     * @return An immutable view of all known arenas
+     */
+    public static Collection<Arena> all() {
+        return ImmutableList.copyOf(arenaCache.values());
     }
 
     public static boolean existsByName(String name) {

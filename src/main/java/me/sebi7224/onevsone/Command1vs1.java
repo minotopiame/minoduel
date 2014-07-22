@@ -1,9 +1,9 @@
 package me.sebi7224.onevsone;
 
 import io.github.xxyy.common.util.CommandHelper;
+import me.sebi7224.onevsone.arena.Arena;
 import me.sebi7224.onevsone.arena.ArenaManager;
 import me.sebi7224.onevsone.util.IconMenu;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -38,124 +38,69 @@ public class Command1vs1 implements CommandExecutor {
             slots = 9;
         }
 
-        arenaMenu = new IconMenu("§8Wähle eine Arena!", slots, new IconMenu.OptionClickEventHandler() {
-            @Override
-            public void onOptionClick(IconMenu.OptionClickEvent event) {
-                final Player player = event.getPlayer();
-                player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
-                String name = event.getName();
-                name = name.replace("§6", "");
-                if (getArenaPlayers(name).size() == 2) {
+        arenaMenu = new IconMenu("§8Wähle eine Arena!", slots, event -> {
+            final Player playerClicked = event.getPlayer();
+            playerClicked.playSound(playerClicked.getLocation(), Sound.NOTE_PIANO, 1, 1);
+            Arena arena = event.getArena();
+            if (arena.getCurrentPlayers().size() == 2) {
 
-                    player.sendMessage(MainClass.getPrefix() + "§eDiese Arena ist bereits voll!"); //TODO queue
-                    //TODO Message: Die gewählte Arena ist bereits voll! Du bist nun in der Warteschlange. (Position: %)
-                    // [Andere Arena wählen] [Die Arena ist mir egal] [Abbrechen]
+                playerClicked.sendMessage(MainClass.getPrefix() + "§eDiese Arena ist bereits voll!"); //TODO queue
+                //TODO Message: Die gewählte Arena ist bereits voll! Du bist nun in der Warteschlange. (Position: %)
+                // [Andere Arena wählen] [Die Arena ist mir egal] [Abbrechen]
 
-                } else if (getArenaPlayers(name).size() == 1) {
+            } else if (getArenaPlayers(name).size() == 1) {
 
-                    for (final Map.Entry<Player, String> entry : MainClass.getPlayersinFight().entrySet()) {
-                        if (entry.getValue().equals(name)) {
-                            final Player player1 = entry.getKey();
+                for (final Map.Entry<Player, String> entry : MainClass.getPlayersinFight().entrySet()) {
+                    if (entry.getValue().equals(name)) {
+                        final Player player1 = entry.getKey();
 
-                            MainClass.getPlayersinFight().put(player, name);
+                        MainClass.getPlayersinFight().put(playerClicked, name);
 
-                            waitingPlayers.put(player, player.getLocation()); //plsno
-                            waitingPlayers.put(player1, player1.getLocation());
+                        waitingPlayers.put(playerClicked, playerClicked.getLocation()); //plsno
+                        waitingPlayers.put(player1, player1.getLocation());
 
-                            player.sendMessage(MainClass.getPrefix() + "§eIn 3 Sekunden wirst du in die Arena teleportiert...");
-                            player1.sendMessage(MainClass.getPrefix() + "§eEs wurde ein Spieler gefunden! In 3 Sekunden wirst du teleportiert...");
+                        playerClicked.sendMessage(MainClass.getPrefix() + "§eIn 3 Sekunden wirst du in die Arena teleportiert...");
+                        player1.sendMessage(MainClass.getPrefix() + "§eEs wurde ein Spieler gefunden! In 3 Sekunden wirst du teleportiert...");
 
-                            final String finalName = name;
-                            final Location locationPlayer = waitingPlayers.get(player);
-                            final Location locationPlayer1 = waitingPlayers.get(player1);
-                            new BukkitRunnable() {
-                                public void run() {
-                                    if (waitingPlayers.containsKey(player) && waitingPlayers.containsKey(player1)) {
-                                        if (locationPlayer.getX() == player.getLocation().getX() && locationPlayer.getY() == player.getLocation().getY() && locationPlayer.getZ() == player.getLocation().getZ()) {
-                                            if (locationPlayer1.getX() == player1.getLocation().getX() && locationPlayer1.getY() == player1.getLocation().getY() && locationPlayer1.getZ() == player1.getLocation().getZ()) {
+                        final String finalName = name;
+                        final Location locationPlayer = waitingPlayers.get(playerClicked);
+                        final Location locationPlayer1 = waitingPlayers.get(player1);
+                        new BukkitRunnable() {
+                            public void run() {
+                                if (waitingPlayers.containsKey(playerClicked) && waitingPlayers.containsKey(player1)) {
+                                    if (locationPlayer.getX() == playerClicked.getLocation().getX() && locationPlayer.getY() == playerClicked.getLocation().getY() && locationPlayer.getZ() == playerClicked.getLocation().getZ()) {
+                                        if (locationPlayer1.getX() == player1.getLocation().getX() && locationPlayer1.getY() == player1.getLocation().getY() && locationPlayer1.getZ() == player1.getLocation().getZ()) {
 
 
-                                                player.sendMessage(MainClass.getPrefix() + "§eDu hast die Arena §4" + finalName + " §ebetreten!");
-                                                player.sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
 
-                                                player1.sendMessage(MainClass.getPrefix() + "§eDer Spieler §6" + player.getName() + "§e hat die Arena betreten!");
-                                                player1.sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
 
-                                                for (Player player2 : Command1vs1.getArenaPlayers(finalName)) {
 
-                                                    MainClass.getSavedLocations().put(player2, player2.getLocation());
-                                                    MainClass.getSavedExperience().put(player2, player2.getExp());
-
-                                                    player2.setFireTicks(0);
-                                                    player2.setHealth(20);
-                                                    player2.getActivePotionEffects().clear();
-                                                    player2.setFoodLevel(20);
-                                                    player2.getInventory().clear();
-                                                    List listb = (List) MainClass.instance().getConfig().getList("arenas." + finalName + ".items");
-                                                    ItemStack[] items = (ItemStack[]) listb.toArray(new ItemStack[listb.size()]);
-                                                    List lista = (List) MainClass.instance().getConfig().getList("arenas." + finalName + ".armor");
-                                                    ItemStack[] armor = (ItemStack[]) lista.toArray(new ItemStack[lista.size()]);
-                                                    player2.getInventory().setArmorContents(armor);
-                                                    player2.getInventory().setContents(items);
-                                                    player2.setGameMode(GameMode.SURVIVAL);
-                                                    player2.updateInventory();
-                                                    player2.closeInventory();
-                                                }
-                                                player.teleport(ArenaManager.getLocation("arenas." + finalName + ".Spawn1"));
-                                                player1.teleport(ArenaManager.getLocation("arenas." + finalName + ".Spawn2"));
-                                                countdown = 300;
-
-                                                new BukkitRunnable() {
-                                                    public void run() {
-                                                        countdown--;
-                                                        if (!runningTasks.containsKey(finalName)) {
-                                                            runningTasks.put(finalName, this.getTaskId());
-                                                        }
-                                                        if (countdown == 180 || countdown == 120 || countdown == 60) {
-                                                            int minutes = countdown / 60;
-                                                            player.sendMessage(MainClass.getPrefix() + "§7Noch §e" + minutes + " §7Minuten!");
-                                                            player1.sendMessage(MainClass.getPrefix() + "§7Noch §e" + minutes + " §7Minuten!");
-                                                        }
-                                                        if (countdown == 30 || countdown == 10 || countdown == 5) {
-                                                            player.sendMessage(MainClass.getPrefix() + "§7Noch §e" + countdown + " §7Sekunden!");
-                                                            player1.sendMessage(MainClass.getPrefix() + "§7Noch §e" + countdown + " §7Sekunden!");
-                                                        }
-                                                        if (countdown == 0) {
-                                                            MainClass.setGameResult(player, player1, finalName);
-                                                            this.cancel();
-                                                            player1.teleport(MainClass.getSavedLocations().get(player1));
-                                                            MainClass.getSavedLocations().remove(player1);
-                                                            runningTasks.remove(finalName);
-                                                        }
-                                                    }
-                                                }.runTaskTimerAsynchronously(MainClass.instance(), 0, 20);
-                                            } else {
-                                                MainClass.getPlayersinFight().remove(player);
-                                                MainClass.getPlayersinFight().remove(player1);
-                                                waitingPlayers.remove(player);
-                                                waitingPlayers.remove(player1);
-                                                player1.sendMessage("§cTeleportierung abgebrochen du hast dich bewegt!");
-                                                player.sendMessage("§cTeleportierung abgebrochen §e" + player1.getName() + " §chat sich bewegt!");
-                                            }
                                         } else {
-                                            MainClass.getPlayersinFight().remove(player);
+                                            MainClass.getPlayersinFight().remove(playerClicked);
                                             MainClass.getPlayersinFight().remove(player1);
-                                            waitingPlayers.remove(player);
+                                            waitingPlayers.remove(playerClicked);
                                             waitingPlayers.remove(player1);
-                                            player.sendMessage("§cTeleportierung abgebrochen du hast dich bewegt!");
-                                            player1.sendMessage("§cTeleportierung abgebrochen §e" + player.getName() + " §chat sich bewegt!");
+                                            player1.sendMessage("§cTeleportierung abgebrochen du hast dich bewegt!");
+                                            playerClicked.sendMessage("§cTeleportierung abgebrochen §e" + player1.getName() + " §chat sich bewegt!");
                                         }
+                                    } else {
+                                        MainClass.getPlayersinFight().remove(playerClicked);
+                                        MainClass.getPlayersinFight().remove(player1);
+                                        waitingPlayers.remove(playerClicked);
+                                        waitingPlayers.remove(player1);
+                                        playerClicked.sendMessage("§cTeleportierung abgebrochen du hast dich bewegt!");
+                                        player1.sendMessage("§cTeleportierung abgebrochen §e" + playerClicked.getName() + " §chat sich bewegt!");
                                     }
                                 }
-                            }.runTaskLaterAsynchronously(MainClass.instance(), 60L);
+                            }
+                        }.runTaskLaterAsynchronously(MainClass.instance(), 60L);
 
-                        }
                     }
-                } else {
-                    MainClass.getPlayersinFight().put(player, name);
-                    player.sendMessage(MainClass.getPrefix() + "§eDu hast die Arena §4" + name + " §ebetreten!");
-                    player.sendMessage(MainClass.getPrefix() + "§eDu wirst teleportiert sobald ein zweiter Spieler beigetreten ist!");
                 }
+            } else {
+                MainClass.getPlayersinFight().put(playerClicked, name);
+                playerClicked.sendMessage(MainClass.getPrefix() + "§eDu hast die Arena §4" + name + " §ebetreten!");
+                playerClicked.sendMessage(MainClass.getPrefix() + "§eDu wirst teleportiert sobald ein zweiter Spieler beigetreten ist!");
             }
         }, MainClass.instance());
     }

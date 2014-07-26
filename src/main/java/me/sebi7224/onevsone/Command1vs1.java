@@ -1,8 +1,7 @@
 package me.sebi7224.onevsone;
 
-import io.github.xxyy.common.util.CommandHelper;
 import me.sebi7224.onevsone.arena.Arena;
-import me.sebi7224.onevsone.arena.ArenaManager;
+import me.sebi7224.onevsone.arena.Arenas;
 import me.sebi7224.onevsone.util.IconMenu;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,7 +13,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
+import io.github.xxyy.common.games.util.RunnableTeleportLater;
+import io.github.xxyy.common.util.CommandHelper;
+import io.github.xxyy.common.util.inventory.InventoryHelper;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +27,17 @@ public class Command1vs1 implements CommandExecutor {
 
     public static HashMap<Player, Location> waitingPlayers = new HashMap<>();
     public static HashMap<String, Integer> runningTasks = new HashMap<>();
-    private static IconMenu arenaMenu;
-    private static int countdown;
+
+    private final MainClass plugin;
     private String noperm = "§4Du hast keine Erlaubnis für diesen Befehl!";
+    private static IconMenu arenaMenu;
+
+    public Command1vs1(MainClass plugin) {
+        this.plugin = plugin;
+    }
 
     public static void registerArenaMenu() {
-        int ready_arenas = ArenaManager.getReadyArenasSize();
+        int ready_arenas = Arenas.getReadyArenasSize();
         int multiple = 0;
         do multiple++;
         while (9 * multiple < ready_arenas);
@@ -65,14 +73,13 @@ public class Command1vs1 implements CommandExecutor {
                         final String finalName = name;
                         final Location locationPlayer = waitingPlayers.get(playerClicked);
                         final Location locationPlayer1 = waitingPlayers.get(player1);
+
+                        new RunnableTeleportLater()
                         new BukkitRunnable() {
                             public void run() {
                                 if (waitingPlayers.containsKey(playerClicked) && waitingPlayers.containsKey(player1)) {
                                     if (locationPlayer.getX() == playerClicked.getLocation().getX() && locationPlayer.getY() == playerClicked.getLocation().getY() && locationPlayer.getZ() == playerClicked.getLocation().getZ()) {
                                         if (locationPlayer1.getX() == player1.getLocation().getX() && locationPlayer1.getY() == player1.getLocation().getY() && locationPlayer1.getZ() == player1.getLocation().getZ()) {
-
-
-
 
 
                                         } else {
@@ -107,7 +114,7 @@ public class Command1vs1 implements CommandExecutor {
 
     private static void openMenuAt(Player player) {
         int slot = 0;
-        for (String arenas : ArenaManager.getReadyArenas()) {
+        for (String arenas : Arenas.getReadyArenas()) {
             if (slot > 53) {
                 return;
             }
@@ -118,7 +125,7 @@ public class Command1vs1 implements CommandExecutor {
             if (getArenaPlayers(arenas).size() == 2) {
                 lore = lore + "§c" + getArenaPlayers(arenas).get(0).getName() + " §avs. " + "§c" + getArenaPlayers(arenas).get(1).getName();
             }
-            arenaMenu.setOption(slot, new ItemStack(ArenaManager.getArenaIconItem(arenas)), "§6" + arenas, lore);
+            arenaMenu.setOption(slot, new ItemStack(Arenas.getArenaIconItem(arenas)), "§6" + arenas, lore);
             slot++;
         }
         arenaMenu.open(player);
@@ -135,7 +142,7 @@ public class Command1vs1 implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             sender.sendMessage("§b========> §6MinoTopia §c| §61vs1 §b<========");
-            sender.sendMessage("§6/1vs1 select §c- §bÖffnet das Arenamenü");
+            sender.sendMessage("§6/1vs1 join §c- §bÖffnet das Arenamenü");
             sender.sendMessage("§6/1vs1 leave §c- §bVerlässt ein Spiel, wenn du alleine in einer Arena bist");
             if (sender.hasPermission("1vs1.admin")) {
                 sender.sendMessage("§6/1vs1 create <arena> §c- §bErstellt eine neue Arena");
@@ -165,81 +172,75 @@ public class Command1vs1 implements CommandExecutor {
                         return true;
                     }
 
-                    if (ArenaManager.exists(args[1])) {
+                    if (Arenas.existsByName(args[1])) {
                         player.sendMessage(MainClass.getPrefix() + "§cDie Arena §4" + args[1] + " §cexistiert bereits!");
                         return true;
                     }
 
-                    ArenaManager.createArena(args[1]);
+                    Arenas.createArena(args[1], plugin.getConfig());
                     player.sendMessage(MainClass.getPrefix() + "§7Du hast die Arena §6" + args[1] + " §7erfolgreich erstellt!");
                     return true;
                 case "remove":
-                    if (player.hasPermission("1vs1.remove")) {
-                        if (args.length < 2) {
-                            player.sendMessage("§cDer Arenaname ist ungültig!");
-                            return true;
-                        }
-                        if (!ArenaManager.exists(args[1])) {
-                            player.sendMessage(MainClass.getPrefix() + "§cDie Arena §4" + args[1] + " §cexistiert nicht!");
-                            return true;
-                        }
-                        ArenaManager.removeArena(args[1]);
-                        player.sendMessage(MainClass.getPrefix() + "§7Du hast die Arena §6" + args[1] + " §7erfolgreich entfernt!");
-                        return true;
-                    } else {
-                        player.sendMessage(noperm);
+                    if (!CommandHelper.checkPermAndMsg(player, "1vs1.remove", commandLabel)) {
                         return true;
                     }
-                case "list":
-                    if (player.hasPermission("1vs1.list")) {
-                        if (ArenaManager.getArenas() == null) {
-                            player.sendMessage(MainClass.getPrefix() + "§cEs existiert keine Arena!");
-                            return true;
-                        }
 
-                        player.sendMessage("§b========> §6MinoTopia §c| §61vs1 §b<========");
-                        String arenaStatus;
-                        int arenasSize = 1;
-                        for (String arenas : ArenaManager.getArenas()) {
-                            if (ArenaManager.isArenaReady(arenas)) {
-                                arenaStatus = "§a(bereit)";
-                            } else {
-                                arenaStatus = "§c(nicht bereit)";
-                                if (ArenaManager.getArenaIconItem(arenas) == null) {
-                                    arenaStatus = arenaStatus + " §4-> Icon fehlt!";
-                                }
-                                if (ArenaManager.getLocation("arenas." + arenas + ".Spawn1") == null) {
-                                    arenaStatus += " §4-> Spawnpunkt 1 fehlt!";
-                                }
-                                if (ArenaManager.getLocation("arenas." + arenas + ".Spawn2") == null) {
-                                    arenaStatus += " §4-> Spawnpunkt 2 fehlt!";
-                                }
-                            }
-                            player.sendMessage("§7" + arenasSize + ". " + arenas + " " + arenaStatus);
-                            arenasSize++;
-                        }
-                        return true;
-                    } else {
-                        player.sendMessage(noperm);
+                    if (args.length < 2) {
+                        player.sendMessage("§cVerwendung: /1vs1 remove [Arenaname]");
                         return true;
                     }
-                case "leave":
-                    if (player.hasPermission("1vs1.leave")) {
-                        if (MainClass.getPlayersinFight().get(player) != null) {
-                            if (getArenaPlayers(MainClass.getPlayersinFight().get(player)).size() == 1) {
-                                player.sendMessage(MainClass.getPrefix() + "§cDu hast die Arena verlassen!");
-                                MainClass.getPlayersinFight().remove(player);
-                                return true;
-                            } else {
-                                player.sendMessage(MainClass.getPrefix() + "§cEs hat bereits ein Kampf begonnen!");
-                                return true;
-                            }
+
+                    Arena arena = Arenas.byName(args[1]);
+
+                    if (arena == null) {
+                        player.sendMessage(MainClass.getPrefix() + "§cDie Arena §4" + args[1] + " §cexistiert nicht!");
+                        return true;
+                    }
+
+                    arena.remove();
+                    player.sendMessage(MainClass.getPrefix() + "§7Die Arena §6" + args[1] + " §7wurde erfolgreich entfernt!");
+                    return true;
+                case "list":
+                    if (!CommandHelper.checkPermAndMsg(player, "1vs1.list", commandLabel)) {
+                        return true;
+                    }
+
+                    Collection<Arena> arenas = Arenas.all();
+
+                    if (arenas.isEmpty()) {
+                        player.sendMessage(MainClass.getPrefix() + "§cEs sind keine Arenen vorhanden!");
+                        return true;
+                    }
+
+                    player.sendMessage("§b========> §6MinoTopia §c| §61vs1 §b<========");
+                    String arenaStatus;
+                    int arenasSize = 1;
+                    for (Arena arena : arenas) {
+                        if (Arenas.isArenaReady(arenas)) {
+                            arenaStatus = "§a(bereit)";
                         } else {
-                            player.sendMessage(MainClass.getPrefix() + "§eDu befindest dich in keinem 1vs1!");
-                            return true;
+                            arenaStatus = "§c(nicht bereit)";
+                            if (Arenas.getArenaIconItem(arenas) == null) {
+                                arenaStatus = arenaStatus + " §4-> Icon fehlt!";
+                            }
+                            if (Arenas.getLocation("arenas." + arenas + ".Spawn1") == null) {
+                                arenaStatus += " §4-> Spawnpunkt 1 fehlt!";
+                            }
+                            if (Arenas.getLocation("arenas." + arenas + ".Spawn2") == null) {
+                                arenaStatus += " §4-> Spawnpunkt 2 fehlt!";
+                            }
                         }
+                        player.sendMessage("§7" + arenasSize + ". " + arenas + " " + arenaStatus);
+                        arenasSize++;
+                    }
+                    return true;
+                case "leave":
+                    Arena arenaToLeave = Arenas.getPlayerArena(player);
+
+                    if (arenaToLeave != null) {
+                        arenaToLeave.endGame(arenaToLeave.getOther(player));
                     } else {
-                        player.sendMessage(noperm);
+                        player.sendMessage(MainClass.getPrefix() + "§eDu befindest dich in keinem Kampf!");
                         return true;
                     }
 
@@ -250,11 +251,11 @@ public class Command1vs1 implements CommandExecutor {
                             return true;
                         }
                         if (args[1].equalsIgnoreCase("1")) {
-                            ArenaManager.saveLocation("arenas." + args[2] + ".Spawn1", player.getLocation());
+                            Arenas.saveLocation("arenas." + args[2] + ".Spawn1", player.getLocation());
                             player.sendMessage(MainClass.getPrefix() + "§7Du hast den §61. Spawn §7der Arena §6" + args[2] + " §7erfolgreich gesetzt!");
                             return true;
                         } else if (args[1].equalsIgnoreCase("2")) {
-                            ArenaManager.saveLocation("arenas." + args[2] + ".Spawn2", player.getLocation());
+                            Arenas.saveLocation("arenas." + args[2] + ".Spawn2", player.getLocation());
                             player.sendMessage(MainClass.getPrefix() + "§7Du hast den §62. Spawn §7der Arena §6" + args[2] + " §7erfolgreich gesetzt!");
                             return true;
                         } else {
@@ -276,7 +277,7 @@ public class Command1vs1 implements CommandExecutor {
                             player.sendMessage(MainClass.getPrefix() + "§cDu hast kein §4Item §cin deiner §4Hand§c!");
                             return true;
                         }
-                        ArenaManager.setArenaIconItem(args[1], player.getItemInHand().getType());
+                        Arenas.setArenaIconItem(args[1], player.getItemInHand().getType());
                         player.sendMessage(MainClass.getPrefix() + "§7Du hast das §6Icon§7 der Arena §6" + args[1] + " §7gesetzt!");
                         return true;
                     } else {
@@ -330,7 +331,7 @@ public class Command1vs1 implements CommandExecutor {
                             player.sendMessage(MainClass.getPrefix() + "§7Du hast erfolgreich den globalen Reward gesetzt!");
                             return true;
                         } else {
-                            if (ArenaManager.exists(args[1])) {
+                            if (Arenas.exists(args[1])) {
                                 for (int i = 0; player.getInventory().getContents().length < i; i++) {
                                     if (player.getInventory().getContents()[i].getType() != Material.AIR || player.getInventory().getContents()[i] != null) {
                                         MainClass.instance().getConfig().set("arenas" + args[1] + ".rewards", player.getInventory().getContents()[i]);
@@ -344,52 +345,33 @@ public class Command1vs1 implements CommandExecutor {
                                 return true;
                             }
                         }
-
-
                     }
-                case "select":
-                    if (player.hasPermission("1vs1.select")) {
-                        if (ArenaManager.getArenas() != null) {
-                            for (String arenas : ArenaManager.getArenas()) {
-                                if (ArenaManager.getArenaIconItem(arenas) != null && ArenaManager.getLocation("arenas." + arenas + ".Spawn1") != null && ArenaManager.getLocation("arenas." + arenas + ".Spawn2") != null) {
-                                    ArenaManager.setArenaReady(arenas, true);
-                                } else {
-                                    ArenaManager.setArenaReady(arenas, false);
-                                }
-                            }
-                        }
+                case "join":
+                    if (!CommandHelper.checkPermAndMsg(player, "1vs1.join", commandLabel)) {
+                        return true;
+                    }
 
-                        if (ArenaManager.getArenas() == null) {
-                            player.sendMessage(MainClass.getPrefix() + "§cKeine Arenen vorhanden =(!");
-                            return true;
-                        }
+                    if (!Arenas.anyExist()) {
+                        player.sendMessage(MainClass.getPrefix() + "§cKeine Arenen vorhanden =(!");
+                        return true;
+                    }
 
-                        if (!MainClass.getPlayersinFight().containsKey(player)) {
-                            if (isInventoryEmpty(player) && player.getInventory().getHelmet() == null && player.getInventory().getChestplate() == null && player.getInventory().getLeggings() == null && player.getInventory().getBoots() == null) {
-                                openMenuAt(player);
-                                return true;
-                            } else {
-                                player.sendMessage(MainClass.getPrefix() + "§eDu musst erst dein Inventar leeren!");
-                                return true;
-                            }
-                        } else {
-                            player.sendMessage(MainClass.getPrefix() + " §eDu bist bereits in einem Kampf!");
-                            return true;
-                        }
+                    if (Arenas.isInGame(player)) {
+                        player.sendMessage(MainClass.getPrefix() + " §eDu bist bereits in einem Kampf!");
+                        return true;
+                    }
+
+                    if (InventoryHelper.isInventoryEmpty(player)) {
+                        openMenuAt(player);
+                        return true;
                     } else {
-                        player.sendMessage(noperm);
+                        player.sendMessage(MainClass.getPrefix() + "§eDu musst zuerst dein Inventar leeren!");
                         return true;
                     }
                 default:
-                    sender.sendMessage("§cUnbekannte Aktion.");
+                    sender.sendMessage("§cUnbekannte Aktion. /1vs1 help");
             }
         }
         return true;
-    }
-
-    boolean isInventoryEmpty(Player player) {
-        return Arrays.asList(player.getInventory().getContents()).stream()
-                .filter(is -> is != null && !is.getType().equals(Material.AIR))
-                .findAny().isPresent();
     }
 }

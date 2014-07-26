@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import io.github.xxyy.common.collections.Pair;
 import me.sebi7224.onevsone.arena.Arena;
+import me.sebi7224.onevsone.arena.Arenas;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -133,16 +134,16 @@ public final class WaitingQueueManager {
     //Returns whether a game has been started with given arguments
     private static boolean tryPop(Arena arena, Player plr1, Player plr2) {
         if(arena == null) {
-            arena = Arena.any();
+            arena = Arenas.any();
         }
 
-        if(arena.isOccupied()) {
+        if(!arena.isReady()) {
             return false;
         }
 
-        arena.startGame(plr1, plr2);
+        remove(plr1);
         remove(plr2);
-        remove(plr2);
+        arena.scheduleGame(plr1, plr2);
 
         return true;
     }

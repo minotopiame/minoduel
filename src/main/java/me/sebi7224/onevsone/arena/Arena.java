@@ -1,14 +1,8 @@
 package me.sebi7224.onevsone.arena;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
-import io.github.xxyy.common.collections.CaseInsensitiveMap;
-import io.github.xxyy.common.collections.Couple;
-import io.github.xxyy.common.util.inventory.InventoryHelper;
-import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 import me.sebi7224.onevsone.MainClass;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -19,7 +13,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import io.github.xxyy.common.collections.Couple;
+import io.github.xxyy.common.games.util.RunnableTeleportLater;
+import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
+import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
+import io.github.xxyy.common.util.inventory.InventoryHelper;
+import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Represents an 1vs1 arena as loaded from configuration.
@@ -29,15 +34,16 @@ import java.util.*;
  */
 public class Arena {
     public static final String CONFIG_PATH = "arenas";
+
     private static final String FIRST_SPAWN_PATH = "spawn1";
     private static final String SECOND_SPAWN_PATH = "spawn2";
     private static final String ICON_STACK_PATH = "icon";
     private static final String SPECIFIC_REWARD_PATH = "rewards";
     private static final String INVENTORY_KIT_PATH = "items";
     private static final String ARMOR_KIT_PATH = "armor";
-    private static final Map<String, Arena> arenaCache = new CaseInsensitiveMap<>();
 
     private final String name;
+    @Nullable
     private ConfigurationSection configSection;
     private Location firstSpawn;
     private Location secondSpawn;
@@ -49,20 +55,30 @@ public class Arena {
     private Couple<PlayerInfo> currentPlayers = null;
     private RunnableArenaTick tickTask = new RunnableArenaTick();
 
-    public Arena(ConfigurationSection storageBackend) {
+    public Arena(@NotNull ConfigurationSection storageBackend) {
         this.name = storageBackend.getName();
         this.configSection = storageBackend;
     }
 
-    public void startGame(Player plr1, Player plr2) {
-        Validate.isTrue(currentPlayers == null, "A game is currently running in this arena!");
+    public void scheduleGame(@NotNull Player plr1, @NotNull Player plr2) {
+        Validate.isTrue(isReady(), "This arena is currently not ready");
         Validate.notNull(plr1, "Player one is null");
         Validate.notNull(plr2, "Player two is null");
 
-        this.currentPlayers = new Couple<>(new PlayerInfo(plr1), new PlayerInfo(plr2));
+        this.currentPlayers = new Couple<>(
+                new PlayerInfo(plr1, getFirstSpawn()),
+                new PlayerInfo(plr2, getSecondSpawn())
+        );
 
-        this.currentPlayers.getLeft().getPlayer().teleport(getFirstSpawn());
-        this.currentPlayers.getRight().getPlayer().teleport(getSecondSpawn());
+        currentPlayers.forEach(PlayerInfo::sendTeleportMessage);
+        currentPlayers.forEach(this::teleportLater);
+    }
+
+    private void startGame() {
+        Validate.validState(isValid(), "This arena is currently not valid");
+        Validate.validState(isOccupied(), "Cannot start game in empty arena!");
+        Validate.validState(currentPlayers.getLeft().isValid(), "left player is invalid: " + currentPlayers.getLeft().getName());
+        Validate.validState(currentPlayers.getRight().isValid(), "right player is invalid: " + currentPlayers.getRight().getName());
 
         this.currentPlayers.forEach(PlayerInfo::sendStartMessage);
 
@@ -88,6 +104,16 @@ public class Arena {
      * @param winner The winner of the game or NULL if no winner could be determined.
      */
     public void endGame(PlayerInfo winner) {
+        endGame(winner, true);
+    }
+
+    /**
+     * Ends this game, gives the winner their reward (if applicable)
+     *
+     * @param winner               The winner of the game or NULL if no winner could be determined.
+     * @param sendUndecidedMessage whether to send the "no winner could be determined" message if {@code winner} is NULL
+     */
+    public void endGame(PlayerInfo winner, boolean sendUndecidedMessage) {
         Validate.isTrue(winner == null || winner.getArena().equals(this));
         Validate.isTrue(currentPlayers != null);
 
@@ -106,23 +132,62 @@ public class Arena {
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
                     .forEach(winner.getPlayer().getInventory()::addItem);
         } else {
-            Bukkit.broadcastMessage(MainClass.getPrefix() + "§7Der Kampf zwischen §a" +
-                    currentPlayers.getLeft().getPlayer().getName() +
-                    "§7 und §a" + currentPlayers.getRight().getPlayer().getName() +
-                    " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
+            if (sendUndecidedMessage) {
+                Bukkit.broadcastMessage(MainClass.getPrefix() + "§7Der Kampf zwischen §a" +
+                        currentPlayers.getLeft().getPlayer().getName() +
+                        "§7 und §a" + currentPlayers.getRight().getPlayer().getName() +
+                        " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
+            }
         }
 
         currentPlayers = null;
+    }
+
+    /**
+     * Removes this arena from cache and storage.
+     */
+    public void remove() {
+        Validate.validState(configSection != null, "Can't remove already removed arena!");
+
+        if (isOccupied()) {
+            currentPlayers.forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
+            endGame(null);
+        }
+
+        configSection.getParent().set(configSection.getName(), null);
+        Arenas.arenaCache.remove(getName());
+        configSection = null;
+    }
+
+    /**
+     * Returns whether this arena is valid and ready to be used.
+     *
+     * @return the current validity state
+     */
+    public boolean isValid() {
+        return configSection != null &&
+                firstSpawn != null &&
+                secondSpawn != null &&
+                inventoryKit != null &&
+                armorKit != null &&
+                iconStack != null;
     }
 
     ///////////// GETTERS //////////////////////////////////////////////////////////////////////////////////////////////
 
     public List<ItemStack> getRewards() {
         if (specificRewards == null || specificRewards.isEmpty()) {
-            return ArenaManager.getDefaultRewards();
+            return Arenas.getDefaultRewards();
         }
 
         return specificRewards;
+    }
+
+    /**
+     * @return whether this arena is ready to accept players.
+     */
+    public boolean isReady() {
+        return isValid() && !isOccupied();
     }
 
     public boolean isOccupied() {
@@ -153,6 +218,10 @@ public class Arena {
         return armorKit;
     }
 
+    protected ConfigurationSection getConfigSection() {
+        return configSection;
+    }
+
     /////// SETTERS ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void setArmorKit(ItemStack[] armorKit) {
@@ -164,46 +233,104 @@ public class Arena {
     }
 
     public void setFirstSpawn(Location firstSpawn) {
-        ArenaManager.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
+        Validate.validState(configSection != null, "This arena has been removed!");
+
+        Arenas.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
         this.firstSpawn = firstSpawn;
     }
 
     public void setSecondSpawn(Location secondSpawn) {
-        ArenaManager.saveLocation(configSection.createSection(SECOND_SPAWN_PATH), secondSpawn);
+        Validate.validState(configSection != null, "This arena has been removed!");
+
+        Arenas.saveLocation(configSection.createSection(SECOND_SPAWN_PATH), secondSpawn);
         this.secondSpawn = secondSpawn;
     }
 
     public void setIconStack(ItemStack iconStack) {
+        Validate.validState(configSection != null, "This arena has been removed!");
+
         configSection.set(ICON_STACK_PATH, iconStack);
         this.iconStack = iconStack;
     }
 
     public void setRewards(List<ItemStack> specificRewards) {
+        Validate.validState(configSection != null, "This arena has been removed!");
+
         this.configSection.set(SPECIFIC_REWARD_PATH, specificRewards);
         this.specificRewards = specificRewards;
+    }
+
+    /**
+     * Gets the opposite player of the argument.
+     *
+     * @param plr Player not to target (you get it?!!)
+     * @return opposite player or NULL if the argument is not in this arena or no opposite player could be found.
+     */
+    public PlayerInfo getOther(@NotNull Player plr) {
+        Validate.validState(isValid(), "Arena is invalid!");
+
+        if (currentPlayers.getLeft().getPlayer().equals(plr)) {
+            return currentPlayers.getRight();
+        } else if (currentPlayers.getRight().getPlayer().equals(plr)) {
+            return currentPlayers.getLeft();
+        } else {
+            return null;
+        }
     }
 
     public String getName() {
         return name;
     }
 
-    // private utility methods
+    //private utility methods
     @SuppressWarnings("unchecked")
     private void updateFromConfig() {
-        this.firstSpawn = ArenaManager.getLocation(configSection.getConfigurationSection("spawn1"));
-        this.secondSpawn = ArenaManager.getLocation(configSection.getConfigurationSection("spawn2"));
+        Validate.validState(this.configSection != null, "This arena has been removed!");
+
+        this.firstSpawn = Arenas.getLocation(configSection.getConfigurationSection("spawn1"));
+        this.secondSpawn = Arenas.getLocation(configSection.getConfigurationSection("spawn2"));
         this.iconStack = configSection.getItemStack(ICON_STACK_PATH);
         this.specificRewards = (List<ItemStack>) configSection.getList(SPECIFIC_REWARD_PATH, new ArrayList<ItemStack>());
 
-        if(configSection.contains(INVENTORY_KIT_PATH)) {
+        if (configSection.contains(INVENTORY_KIT_PATH)) {
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(INVENTORY_KIT_PATH);
             this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[InventoryType.PLAYER.getDefaultSize()]);
         }
 
-        if(configSection.contains(ARMOR_KIT_PATH)) {
+        if (configSection.contains(ARMOR_KIT_PATH)) {
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(ARMOR_KIT_PATH);
             this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[4]);
         }
+    }
+
+    private void teleportLater(@NotNull PlayerInfo playerInfo) {
+        Validate.notNull(playerInfo.getPlayer(), "player is null");
+
+        RunnableTeleportLater.TeleportCompleteHandler completeHandler =
+                RunnableTeleportLater.MessageTeleportCompleteHandler.getHandler(Locale.GERMAN, (runnableTeleportLater, failureReason, lastTry) -> {
+                    if (!playerInfo.isValid()) { //Players might execute /1vs1 leave during the teleport period
+                        runnableTeleportLater.tryCancel();
+                        return;
+                    }
+
+                    if (failureReason == null) {
+                        playerInfo.setInArena(true);
+
+                        if (currentPlayers.getOther(playerInfo).isInArena()) {
+                            startGame();
+                        } else {
+                            playerInfo.getPlayer().sendMessage("§eBitte warte, bis dein Gegner teleportiert wird.");
+                        }
+                    } else if (lastTry) {
+                        playerInfo.getPlayer().sendMessage("§cWir haben es bereits oft genug probiert, die Teleportation wird jetzt abgebrochen.");
+                        currentPlayers.getOther(playerInfo).getPlayer()
+                                .sendMessage("§4" + playerInfo.getName() + "§c konnte nicht stillhalten, daher kann das Spiel nicht beginnen. Bitte versuche es erneut.");
+                        endGame(null, false);
+                    }
+                });
+
+        new RunnableTeleportLater(playerInfo.getPlayer(), playerInfo.getSpawnLocation(), 5, completeHandler)
+                .runTaskTimer(MainClass.instance(), MainClass.instance().getTeleportDelayTicks(), MainClass.instance().getTeleportDelayTicks());
     }
 
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,81 +349,22 @@ public class Arena {
         return arena;
     }
 
-    /**
-     * Gets an Arena from its name.
-     *
-     * @param name Name of the Arena to get.
-     * @return An Arena with the given name or NULL if none exists.
-     */
-    public static Arena byName(String name) {
-        Arena arena = arenaCache.get(name);
+    static void reloadArenas(FileConfiguration source) {
+        Map<String, Arena> existingArenas = new HashMap<>(Arenas.arenaCache);
+        Arenas.arenaCache.clear();
 
-        if (arena == null && MainClass.instance().getConfig().contains(CONFIG_PATH + "." + name)) {
-            reloadArenas(MainClass.getInstance().getConfig());
-            arena = arenaCache.get(name);
-        }
-
-        return arena;
-    }
-
-    /**
-     * Gets a semi-random Arena object from the collection of know Arenas.
-     * @return Any Arena object
-     * @throws java.lang.IllegalStateException If no arenas are known
-     */
-    public static Arena any() {
-        Validate.isTrue(!arenaCache.isEmpty(), "No arenas known!");
-        return arenaCache.values().stream()
-                .skip(RandomUtils.nextInt(arenaCache.size()))
-                .findFirst().get();
-    }
-
-    /**
-     * @return An immutable view of all known arenas
-     */
-    public static Collection<Arena> all() {
-        return ImmutableList.copyOf(arenaCache.values());
-    }
-
-    public static boolean existsByName(String name) {
-        return arenaCache.containsKey(name);
-    }
-
-    /**
-     * Creates a new Arena with empty properties. Replaces existing ones.
-     *
-     * @param name   Name of the new Arena.
-     * @param config Configuration backend to use to persist arena information
-     * @return the created Arena
-     */
-    public static Arena createArena(String name, FileConfiguration config) {
-        Arena arena = new Arena(config.getConfigurationSection(CONFIG_PATH).createSection(name));
-        arenaCache.put(name, arena);
-        return arena;
-    }
-
-    /**
-     * Reloads arenas from a given {@link FileConfiguration}. Loads from path {@link #CONFIG_PATH}.
-     * Existing objects are modified.
-     *
-     * @param source Where to get data from
-     */
-    public static void reloadArenas(FileConfiguration source) {
-        Map<String, Arena> existingArenas = new HashMap<>(arenaCache);
-        arenaCache.clear();
-
-        if (source.contains(CONFIG_PATH)) {
-            ConfigurationSection arenaSection = source.getConfigurationSection(CONFIG_PATH);
+        if (source.contains(Arena.CONFIG_PATH)) {
+            ConfigurationSection arenaSection = source.getConfigurationSection(Arena.CONFIG_PATH);
             for (String key : arenaSection.getKeys(false)) {
                 Arena existingArena = existingArenas.get(key);
-                ConfigurationSection section = source.getConfigurationSection(CONFIG_PATH + "." + key);
+                ConfigurationSection section = source.getConfigurationSection(Arena.CONFIG_PATH + "." + key);
 
                 if (existingArena == null) {
-                    arenaCache.put(key, Arena.fromConfigSection(section));
+                    Arenas.arenaCache.put(key, Arena.fromConfigSection(section));
                 } else {
                     existingArena.configSection = section;
                     existingArena.updateFromConfig();
-                    arenaCache.put(key, existingArena);
+                    Arenas.arenaCache.put(key, existingArena);
                     existingArenas.remove(key);
                 }
             }
@@ -305,7 +373,7 @@ public class Arena {
         for (Arena removedArena : existingArenas.values()) {
             removedArena.getCurrentPlayers()
                     .forEach(pi -> pi.getPlayer().sendMessage("§cDeine Arena wurde entfernt. Bitte entschuldige die Unannehmlichkeiten!"));
-            removedArena.endGame(null);
+            removedArena.endGame(null, false);
         }
     }
 
@@ -386,15 +454,20 @@ public class Arena {
     public class PlayerInfo {
         private final int previousExperience;
         private final Location previousLocation;
+        private final Location spawnLocation;
         private final String name;
         private Player player;
         private boolean valid = true;
+        private boolean inArena = false;
 
-        protected PlayerInfo(Player plr) {
+        protected PlayerInfo(Player plr, Location spawnLocation) {
+            this.spawnLocation = spawnLocation;
             this.player = plr;
             this.name = plr.getName();
             this.previousExperience = plr.getTotalExperience();
             this.previousLocation = plr.getLocation();
+
+            Arenas.setPlayerArena(player, Arena.this);
         }
 
         /**
@@ -405,11 +478,30 @@ public class Arena {
          */
         protected void invalidate() {
             this.valid = false;
+            this.inArena = false;
             player.setTotalExperience(previousExperience);
             player.teleport(previousLocation);
             InventoryHelper.clearInventory(player);
-            MainClass.getPlayersinFight().remove(player);
+            Arenas.setPlayerArena(player, null);
             this.player = null; //Don't keep Player ref in case this object is accidentally kept
+        }
+
+        /**
+         * Sets the new inArena (i.e. whether the player is currently in the arena) value of this player.
+         *
+         * @param inArena whether the player is currently in the arena
+         */
+        protected void setInArena(boolean inArena) {
+            this.inArena = inArena;
+        }
+
+        /**
+         * This actually returns whether the player has been teleported to a spawn point but not teleported back yet.
+         *
+         * @return whether the player is currently in the arena
+         */
+        public boolean isInArena() {
+            return inArena;
         }
 
         /**
@@ -420,6 +512,10 @@ public class Arena {
          */
         public Arena getArena() {
             return isValid() ? Arena.this : null;
+        }
+
+        public Location getSpawnLocation() {
+            return spawnLocation;
         }
 
         /**
@@ -448,9 +544,13 @@ public class Arena {
             return valid;
         }
 
+        protected void sendTeleportMessage() {
+            getPlayer().sendMessage(MainClass.getPrefix() + "§eDu wirst jetzt gegen §a" +
+                    Arena.this.getCurrentPlayers().getOther(this).getName() + "§e kämpfen!");
+            getPlayer().sendMessage(MainClass.getPrefix() + "§8Bitte stillhalten, du wirst in die Arena §7" + Arena.this.getName() + "§8 teleportiert!");
+        }
+
         protected void sendStartMessage() {
-            getPlayer().sendMessage(MainClass.getPrefix() + "§eDu kämpfst jetzt gegen §a" +
-                    Arena.this.getCurrentPlayers().getOther(this).getName() + "§6 (" + Arena.this.getName() + ")");
             getPlayer().sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
         }
     }

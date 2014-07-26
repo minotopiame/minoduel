@@ -1,26 +1,33 @@
 package me.sebi7224.onevsone;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import io.github.xxyy.common.collections.Pair;
 import me.sebi7224.onevsone.arena.Arena;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Class which takes care of maintaining a waiting queue of players with their arena preferences and automatically
  * sending players with matching interests into a corresponding arena, if free.
+ * This class utilizes a FIFO (first-in-first-out) order.
  *
  * @author <a href="http://xxyy.github.io/">xxyy</a>
  * @since 22.7.14
  */
 public final class WaitingQueueManager {
 
-    private static LinkedList<Pair<Player, Arena>> queue = new LinkedList<>(); //Using impl type here because LinkedList is not only a Queue but also a List and we need that...sorry standards
+    private static List<Pair<Player, Arena>> queue = new ArrayList<>();
 
     private WaitingQueueManager() {
 
@@ -89,13 +96,39 @@ public final class WaitingQueueManager {
         });
     }
 
-    //TODO: Method for informing players about their position in the queue
+    /**
+     * Returns the waiting queue for a given arena.
+     * @param arena The arena to find
+     * @param strict Whether or not to include NULL choices ("don't care about which arena) into the result
+     * @return Ordered waiting queue for {@code arena}
+     */
+    public static List<Player> queueFor(@NotNull Arena arena, boolean strict) {
+        Predicate<Pair<Player, Arena>> predicate;
+        if(strict) {
+            predicate = pair -> arena.equals(pair.getRight()); //Match same arena
+        } else {
+            predicate = pair -> pair.getRight() == null || arena.equals(pair.getRight()); //Match same arena or "don't care"
+        }
 
-    //TODO: Method to visualize arena queues
-    //Should return Map<Arena, List<Player>>
-    //Visualisation: (egal) => Player1, Player2
-    //(arena1) => Player4, Player5, Player7
-    //arena names should be green if this queue would allow for joining a game immediately
+        return queue.stream()
+                .filter(predicate)
+                .map(Pair::getLeft) //Get player out of pairs
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a view of the current queues (not actually Queue instances!) for all arenas.
+     * All queues are in insertion order, i.e. the first person in any list will be the next to play.
+     * Arenas which don't have a queue are not present in the return value.
+     * @return a view of current arena queues
+     */
+    public static Multimap<Arena, Player> getArenaQueues() {
+        Multimap<Arena, Player> result = MultimapBuilder.hashKeys().arrayListValues().build();
+
+        queue.forEach(pair -> result.put(pair.getRight(), pair.getLeft()));
+
+        return ImmutableListMultimap.copyOf(result);
+    }
 
     //Returns whether a game has been started with given arguments
     private static boolean tryPop(Arena arena, Player plr1, Player plr2) {

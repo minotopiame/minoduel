@@ -1,5 +1,7 @@
-package me.sebi7224.onevsone;
+package me.sebi7224.onevsone.cmd;
 
+import me.sebi7224.onevsone.MainClass;
+import me.sebi7224.onevsone.WaitingQueueManager;
 import me.sebi7224.onevsone.arena.Arena;
 import me.sebi7224.onevsone.arena.Arenas;
 import me.sebi7224.onevsone.util.IconMenu;

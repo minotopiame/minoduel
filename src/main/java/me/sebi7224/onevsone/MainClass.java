@@ -1,6 +1,7 @@
 package me.sebi7224.onevsone;
 
 import me.sebi7224.onevsone.arena.Arenas;
+import me.sebi7224.onevsone.cmd.Command1vs1;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MainClass extends JavaPlugin {

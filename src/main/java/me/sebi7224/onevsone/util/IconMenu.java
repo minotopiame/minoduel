@@ -1,8 +1,8 @@
 package me.sebi7224.onevsone.util;
 
-import io.github.xxyy.common.util.inventory.InventoryHelper;
 import me.sebi7224.onevsone.MainClass;
 import me.sebi7224.onevsone.arena.Arena;
+import me.sebi7224.onevsone.arena.Arenas;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,6 +13,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import io.github.xxyy.common.util.inventory.InventoryHelper;
+import io.github.xxyy.common.util.inventory.ItemStackFactory;
+
 public class IconMenu implements Listener {
 
     private final String name;
@@ -21,7 +24,6 @@ public class IconMenu implements Listener {
     private MainClass plugin;
 
     private Arena[] optionArenas;
-    private ItemStack[] optionIcons;
 
     public IconMenu(String name, int size, OptionClickEventHandler handler, MainClass plugin) {
         this.name = name;
@@ -29,23 +31,22 @@ public class IconMenu implements Listener {
         this.size = size;
         this.handler = handler;
         this.plugin = plugin;
-        this.optionIcons = new ItemStack[size];
         this.optionArenas = new Arena[size];
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public IconMenu setArena(int position, Arena arena) {
         optionArenas[position] = arena;
-        optionIcons[position] = arena.getIconStack();
-
         return this;
     }
 
     public void open(Player player) {
         Inventory inventory = Bukkit.createInventory(player, size, name);
-        for (int i = 0; i < optionIcons.length; i++) {
-            if (optionIcons[i] != null) {
-                inventory.setItem(i, optionIcons[i]);
+        for (int i = 0; i < optionArenas.length; i++) {
+            if (optionArenas[i] == null) {
+                inventory.setItem(i, Arenas.getAnyArenaIcon());
+            } else {
+                inventory.setItem(i, getIcon(optionArenas[i]));
             }
         }
         player.openInventory(inventory);
@@ -55,7 +56,6 @@ public class IconMenu implements Listener {
         HandlerList.unregisterAll(this);
         handler = null;
         plugin = null;
-        optionIcons = null;
         optionArenas = null;
     }
 
@@ -64,7 +64,7 @@ public class IconMenu implements Listener {
         if (event.getInventory().getTitle().equals(name)) {
             event.setCancelled(true);
             int slot = event.getRawSlot();
-            if (slot >= 0 && slot < size && optionArenas[slot] != null) {
+            if (slot >= 0 && slot < size/* && optionArenas[slot] != null*/) {
                 OptionClickEvent e = new OptionClickEvent((Player) event.getWhoClicked(), slot, optionArenas[slot]);
                 handler.onOptionClick(e);
                 if (e.willClose()) {
@@ -72,6 +72,16 @@ public class IconMenu implements Listener {
                 }
             }
         }
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    private ItemStack getIcon(Arena arena) {
+        return new ItemStackFactory(arena.getIconStack())
+                .lore(arena.getPlayerString())
+                .produce();
     }
 
     public interface OptionClickEventHandler {

@@ -25,7 +25,6 @@ public class MainClass extends JavaPlugin {
         //Register Bukkit API stuffs
         getServer().getPluginManager().registerEvents(new MainListener(), this);
         getCommand("1vs1").setExecutor(new Command1vs1(this));
-        Command1vs1.registerArenaMenu();
 
         //Automagically save config every 5 minutes to minimize data-loss on crash
         getServer().getScheduler().runTaskTimer(this, this::saveConfig, 5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx

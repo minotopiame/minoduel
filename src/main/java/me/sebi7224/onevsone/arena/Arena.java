@@ -7,12 +7,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
+import io.github.xxyy.common.checklist.Checklist;
+import io.github.xxyy.common.checklist.renderer.CommandSenderRenderer;
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.games.util.RunnableTeleportLater;
 import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
@@ -32,7 +35,7 @@ import java.util.Map;
  * @author <a href="http://xxyy.github.io/">xxyy</a>
  * @since 19.7.14
  */
-public class Arena {
+public class Arena { //TODO: It should be possible to put arenas out of service temporarily
     public static final String CONFIG_PATH = "arenas";
 
     private static final String FIRST_SPAWN_PATH = "spawn1";
@@ -41,6 +44,9 @@ public class Arena {
     private static final String SPECIFIC_REWARD_PATH = "rewards";
     private static final String INVENTORY_KIT_PATH = "items";
     private static final String ARMOR_KIT_PATH = "armor";
+
+    private static final CommandSenderRenderer CHECKLIST_RENDERER = new CommandSenderRenderer.Builder()
+            .brackets(true).uncheckedEmpty(false).build();
 
     private final String name;
     @Nullable
@@ -52,8 +58,14 @@ public class Arena {
     private ItemStack[] inventoryKit;
     private ItemStack[] armorKit;
 
-    private Couple<PlayerInfo> currentPlayers = null;
+    private Couple<PlayerInfo> players = null;
     private RunnableArenaTick tickTask = new RunnableArenaTick();
+    private Checklist validityChecklist = new Checklist()
+            .append("Arena gelöscht!",() -> configSection != null)
+            .append("Spawn 1 gesetzt", () -> firstSpawn != null)
+            .append("Spawn 2 gesetzt", () -> secondSpawn != null)
+            .append("Kit gesetzt", () -> inventoryKit != null && armorKit != null)
+            .append("Icon gesetzt", () -> iconStack != null);
 
     public Arena(@NotNull ConfigurationSection storageBackend) {
         this.name = storageBackend.getName();
@@ -65,24 +77,25 @@ public class Arena {
         Validate.notNull(plr1, "Player one is null");
         Validate.notNull(plr2, "Player two is null");
 
-        this.currentPlayers = new Couple<>(
+        this.players = new Couple<>(
                 new PlayerInfo(plr1, getFirstSpawn()),
                 new PlayerInfo(plr2, getSecondSpawn())
         );
 
-        currentPlayers.forEach(PlayerInfo::sendTeleportMessage);
-        currentPlayers.forEach(this::teleportLater);
+        players.forEach(PlayerInfo::sendTeleportMessage);
+        players.forEach(this::teleportLater);
     }
 
+    @SuppressWarnings("deprecation") //updateInventory
     private void startGame() {
         Validate.validState(isValid(), "This arena is currently not valid");
         Validate.validState(isOccupied(), "Cannot start game in empty arena!");
-        Validate.validState(currentPlayers.getLeft().isValid(), "left player is invalid: " + currentPlayers.getLeft().getName());
-        Validate.validState(currentPlayers.getRight().isValid(), "right player is invalid: " + currentPlayers.getRight().getName());
+        Validate.validState(players.getLeft().isValid(), "left player is invalid: " + players.getLeft().getName());
+        Validate.validState(players.getRight().isValid(), "right player is invalid: " + players.getRight().getName());
 
-        this.currentPlayers.forEach(PlayerInfo::sendStartMessage);
+        this.players.forEach(PlayerInfo::sendStartMessage);
 
-        this.currentPlayers.forEach(pi -> {
+        this.players.forEach(pi -> {
             Player plr = pi.getPlayer();
             plr.setFireTicks(0);
             plr.setHealth(plr.getMaxHealth());
@@ -90,7 +103,6 @@ public class Arena {
             plr.getInventory().setContents(getInventoryKit());
             plr.getInventory().setArmorContents(getArmorKit());
             plr.setGameMode(GameMode.SURVIVAL);
-            //noinspection deprecation
             plr.updateInventory();
             plr.closeInventory();
             plr.setFlying(false);
@@ -115,15 +127,15 @@ public class Arena {
      */
     public void endGame(PlayerInfo winner, boolean sendUndecidedMessage) {
         Validate.isTrue(winner == null || winner.getArena().equals(this));
-        Validate.isTrue(currentPlayers != null);
+        Validate.isTrue(players != null);
 
         //Clean up players - teleport them back etc
-        currentPlayers.forEach(PlayerInfo::invalidate);
+        players.forEach(PlayerInfo::invalidate);
 
         tickTask.reset();
 
         if (winner != null) { //A winner has been determined
-            PlayerInfo loser = currentPlayers.getOther(winner);
+            PlayerInfo loser = players.getOther(winner);
 
             Bukkit.broadcastMessage(MainClass.getPrefix() + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
@@ -134,13 +146,13 @@ public class Arena {
         } else {
             if (sendUndecidedMessage) {
                 Bukkit.broadcastMessage(MainClass.getPrefix() + "§7Der Kampf zwischen §a" +
-                        currentPlayers.getLeft().getPlayer().getName() +
-                        "§7 und §a" + currentPlayers.getRight().getPlayer().getName() +
+                        players.getLeft().getPlayer().getName() +
+                        "§7 und §a" + players.getRight().getPlayer().getName() +
                         " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
             }
         }
 
-        currentPlayers = null;
+        players = null;
     }
 
     /**
@@ -150,7 +162,7 @@ public class Arena {
         Validate.validState(configSection != null, "Can't remove already removed arena!");
 
         if (isOccupied()) {
-            currentPlayers.forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
+            players.forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
             endGame(null);
         }
 
@@ -164,13 +176,43 @@ public class Arena {
      *
      * @return the current validity state
      */
-    public boolean isValid() {
+    public boolean isValid() { //TODO: Should we use validityChecklist.isDone() ? -> overhead considerable?
         return configSection != null &&
                 firstSpawn != null &&
                 secondSpawn != null &&
                 inventoryKit != null &&
                 armorKit != null &&
                 iconStack != null;
+    }
+
+    /**
+     * Sends a checklist to given CommandSender explaining what is missing to make this arena valid, if anything.
+     * @param sender the receiver of the checklist
+     */
+    public void sendChecklist(CommandSender sender) {
+        if(isOccupied()) {
+            sender.sendMessage("§7(besetzt)");
+        }
+        if(configSection == null) {
+            sender.sendMessage("§c(gelöscht)");
+            return;
+        }
+
+        CHECKLIST_RENDERER.renderFor(sender, validityChecklist);
+    }
+
+    public String getValidityString() {
+        if(isOccupied()) {
+            return "§7(besetzt)";
+        }
+        if(isValid()) {
+            return "§a(valide)";
+        }
+        if(configSection == null) {
+            return "§c(gelöscht)";
+        }
+
+        return "§c(invalide)";
     }
 
     ///////////// GETTERS //////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,11 +233,25 @@ public class Arena {
     }
 
     public boolean isOccupied() {
-        return currentPlayers != null;
+        return players != null;
     }
 
-    public Couple<PlayerInfo> getCurrentPlayers() {
-        return currentPlayers;
+    public Couple<PlayerInfo> getPlayers() {
+        return players;
+    }
+
+    /**
+     * @return A string nicely showing this arena's current players.
+     */
+    public String getPlayerString() {
+        if(!isOccupied()) {
+            return "§7§oleer";
+        }
+
+        return "§c" +
+                (players.getLeft() == null ? "???" : players.getLeft().getName()) +
+                "§7 vs. §c" +
+                (players.getRight() == null ? "???" : players.getRight().getName());
     }
 
     public Location getFirstSpawn() {
@@ -269,10 +325,10 @@ public class Arena {
     public PlayerInfo getOther(@NotNull Player plr) {
         Validate.validState(isValid(), "Arena is invalid!");
 
-        if (currentPlayers.getLeft().getPlayer().equals(plr)) {
-            return currentPlayers.getRight();
-        } else if (currentPlayers.getRight().getPlayer().equals(plr)) {
-            return currentPlayers.getLeft();
+        if (players.getLeft().getPlayer().equals(plr)) {
+            return players.getRight();
+        } else if (players.getRight().getPlayer().equals(plr)) {
+            return players.getLeft();
         } else {
             return null;
         }
@@ -316,14 +372,14 @@ public class Arena {
                     if (failureReason == null) {
                         playerInfo.setInArena(true);
 
-                        if (currentPlayers.getOther(playerInfo).isInArena()) {
+                        if (players.getOther(playerInfo).isInArena()) {
                             startGame();
                         } else {
                             playerInfo.getPlayer().sendMessage("§eBitte warte, bis dein Gegner teleportiert wird.");
                         }
                     } else if (lastTry) {
                         playerInfo.getPlayer().sendMessage("§cWir haben es bereits oft genug probiert, die Teleportation wird jetzt abgebrochen.");
-                        currentPlayers.getOther(playerInfo).getPlayer()
+                        players.getOther(playerInfo).getPlayer()
                                 .sendMessage("§4" + playerInfo.getName() + "§c konnte nicht stillhalten, daher kann das Spiel nicht beginnen. Bitte versuche es erneut.");
                         endGame(null, false);
                     }
@@ -371,7 +427,7 @@ public class Arena {
         }
 
         for (Arena removedArena : existingArenas.values()) {
-            removedArena.getCurrentPlayers()
+            removedArena.getPlayers()
                     .forEach(pi -> pi.getPlayer().sendMessage("§cDeine Arena wurde entfernt. Bitte entschuldige die Unannehmlichkeiten!"));
             removedArena.endGame(null, false);
         }
@@ -403,7 +459,7 @@ public class Arena {
                 .add("secondSpawn", secondSpawn)
                 .add("iconStack", iconStack)
                 .add("specificRewards", specificRewards)
-                .add("currentPlayers", currentPlayers)
+                .add("players", players)
                 .toString();
     }
 
@@ -432,10 +488,10 @@ public class Arena {
 
             //Announce full minutes
             if (ticksLeft % 12 == 0) { //every minute
-                getCurrentPlayers().stream()
+                getPlayers().stream()
                         .forEach(pi -> pi.getPlayer().sendMessage(MainClass.getPrefix() + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
             } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
-                getCurrentPlayers().stream()
+                getPlayers().stream()
                         .forEach(pi -> pi.getPlayer().sendMessage(MainClass.getPrefix() + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
             } else if (ticksLeft == 0) {
                 Arena.this.endGame(null);
@@ -481,6 +537,11 @@ public class Arena {
             this.inArena = false;
             player.setTotalExperience(previousExperience);
             player.teleport(previousLocation);
+            player.setFoodLevel(20);
+            player.setHealth(player.getMaxHealth());
+            player.setFireTicks(0);
+            player.setExhaustion(0.0F);
+            player.setSaturation(9.6F); //Notch's Golden apple - balance between prev sat and taking away eventual golden apples consumed during the fight
             InventoryHelper.clearInventory(player);
             Arenas.setPlayerArena(player, null);
             this.player = null; //Don't keep Player ref in case this object is accidentally kept
@@ -546,12 +607,17 @@ public class Arena {
 
         protected void sendTeleportMessage() {
             getPlayer().sendMessage(MainClass.getPrefix() + "§eDu wirst jetzt gegen §a" +
-                    Arena.this.getCurrentPlayers().getOther(this).getName() + "§e kämpfen!");
+                    Arena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
             getPlayer().sendMessage(MainClass.getPrefix() + "§8Bitte stillhalten, du wirst in die Arena §7" + Arena.this.getName() + "§8 teleportiert!");
         }
 
         protected void sendStartMessage() {
             getPlayer().sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 }

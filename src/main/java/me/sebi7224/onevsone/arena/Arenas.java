@@ -17,7 +17,6 @@ import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
 import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 import io.github.xxyy.common.util.inventory.ItemStackFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ public final class Arenas {
 
     static final Map<String, Arena> arenaCache = new CaseInsensitiveMap<>();
     private static List<ItemStack> defaultRewards;
+    private static ItemStack anyArenaIcon;
     private static Map<UUID, Arena> playersInGame = new HashMap<>();
 
     private Arenas() {
@@ -87,53 +87,6 @@ public final class Arenas {
         return defaultRewards;
     }
 
-    @Deprecated
-    public static void setArenaReady(String arena_name, boolean ready) {
-        MainClass.instance().getConfig().set("arenas." + arena_name + ".ready", ready);
-        MainClass.instance().saveConfig();
-    }
-
-    @Deprecated
-    public static List<String> getReadyArenas() {
-        Set<String> arenas = getArenas();
-        if (arenas == null) {
-            return null;
-        }
-        List<String> ready_arenas = new ArrayList<>();
-
-        for (String arena : arenas) {
-            if (isArenaReady(arena)) ready_arenas.add(arena);
-        }
-
-        return ready_arenas;
-    }
-
-    @Deprecated
-    public static int getReadyArenasSize() {
-        List<String> ready_arenas = getReadyArenas();
-        if (ready_arenas == null) {
-            return 0;
-        } else {
-            return getReadyArenas().size();
-        }
-    }
-
-    @Deprecated
-    public static void setArenaIconItem(String arena_name, Material material) {
-        MainClass.instance().getConfig().set("arenas." + arena_name + ".icon", material.name());
-        MainClass.instance().saveConfig();
-    }
-
-    @Deprecated
-    public static Material getArenaIconItem(String arena_name) {
-        return Material.getMaterial(MainClass.instance().getConfig().getString("arenas." + arena_name + ".icon"));
-    }
-
-    public static void saveLocation(String path, Location loc) {
-        saveLocation(MainClass.instance().getConfig().getConfigurationSection(path), loc);
-        MainClass.instance().saveConfig();
-    }
-
     public static void saveLocation(ConfigurationSection section, Location loc) {
         section.set("world", loc.getWorld().getName());
         section.set("x", loc.getX());
@@ -158,10 +111,6 @@ public final class Arenas {
         return new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
     }
 
-    public static Location getLocation(String path) {
-        return getLocation(MainClass.instance().getConfig().getConfigurationSection(path));
-    }
-
     private static float getFloat(String floatString) {
         if (floatString == null) {
             return 0F;
@@ -176,6 +125,7 @@ public final class Arenas {
 
     /**
      * Gets a semi-random Arena object from the collection of know Arenas.
+     *
      * @return Any Arena object
      * @throws IllegalStateException If no arenas are known
      */
@@ -242,5 +192,23 @@ public final class Arenas {
      */
     public static void reloadArenas(FileConfiguration source) {
         Arena.reloadArenas(source);
+    }
+
+    /**
+     * Gets the "any arena" icon for display in the arena menu.
+     * @return the global "any arena" icon
+     */
+    public static ItemStack getAnyArenaIcon() {
+        if (anyArenaIcon == null) {
+            anyArenaIcon = MainClass.instance().getConfig().getItemStack("any-arena-icon");
+
+            if (anyArenaIcon == null) {
+                anyArenaIcon = new ItemStackFactory(Material.DIRT)
+                        .displayName("§eArena egal")
+                        .produce();
+            }
+        }
+
+        return anyArenaIcon;
     }
 }

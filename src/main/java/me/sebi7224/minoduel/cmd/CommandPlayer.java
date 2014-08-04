@@ -1,11 +1,9 @@
-package me.sebi7224.onevsone.cmd;
+package me.sebi7224.minoduel.cmd;
 
-import me.sebi7224.onevsone.MainClass;
-import me.sebi7224.onevsone.WaitingQueueManager;
-import me.sebi7224.onevsone.arena.Arena;
-import me.sebi7224.onevsone.arena.Arenas;
-import me.sebi7224.onevsone.util.IconMenu;
-import org.bukkit.Sound;
+import me.sebi7224.minoduel.MainClass;
+import me.sebi7224.minoduel.arena.Arena;
+import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.util.IconMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,48 +14,20 @@ import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.util.Collection;
 
-public class Command1vs1 implements CommandExecutor {
+/**
+ * Player interface command for MinoDuel.
+ * @since 1.0
+ */
+public class CommandPlayer implements CommandExecutor {
 
     private final MainClass plugin;
     private static IconMenu arenaMenu;
 
-    public Command1vs1(MainClass plugin) {
+    public CommandPlayer(MainClass plugin) {
         this.plugin = plugin;
-
-        initArenaMenu();
-    }
-
-    public void initArenaMenu() {
-        arenaMenu = new IconMenu("§8Wähle eine Arena!", //Title
-                InventoryHelper.validateInventorySize(Arenas.all().size() + 1), //Round arena amount up to next valid inv size - Need +1 so that at least one "any arena" option is included
-                event -> {
-                    final Player playerClicked = event.getPlayer();
-                    playerClicked.playSound(playerClicked.getLocation(), Sound.NOTE_PIANO, 1, 1);
-                    Arena arena = event.getArena();
-                    WaitingQueueManager.enqueue(playerClicked, arena);
-
-                }, plugin);
-
-        int i = 0;
-        for (Arena arena : Arenas.all()) {
-            if (i >= arenaMenu.getSize()) {
-                return;
-            }
-
-            arenaMenu.setArena(i, arena);
-            i++;
-        }
     }
 
     private void openMenuFor(Player player) {
-        int slot = 0;
-        for (Arena arena : Arenas.all()) {
-            if (slot > 53) {
-                return;
-            }
-            arenaMenu.setArena(slot, arena);
-            slot++;
-        }
         arenaMenu.open(player);
     }
 
@@ -67,7 +37,7 @@ public class Command1vs1 implements CommandExecutor {
             sender.sendMessage("§b========> §6MinoTopia §c| §61vs1 §b<========");
             sender.sendMessage("§6/1vs1 join §c- §bÖffnet das Arenamenü");
             sender.sendMessage("§6/1vs1 leave §c- §bVerlässt ein Spiel, wenn du alleine in einer Arena bist");
-            if (sender.hasPermission("1vs1.admin")) {
+            if (sender.hasPermission("minoduel.admin")) { //TODO
                 sender.sendMessage("§6/1vs1 create <arena> §c- §bErstellt eine neue Arena");
                 sender.sendMessage("§6/1vs1 remove <arena> §c- §bLöscht eine Arena");
                 sender.sendMessage("§6/1vs1 setspawn <1|2> <arena> §c- §bSetzt ein Spawn");
@@ -85,8 +55,8 @@ public class Command1vs1 implements CommandExecutor {
             }
             Player player = (Player) sender;
             switch (args[0].toLowerCase()) {
-                case "create":
-                    if (!CommandHelper.checkPermAndMsg(player, "1vs1.create", commandLabel)) {
+                case "create": //TODO mda
+                    if (!CommandHelper.checkPermAndMsg(player, "minoduel.create", commandLabel)) {
                         return true;
                     }
 
@@ -103,7 +73,7 @@ public class Command1vs1 implements CommandExecutor {
                     Arenas.createArena(args[1], plugin.getConfig());
                     player.sendMessage(MainClass.getPrefix() + "§7Du hast die Arena §6" + args[1] + " §7erfolgreich erstellt!");
                     return true;
-                case "remove":
+                case "remove": //TODO mda
                     if (!CommandHelper.checkPermAndMsg(player, "1vs1.remove", commandLabel)) {
                         return true;
                     }
@@ -123,7 +93,7 @@ public class Command1vs1 implements CommandExecutor {
                     arenaToRemove.remove();
                     player.sendMessage(MainClass.getPrefix() + "§7Die Arena §6" + args[1] + " §7wurde erfolgreich entfernt!");
                     return true;
-                case "list":
+                case "list": //TODO make this more ux and add additional thing in /mda
                     if (!CommandHelper.checkPermAndMsg(player, "1vs1.list", commandLabel)) {
                         return true;
                     }
@@ -255,7 +225,7 @@ public class Command1vs1 implements CommandExecutor {
 //                        }
 //                    }
                 case "join":
-                    if (!CommandHelper.checkPermAndMsg(player, "1vs1.join", commandLabel)) {
+                    if (!CommandHelper.checkPermAndMsg(player, "minoduel.join", commandLabel)) {
                         return true;
                     }
 

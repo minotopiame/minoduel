@@ -1,9 +1,21 @@
-name: 1vs1
-version: 0.1
+name: MinoDuel
+version: ${project.version}
 author: sebi7224
+authors: [sebi7224, xxyy98]
+website: http://minotopia.me/
 
-main: me.sebi7224.onevsone.MainClass
+main: me.sebi7224.minoduel.MainClass
 
 commands:
-    1vs1:
-        usage: /<command>
+  mdu:
+    description: Spielerbefehle von MinoDuel
+    usage: /<command> help
+    aliases: [1vs1]
+  mdm:
+    description: Moderationsbefehle von MinoDuel
+    usage: /<command> help
+    aliases: [mdmod, mdadmin, minoduel]
+  mda:
+    description: Arenabefehle von MinoDuel
+    usage: /<command> help
+    aliases: [mdarena]

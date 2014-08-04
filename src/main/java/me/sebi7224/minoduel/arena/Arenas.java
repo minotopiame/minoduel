@@ -1,7 +1,7 @@
-package me.sebi7224.onevsone.arena;
+package me.sebi7224.minoduel.arena;
 
 import com.google.common.collect.ImmutableList;
-import me.sebi7224.onevsone.MainClass;
+import me.sebi7224.minoduel.MainClass;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
@@ -25,6 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Static utility methods for managing MinoDuel arenas.
+ * @since 1.0
+ */
 public final class Arenas {
 
     static final Map<String, Arena> arenaCache = new CaseInsensitiveMap<>();

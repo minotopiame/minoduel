@@ -1,15 +1,17 @@
-package me.sebi7224.onevsone;
+package me.sebi7224.minoduel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import io.github.xxyy.common.collections.Pair;
-import me.sebi7224.onevsone.arena.Arena;
-import me.sebi7224.onevsone.arena.Arenas;
+import me.sebi7224.minoduel.arena.Arena;
+import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import io.github.xxyy.common.collections.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
  * This class utilizes a FIFO (first-in-first-out) order.
  *
  * @author <a href="http://xxyy.github.io/">xxyy</a>
- * @since 22.7.14
+ * @since 22.7.14 // 1.0
  */
 public final class WaitingQueueManager {
 
@@ -82,14 +84,14 @@ public final class WaitingQueueManager {
             return;
         }
 
-        ImmutableList.copyOf(queue).stream().forEach(pair -> { //Need to copy to avoid concurrent modifications
+        ImmutableList.copyOf(queue).stream().forEach(pair -> { //Need to copy to avoid concurrent modification
             Player match = arenaChoices.remove(pair.getRight()); //Get a player who chose the same arena
 
-            if(match == null) {
+            if (match == null) {
                 match = arenaChoices.get(null); //Get player w/o arena preference
             }
 
-            if(match != null) { //If we found someone, start a game
+            if (match != null) { //If we found someone, start a game
                 tryPop(pair.getRight(), pair.getLeft(), match); //That method gets a random arena if NULL is passed
             } else {
                 arenaChoices.put(pair.getRight(), pair.getLeft()); //If we found no match, queue this player to be matched
@@ -98,14 +100,43 @@ public final class WaitingQueueManager {
     }
 
     /**
+     * Notifies each queued player of their position in the respectivequeue.
+     */
+    public static void notifyPositions() {
+        Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
+
+        queue.stream().forEach(pair -> {
+            Arena arena = pair.getRight();
+            Player plr = pair.getLeft();
+
+            if(arena == null && !queueSizes.isEmpty()) { //Select best arena w/ shortest wait time
+                arena = queueSizes.entrySet().stream() //From all queue sizes
+                        .min((entry1, entry2) -> entry1.getValue().compareTo(entry2.getValue())).get() //Get the one with the shortest queue
+                        .getKey(); //And retrieve its arena's name
+            }
+
+            Integer queueSize = queueSizes.getOrDefault(arena, 0); //Get arena's queue size
+            queueSize++;
+            if(arena != null) { //We can't actually write anything back if we don't know which arena the player is queueing for :/
+                queueSizes.put(arena, queueSize); //Increase and put
+            }
+
+            String arenaName = arena == null ? "(egal)" : arena.getName();
+
+            plr.sendMessage(MainClass.getPrefix() + "Du bist §e" + queueSize + ".§6 in der Warteschlange der Arena §e" + arenaName + "§6!");
+        });
+    }
+
+    /**
      * Returns the waiting queue for a given arena.
-     * @param arena The arena to find
+     *
+     * @param arena  The arena to find
      * @param strict Whether or not to include NULL choices ("don't care about which arena) into the result
      * @return Ordered waiting queue for {@code arena}
      */
     public static List<Player> queueFor(@NotNull Arena arena, boolean strict) {
         Predicate<Pair<Player, Arena>> predicate;
-        if(strict) {
+        if (strict) {
             predicate = pair -> arena.equals(pair.getRight()); //Match same arena
         } else {
             predicate = pair -> pair.getRight() == null || arena.equals(pair.getRight()); //Match same arena or "don't care"
@@ -121,9 +152,10 @@ public final class WaitingQueueManager {
      * Returns a view of the current queues (not actually Queue instances!) for all arenas.
      * All queues are in insertion order, i.e. the first person in any list will be the next to play.
      * Arenas which don't have a queue are not present in the return value.
+     *
      * @return a view of current arena queues
      */
-    public static Multimap<Arena, Player> getArenaQueues() {
+    public static ListMultimap<Arena, Player> getArenaQueues() {
         Multimap<Arena, Player> result = MultimapBuilder.hashKeys().arrayListValues().build();
 
         queue.forEach(pair -> result.put(pair.getRight(), pair.getLeft()));
@@ -133,11 +165,11 @@ public final class WaitingQueueManager {
 
     //Returns whether a game has been started with given arguments
     private static boolean tryPop(Arena arena, Player plr1, Player plr2) {
-        if(arena == null) {
+        if (arena == null) {
             arena = Arenas.any();
         }
 
-        if(!arena.isReady()) {
+        if (!arena.isReady()) {
             return false;
         }
 

@@ -1,7 +1,7 @@
-package me.sebi7224.onevsone.arena;
+package me.sebi7224.minoduel.arena;
 
 import com.google.common.base.Objects;
-import me.sebi7224.onevsone.MainClass;
+import me.sebi7224.minoduel.MainClass;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -30,10 +30,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Represents an 1vs1 arena as loaded from configuration.
+ * Represents a MinoDuel arena as loaded from configuration.
  *
  * @author <a href="http://xxyy.github.io/">xxyy</a>
- * @since 19.7.14
+ * @since 19.7.14 // 1.0
  */
 public class Arena { //TODO: It should be possible to put arenas out of service temporarily
     public static final String CONFIG_PATH = "arenas";
@@ -502,10 +502,10 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
     //////////// LE INNER CLASS ////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Stores information about a player playing in 1vs1.
+     * Stores information about a player playing in this MinoDuel arena.
      *
      * @author <a href="http://xxyy.github.io/">xxyy</a>
-     * @since 20.7.14
+     * @since 20.7.14 // 1.0
      */
     public class PlayerInfo {
         private final int previousExperience;
@@ -530,7 +530,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
          * Invalidates this PlayerInfo, removing the player from the game.
          * This teleports them back to their previous location and resets their experience to the previous value.
          * This also clears their inventory.
-         * <b>This doesn't, however, remove them from the player list of the associated {@link me.sebi7224.onevsone.arena.Arena}!</b>
+         * <b>This doesn't, however, remove them from the player list of the associated {@link me.sebi7224.minoduel.arena.Arena}!</b>
          */
         protected void invalidate() {
             this.valid = false;

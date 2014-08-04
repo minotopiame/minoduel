@@ -1,7 +1,7 @@
-package me.sebi7224.onevsone;
+package me.sebi7224.minoduel;
 
-import me.sebi7224.onevsone.arena.Arena;
-import me.sebi7224.onevsone.arena.Arenas;
+import me.sebi7224.minoduel.arena.Arena;
+import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,8 +48,9 @@ public class MainListener implements Listener {
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent evt) {
         if (Arenas.isInGame(evt.getPlayer()) &&
-                !evt.getPlayer().hasPermission("1vs1.command.bypass") &&
-                !evt.getMessage().toLowerCase().startsWith("/1vs1 leave")) {
+                !evt.getPlayer().hasPermission("minoduel.command.bypass") &&
+                !evt.getMessage().toLowerCase().startsWith("/1vs1 leave") &&
+                !evt.getMessage().toLowerCase().startsWith("/mdu leave")) {
             evt.setCancelled(true);
             evt.getPlayer().sendMessage(MainClass.getPrefix() + "§eDu kannst im 1vs1 keine Befehle benutzen!");
         }

@@ -1,8 +1,8 @@
-package me.sebi7224.onevsone.util;
+package me.sebi7224.minoduel.util;
 
-import me.sebi7224.onevsone.MainClass;
-import me.sebi7224.onevsone.arena.Arena;
-import me.sebi7224.onevsone.arena.Arenas;
+import me.sebi7224.minoduel.MainClass;
+import me.sebi7224.minoduel.arena.Arena;
+import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.common.util.inventory.ItemStackFactory;
 
+/**
+ * A simple icon menu framework, adapted to MinoDuel.
+ * @since 1.0
+ */
 public class IconMenu implements Listener {
 
     private final String name;

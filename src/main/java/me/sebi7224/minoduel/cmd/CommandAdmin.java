@@ -1,18 +1,20 @@
-package me.sebi7224.onevsone.cmd;
+package me.sebi7224.minoduel.cmd;
 
-import me.sebi7224.onevsone.MainClass;
+import me.sebi7224.minoduel.MainClass;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 /**
+ * Command for administering 1vs1.
+ *
  * @author <a href="http://xxyy.github.io/">xxyy</a>
- * @since 4.8.14
+ * @since 4.8.14 // 1.0
  */
-public class CommandArena implements CommandExecutor {
+public class CommandAdmin implements CommandExecutor {
     private final MainClass plugin;
 
-    public CommandArena(MainClass plugin) {
+    public CommandAdmin(MainClass plugin) {
         this.plugin = plugin;
     }
 

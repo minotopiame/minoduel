@@ -52,7 +52,7 @@ public class MainListener implements Listener {
                 !evt.getMessage().toLowerCase().startsWith("/1vs1 leave") &&
                 !evt.getMessage().toLowerCase().startsWith("/mdu leave")) {
             evt.setCancelled(true);
-            evt.getPlayer().sendMessage(MainClass.getPrefix() + "§eDu kannst im 1vs1 keine Befehle benutzen!");
+            evt.getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§eDu kannst im 1vs1 keine Befehle benutzen!");
         }
     }
 }

@@ -123,7 +123,7 @@ public final class WaitingQueueManager {
 
             String arenaName = arena == null ? "(egal)" : arena.getName();
 
-            plr.sendMessage(MainClass.getPrefix() + "Du bist §e" + queueSize + ".§6 in der Warteschlange der Arena §e" + arenaName + "§6!");
+            plr.sendMessage(MinoDuelPlugin.getPrefix() + "Du bist §e" + queueSize + ".§6 in der Warteschlange der Arena §e" + arenaName + "§6!");
         });
     }
 

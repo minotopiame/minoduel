@@ -1,7 +1,7 @@
 package me.sebi7224.minoduel.arena;
 
 import com.google.common.collect.ImmutableList;
-import me.sebi7224.minoduel.MainClass;
+import me.sebi7224.minoduel.MinoDuelPlugin;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
@@ -59,8 +59,8 @@ public final class Arenas {
 
     @Deprecated
     public static Set<String> getArenas() {
-        if (MainClass.instance().getConfig().getConfigurationSection("arenas.") != null) {
-            return MainClass.instance().getConfig().getConfigurationSection("arenas.").getKeys(false);
+        if (MinoDuelPlugin.inst().getConfig().getConfigurationSection("arenas.") != null) {
+            return MinoDuelPlugin.inst().getConfig().getConfigurationSection("arenas.").getKeys(false);
         } else {
             return null;
         }
@@ -68,23 +68,23 @@ public final class Arenas {
 
     @Deprecated
     public static boolean exists(String arena_name) {
-        return MainClass.instance().getConfig().contains("arenas." + arena_name);
+        return MinoDuelPlugin.inst().getConfig().contains("arenas." + arena_name);
     }
 
     @Deprecated
     public static boolean isArenaReady(String arena_name) {
-        return MainClass.instance().getConfig().getBoolean("arenas." + arena_name + ".ready");
+        return MinoDuelPlugin.inst().getConfig().getBoolean("arenas." + arena_name + ".ready");
     }
 
     public static List<ItemStack> getDefaultRewards() {
         if (defaultRewards == null) {
             //noinspection unchecked
-            defaultRewards = (List<ItemStack>) MainClass.instance().getConfig().getList("default-rewards");
+            defaultRewards = (List<ItemStack>) MinoDuelPlugin.inst().getConfig().getList("default-rewards");
 
             if (defaultRewards == null || defaultRewards.isEmpty()) {
                 defaultRewards = Arrays.asList(new ItemStackFactory(Material.DIAMOND).displayName("§61vs1-Belohnung!").produce());
-                MainClass.instance().getConfig().set("default-rewards", defaultRewards);
-                MainClass.instance().saveConfig();
+                MinoDuelPlugin.inst().getConfig().set("default-rewards", defaultRewards);
+                MinoDuelPlugin.inst().saveConfig();
             }
         }
 
@@ -167,8 +167,8 @@ public final class Arenas {
     public static Arena byName(String name) {
         Arena arena = arenaCache.get(name);
 
-        if (arena == null && MainClass.instance().getConfig().contains(Arena.CONFIG_PATH + "." + name)) {
-            Arena.reloadArenas(MainClass.getInstance().getConfig());
+        if (arena == null && MinoDuelPlugin.inst().getConfig().contains(Arena.CONFIG_PATH + "." + name)) {
+            Arena.reloadArenas(MinoDuelPlugin.getInstance().getConfig());
             arena = arenaCache.get(name);
         }
 
@@ -204,7 +204,7 @@ public final class Arenas {
      */
     public static ItemStack getAnyArenaIcon() {
         if (anyArenaIcon == null) {
-            anyArenaIcon = MainClass.instance().getConfig().getItemStack("any-arena-icon");
+            anyArenaIcon = MinoDuelPlugin.inst().getConfig().getItemStack("any-arena-icon");
 
             if (anyArenaIcon == null) {
                 anyArenaIcon = new ItemStackFactory(Material.DIRT)

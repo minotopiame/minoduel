@@ -24,6 +24,14 @@
             <id>xxyy-lib</id>
             <url>http://server.nowak-at.net/repo/xxyy-lib/</url>
         </repository>
+        <repository>
+            <id>overcast-repo</id>
+            <url>http://repo.oc.tc/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>xxyy-libs-snapshots</id>
+            <url>http://server.nowak-at.net/repo/libs-snapshot/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -41,6 +49,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>command-framework-bukkit</artifactId>
+            <version>0.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>mkremins</groupId>
+            <artifactId>fanciful</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -72,6 +90,7 @@
                             <include>io.github.xxyy:common</include>
                             <include>${project.groupId}:${project.artifactId}</include>
                             <include>org.apache.commons:commons-lang3</include>
+                            <include>mkremins:fanciful</include>
                         </includes>
                     </artifactSet>
                     <relocations>

@@ -1,6 +1,6 @@
 package me.sebi7224.minoduel.cmd;
 
-import me.sebi7224.minoduel.MainClass;
+import me.sebi7224.minoduel.MinoDuelPlugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,10 +11,10 @@ import org.bukkit.command.CommandSender;
  * @author <a href="http://xxyy.github.io/">xxyy</a>
  * @since 4.8.14 // 1.0
  */
-public class CommandAdmin implements CommandExecutor {
-    private final MainClass plugin;
+public class CommandsAdmin implements CommandExecutor {
+    private final MinoDuelPlugin plugin;
 
-    public CommandAdmin(MainClass plugin) {
+    public CommandsAdmin(MinoDuelPlugin plugin) {
         this.plugin = plugin;
     }
 

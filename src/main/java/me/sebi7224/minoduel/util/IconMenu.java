@@ -1,6 +1,6 @@
 package me.sebi7224.minoduel.util;
 
-import me.sebi7224.minoduel.MainClass;
+import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.Bukkit;
@@ -25,11 +25,11 @@ public class IconMenu implements Listener {
     private final String name;
     private final int size;
     private OptionClickEventHandler handler;
-    private MainClass plugin;
+    private MinoDuelPlugin plugin;
 
     private Arena[] optionArenas;
 
-    public IconMenu(String name, int size, OptionClickEventHandler handler, MainClass plugin) {
+    public IconMenu(String name, int size, OptionClickEventHandler handler, MinoDuelPlugin plugin) {
         this.name = name;
 
         this.size = size;

@@ -1,7 +1,7 @@
 package me.sebi7224.minoduel.arena;
 
 import com.google.common.base.Objects;
-import me.sebi7224.minoduel.MainClass;
+import me.sebi7224.minoduel.MinoDuelPlugin;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -137,7 +137,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
         if (winner != null) { //A winner has been determined
             PlayerInfo loser = players.getOther(winner);
 
-            Bukkit.broadcastMessage(MainClass.getPrefix() + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
+            Bukkit.broadcastMessage(MinoDuelPlugin.getPrefix() + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
 
             //Treat winner nicely
@@ -145,7 +145,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
                     .forEach(winner.getPlayer().getInventory()::addItem);
         } else {
             if (sendUndecidedMessage) {
-                Bukkit.broadcastMessage(MainClass.getPrefix() + "§7Der Kampf zwischen §a" +
+                Bukkit.broadcastMessage(MinoDuelPlugin.getPrefix() + "§7Der Kampf zwischen §a" +
                         players.getLeft().getPlayer().getName() +
                         "§7 und §a" + players.getRight().getPlayer().getName() +
                         " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
@@ -191,10 +191,10 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
      */
     public void sendChecklist(CommandSender sender) {
         if(isOccupied()) {
-            sender.sendMessage("§7(besetzt)");
+            sender.sendMessage("§7Die Arena ist momentan besetzt: " + getPlayerString());
         }
         if(configSection == null) {
-            sender.sendMessage("§c(gelöscht)");
+            sender.sendMessage("§cDiese Arena wurde gelöscht!");
             return;
         }
 
@@ -386,7 +386,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
                 });
 
         new RunnableTeleportLater(playerInfo.getPlayer(), playerInfo.getSpawnLocation(), 5, completeHandler)
-                .runTaskTimer(MainClass.instance(), MainClass.instance().getTeleportDelayTicks(), MainClass.instance().getTeleportDelayTicks());
+                .runTaskTimer(MinoDuelPlugin.inst(), MinoDuelPlugin.inst().getTeleportDelayTicks(), MinoDuelPlugin.inst().getTeleportDelayTicks());
     }
 
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////
@@ -474,7 +474,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
 
         public void start() {
             this.ticksLeft = TICKS_IN_A_GAME;
-            this.runTaskTimer(MainClass.instance(), 20L * 5L, 20L * 5L); //This task so far only announces time left and the smallest interval is 5 seconds
+            this.runTaskTimer(MinoDuelPlugin.inst(), 20L * 5L, 20L * 5L); //This task so far only announces time left and the smallest interval is 5 seconds
         }
 
         public void reset() {
@@ -489,10 +489,10 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
             //Announce full minutes
             if (ticksLeft % 12 == 0) { //every minute
                 getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MainClass.getPrefix() + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
+                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
             } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
                 getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MainClass.getPrefix() + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
+                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
             } else if (ticksLeft == 0) {
                 Arena.this.endGame(null);
             }
@@ -606,13 +606,13 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
         }
 
         protected void sendTeleportMessage() {
-            getPlayer().sendMessage(MainClass.getPrefix() + "§eDu wirst jetzt gegen §a" +
+            getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§eDu wirst jetzt gegen §a" +
                     Arena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
-            getPlayer().sendMessage(MainClass.getPrefix() + "§8Bitte stillhalten, du wirst in die Arena §7" + Arena.this.getName() + "§8 teleportiert!");
+            getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§8Bitte stillhalten, du wirst in die Arena §7" + Arena.this.getName() + "§8 teleportiert!");
         }
 
         protected void sendStartMessage() {
-            getPlayer().sendMessage(MainClass.getPrefix() + "§eMögen die Spiele beginnen!");
+            getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§eMögen die Spiele beginnen!");
         }
 
         @Override

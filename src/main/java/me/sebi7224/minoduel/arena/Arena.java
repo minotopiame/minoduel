@@ -1,11 +1,14 @@
 package me.sebi7224.minoduel.arena;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -44,6 +47,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
     private static final String SPECIFIC_REWARD_PATH = "rewards";
     private static final String INVENTORY_KIT_PATH = "items";
     private static final String ARMOR_KIT_PATH = "armor";
+    private static final String REWARD_ALL_PATH = "reward-all";
 
     private static final CommandSenderRenderer CHECKLIST_RENDERER = new CommandSenderRenderer.Builder()
             .brackets(true).uncheckedEmpty(false).build();
@@ -57,11 +61,12 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
     private List<ItemStack> specificRewards;
     private ItemStack[] inventoryKit;
     private ItemStack[] armorKit;
+    private boolean doAllRewards = true;
 
     private Couple<PlayerInfo> players = null;
     private RunnableArenaTick tickTask = new RunnableArenaTick();
     private Checklist validityChecklist = new Checklist()
-            .append("Arena gelöscht!",() -> configSection != null)
+            .append("Arena gelöscht!", () -> configSection != null)
             .append("Spawn 1 gesetzt", () -> firstSpawn != null)
             .append("Spawn 2 gesetzt", () -> secondSpawn != null)
             .append("Kit gesetzt", () -> inventoryKit != null && armorKit != null)
@@ -187,13 +192,14 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
 
     /**
      * Sends a checklist to given CommandSender explaining what is missing to make this arena valid, if anything.
+     *
      * @param sender the receiver of the checklist
      */
     public void sendChecklist(CommandSender sender) {
-        if(isOccupied()) {
+        if (isOccupied()) {
             sender.sendMessage("§7Die Arena ist momentan besetzt: " + getPlayerString());
         }
-        if(configSection == null) {
+        if (configSection == null) {
             sender.sendMessage("§cDiese Arena wurde gelöscht!");
             return;
         }
@@ -202,17 +208,17 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
     }
 
     public String getValidityString() {
-        if(isOccupied()) {
-            return "§7(besetzt)";
+        if (isOccupied()) {
+            return "(" + getPlayerString() + ")";
         }
-        if(isValid()) {
-            return "§a(valide)";
+        if (isValid()) {
+            return "(valide)";
         }
-        if(configSection == null) {
-            return "§c(gelöscht)";
+        if (configSection == null) {
+            return "(gelöscht)";
         }
 
-        return "§c(invalide)";
+        return "(invalide)";
     }
 
     ///////////// GETTERS //////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +228,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
             return Arenas.getDefaultRewards();
         }
 
-        return specificRewards;
+        return doAllRewards ? specificRewards : ImmutableList.of(specificRewards.get(RandomUtils.nextInt(specificRewards.size())));
     }
 
     /**
@@ -244,7 +250,7 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
      * @return A string nicely showing this arena's current players.
      */
     public String getPlayerString() {
-        if(!isOccupied()) {
+        if (!isOccupied()) {
             return "§7§oleer";
         }
 
@@ -281,39 +287,53 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
     /////// SETTERS ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void setArmorKit(ItemStack[] armorKit) {
+        validateHasConfig();
+
+        configSection.set(ARMOR_KIT_PATH, armorKit);
         this.armorKit = armorKit;
     }
 
     public void setInventoryKit(ItemStack[] inventoryKit) {
+        validateHasConfig();
+
+        configSection.set(INVENTORY_KIT_PATH, inventoryKit);
         this.inventoryKit = inventoryKit;
     }
 
     public void setFirstSpawn(Location firstSpawn) {
-        Validate.validState(configSection != null, "This arena has been removed!");
+        validateHasConfig();
 
         Arenas.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
         this.firstSpawn = firstSpawn;
     }
 
     public void setSecondSpawn(Location secondSpawn) {
-        Validate.validState(configSection != null, "This arena has been removed!");
+        validateHasConfig();
 
         Arenas.saveLocation(configSection.createSection(SECOND_SPAWN_PATH), secondSpawn);
         this.secondSpawn = secondSpawn;
     }
 
     public void setIconStack(ItemStack iconStack) {
-        Validate.validState(configSection != null, "This arena has been removed!");
+        validateHasConfig();
 
         configSection.set(ICON_STACK_PATH, iconStack);
         this.iconStack = iconStack;
     }
 
     public void setRewards(List<ItemStack> specificRewards) {
-        Validate.validState(configSection != null, "This arena has been removed!");
+        validateHasConfig();
 
+        specificRewards.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
         this.configSection.set(SPECIFIC_REWARD_PATH, specificRewards);
         this.specificRewards = specificRewards;
+    }
+
+    public void setDoAllRewards(boolean doAllRewards) {
+        validateHasConfig();
+
+        this.configSection.set(REWARD_ALL_PATH, doAllRewards);
+        this.doAllRewards = doAllRewards;
     }
 
     /**
@@ -341,12 +361,13 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
     //private utility methods
     @SuppressWarnings("unchecked")
     private void updateFromConfig() {
-        Validate.validState(this.configSection != null, "This arena has been removed!");
+        validateHasConfig();
 
         this.firstSpawn = Arenas.getLocation(configSection.getConfigurationSection("spawn1"));
         this.secondSpawn = Arenas.getLocation(configSection.getConfigurationSection("spawn2"));
         this.iconStack = configSection.getItemStack(ICON_STACK_PATH);
         this.specificRewards = (List<ItemStack>) configSection.getList(SPECIFIC_REWARD_PATH, new ArrayList<ItemStack>());
+        this.doAllRewards = configSection.getBoolean(REWARD_ALL_PATH, doAllRewards);
 
         if (configSection.contains(INVENTORY_KIT_PATH)) {
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(INVENTORY_KIT_PATH);
@@ -357,6 +378,10 @@ public class Arena { //TODO: It should be possible to put arenas out of service 
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(ARMOR_KIT_PATH);
             this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[4]);
         }
+    }
+
+    private void validateHasConfig() {
+        Validate.validState(configSection != null, "The arena %s has been removed!", getName());
     }
 
     private void teleportLater(@NotNull PlayerInfo playerInfo) {

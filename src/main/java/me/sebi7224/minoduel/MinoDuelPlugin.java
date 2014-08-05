@@ -5,7 +5,9 @@ import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissionsException;
 import com.sk89q.minecraft.util.commands.CommandUsageException;
 import com.sk89q.minecraft.util.commands.CommandsManager;
+import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.MissingNestedCommandException;
+import com.sk89q.minecraft.util.commands.SimpleInjector;
 import com.sk89q.minecraft.util.commands.WrappedCommandException;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
@@ -22,7 +24,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
+import java.lang.reflect.Method;
+
 public class MinoDuelPlugin extends JavaPlugin {
+    private static class PlayerOnlyCommandException extends RuntimeException { //Hack to work around hasPermission(...) not declaring the checked CommandException exception
+        public PlayerOnlyCommandException(String desc) {
+            super(desc);
+        }
+    }
 
     public static final String PREFIX = "§6[§a1vs1§6] ";
     private static MinoDuelPlugin instance;
@@ -31,6 +40,15 @@ public class MinoDuelPlugin extends JavaPlugin {
         @Override
         public boolean hasPermission(CommandSender sender, String perm) {
             return sender instanceof ConsoleCommandSender || sender.hasPermission(perm);
+        }
+
+        @Override
+        protected boolean hasPermission(Method method, CommandSender player) { //sneaky hack bcuz @Console has no effect by default
+            if(method.isAnnotationPresent(Console.class) && !(player instanceof Player)) {
+                throw new PlayerOnlyCommandException("Du kannst diesen Befehl nur als Spieler ausführen!");
+            }
+
+            return super.hasPermission(method, player);
         }
     };
     private IconMenu arenaMenu;
@@ -50,6 +68,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         initArenaMenu();
 
         //Register dem commands
+        commandsManager.setInjector(new SimpleInjector(this));
         CommandsManagerRegistration reg = new CommandsManagerRegistration(this, commandsManager);
         reg.register(CommandsPlayer.class);
         reg.register(CommandsAdmin.class);
@@ -59,7 +78,8 @@ public class MinoDuelPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MainListener(), this);
 
         //Automagically save config every 5 minutes to minimize data-loss on crash
-        getServer().getScheduler().runTaskTimer(this, this::saveConfig, 5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
+        getServer().getScheduler().runTaskTimer(this, this::saveConfig,
+                5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
     }
 
     @Override
@@ -87,8 +107,11 @@ public class MinoDuelPlugin extends JavaPlugin {
             }
         } catch (CommandPermissionsException cpe) {
             sender.sendMessage(getPrefix() + "§cDu bist nicht berechtigt, diese Aktion auszuführen.");
-        } catch (CommandException e) {
+        } catch (CommandException | PlayerOnlyCommandException e) {
             sender.sendMessage("§c" + e.getMessage());
+        } catch (IllegalStateException | IllegalArgumentException ise) {
+            sender.sendMessage("§cInterner Fehler: "+ise.getMessage()+" - Sollte dies öfter auftreten, melde dies bitte im Forum!");
+            ise.printStackTrace();
         }
 
         return true;

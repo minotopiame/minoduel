@@ -32,6 +32,7 @@ import java.util.UUID;
 public final class Arenas {
 
     static final Map<String, Arena> arenaCache = new CaseInsensitiveMap<>();
+    public static final String DEFAULT_REWARDS_PATH = "default-rewards";
     private static List<ItemStack> defaultRewards;
     private static ItemStack anyArenaIcon;
     private static Map<UUID, Arena> playersInGame = new HashMap<>();
@@ -79,16 +80,23 @@ public final class Arenas {
     public static List<ItemStack> getDefaultRewards() {
         if (defaultRewards == null) {
             //noinspection unchecked
-            defaultRewards = (List<ItemStack>) MinoDuelPlugin.inst().getConfig().getList("default-rewards");
+            defaultRewards = (List<ItemStack>) MinoDuelPlugin.inst().getConfig().getList(DEFAULT_REWARDS_PATH);
 
             if (defaultRewards == null || defaultRewards.isEmpty()) {
                 defaultRewards = Arrays.asList(new ItemStackFactory(Material.DIAMOND).displayName("§61vs1-Belohnung!").produce());
-                MinoDuelPlugin.inst().getConfig().set("default-rewards", defaultRewards);
+                MinoDuelPlugin.inst().getConfig().set(DEFAULT_REWARDS_PATH, defaultRewards);
                 MinoDuelPlugin.inst().saveConfig();
             }
         }
 
         return defaultRewards;
+    }
+
+    public static void setDefaultRewards(List<ItemStack> defaultRewards) {
+        defaultRewards.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
+        Validate.notEmpty(defaultRewards, "Cannot set no rewards!");
+
+        MinoDuelPlugin.inst().getConfig().set(DEFAULT_REWARDS_PATH, defaultRewards);
     }
 
     public static void saveLocation(ConfigurationSection section, Location loc) {

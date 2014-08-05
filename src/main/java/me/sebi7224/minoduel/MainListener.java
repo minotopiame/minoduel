@@ -33,6 +33,8 @@ public class MainListener implements Listener {
 
         if (arena != null) {
             arena.endGame(arena.getOther(evt.getPlayer()));
+        } else {
+            WaitingQueueManager.remove(evt.getPlayer());
         }
     }
 
@@ -42,6 +44,8 @@ public class MainListener implements Listener {
 
         if (arena != null) {
             arena.endGame(arena.getOther(evt.getPlayer()));
+        } else {
+            WaitingQueueManager.remove(evt.getPlayer());
         }
     }
 

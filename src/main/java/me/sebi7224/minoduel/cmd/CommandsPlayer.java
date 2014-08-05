@@ -22,20 +22,25 @@ import java.util.Collection;
  * @since 5.8.14
  */
 public class CommandsPlayer {
-
     @Command(aliases = {"1vs1", "mdu"}, desc = "Spielerbefehle von MinoDuel")
     @NestedCommand(SubCommands.class)
-    public void mduMain() {
+    public static void mduMain() {
         //body is ignored
     }
 
     public class SubCommands {
+        private final MinoDuelPlugin plugin;
+
+        public SubCommands(MinoDuelPlugin plugin) {
+            this.plugin = plugin;
+        }
+
         @Command(aliases = {"join", "new"},
                 desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
                 usage = "<-a [Arena|'egal']>",
-                flags = ":a")
+                flags = "a:")
         @CommandPermissions({"minoduel.user.join"})
-        public void join(CommandContext args, Player player) throws CommandException {
+        public void playerJoin(CommandContext args, Player player) throws CommandException {
             if (!Arenas.anyExist()) {
                 player.sendMessage(MinoDuelPlugin.getPrefix() + "§cKeine Arenen vorhanden =(!");
                 return;
@@ -61,7 +66,7 @@ public class CommandsPlayer {
             }
 
             if (InventoryHelper.isInventoryEmpty(player)) {
-                MinoDuelPlugin.inst().getArenaMenu().open(player);
+                plugin.getArenaMenu().open(player);
             } else {
                 player.sendMessage(MinoDuelPlugin.getPrefix() + "§eDu musst zuerst dein Inventar leeren!");
             }
@@ -69,7 +74,7 @@ public class CommandsPlayer {
 
         @Command(aliases = {"leave"},
                 desc = "Gib deinen aktuellen Kampf auf!")
-        public void leave(CommandContext args, Player player) throws CommandException {
+        public void playerLeave(CommandContext args, Player player) throws CommandException {
             Arena arenaToLeave = Arenas.getPlayerArena(player);
 
             if (arenaToLeave != null) {
@@ -83,26 +88,30 @@ public class CommandsPlayer {
                 desc = "Listet alle Arenen auf.",
                 usage = "[Suchbegriff]")
         @CommandPermissions({"minoduel.user.arenas"})
-        public void arenas(CommandContext args, Player player) throws CommandException {
-            Collection<Arena> arenasToList = Arenas.all(); //Strange naming because of switch scope thing
+        public void adminListArenas(CommandContext args, Player player) throws CommandException {
+            Collection<Arena> arenas = Arenas.all();
             if(args.argsLength() >= 1) { //If we have a filter
                 String search = args.getString(0).toLowerCase(); //Get that
-                arenasToList.removeIf(arena -> !arena.getName().toLowerCase().contains(search)); //And remove non-matching arenas
+                arenas.removeIf(arena -> !arena.getName().toLowerCase().contains(search)); //And remove non-matching arenas
             }
 
-            arenasToList.removeIf(arena -> !arena.isValid());
+            arenas.removeIf(arena -> !arena.isValid());
 
-            if (arenasToList.isEmpty()) {
+            if (arenas.isEmpty()) {
                 player.sendMessage(MinoDuelPlugin.getPrefix() + "§cKeine Arena entspricht deinem Suchkriterium!"); return;
             }
 
             player.sendMessage("§6========> §eMinoTopia §6| §e1vs1 §6<========");
-            for (Arena arena : arenasToList) {
+            for (Arena arena : arenas) {
                 player.sendMessage("§6" + arena.getName() + " §7-> §e" + arena.getPlayerString());
             }
         }
 
-        public void duel(CommandContext args, Player player) {
+        public void playerPosition(CommandContext args, Player player) {
+            //TODO: show player position in queue
+        }
+
+        public void playerDuel(CommandContext args, Player player) {
             //TODO: actual duel, as in duel <player>
         }
 

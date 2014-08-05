@@ -1,5 +1,6 @@
 package me.sebi7224.minoduel.cmd;
 
+import com.google.common.collect.Lists;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
@@ -10,16 +11,19 @@ import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import mkremins.fanciful.FancyMessage;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.util.CommandHelper;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.bukkit.ChatColor.DARK_BLUE;
 import static org.bukkit.ChatColor.DARK_RED;
 import static org.bukkit.ChatColor.GOLD;
 import static org.bukkit.ChatColor.RED;
+import static org.bukkit.ChatColor.YELLOW;
 
 /**
  * Provides commands for managing arenas.
@@ -30,15 +34,21 @@ import static org.bukkit.ChatColor.RED;
 public class CommandsArena {
     @Command(aliases = {"mdarena", "mda"}, desc = "Arenamanagement für MinoDuel")
     @NestedCommand(SubCommands.class)
-    public void mdaMain() {
+    public static void mdaMain() {
         //body is ignored
     }
 
-    public class SubCommands {
+    public static class SubCommands {
+        private final MinoDuelPlugin plugin;
+
+        public SubCommands(MinoDuelPlugin plugin) {
+            this.plugin = plugin;
+        }
+
         @Command(aliases = {"create", "new"},
                 desc = "Erstellt eine neue Arena.", min = 1)
         @CommandPermissions({"minoduel.arena.create"})
-        public void create(CommandContext args, Player player) throws CommandException {
+        public void arenaCreate(CommandContext args, Player player) throws CommandException {
             String arenaName = args.getString(0);
 
             if (Arenas.existsByName(arenaName)) {
@@ -46,7 +56,7 @@ public class CommandsArena {
                 return;
             }
 
-            Arenas.createArena(arenaName, MinoDuelPlugin.inst().getConfig());
+            Arenas.createArena(arenaName, plugin.getConfig());
             player.sendMessage(MinoDuelPlugin.getPrefix() + "§aDu hast die Arena §2" + arenaName + " §aerfolgreich erstellt!");
         }
 
@@ -55,10 +65,11 @@ public class CommandsArena {
                 usage = "[Arena]",
                 flags = "y", min = 1)
         @CommandPermissions({"minoduel.arena.remove"})
-        public void remove(CommandContext args, Player player) throws CommandException {
+        public void arenaRemove(CommandContext args, Player player) throws CommandException {
             String arenaName = args.getString(0);
 
-            if(!args.hasFlag('y')) {
+            if (!args.hasFlag('y')) {
+                //@formatter:off
                 new FancyMessage("Möchtest du die Arena ")
                             .color(RED)
                         .then(arenaName)
@@ -71,151 +82,140 @@ public class CommandsArena {
                             .tooltip("Dies entfernt die Arena und alle Optionen permanent!")
                         .send(player);
                 return;
+                //@formatter:on
             }
 
-            Arena arena = Arenas.byName(arenaName);
-
-            if (arena == null) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");
-                return;
-            }
+            Arena arena = CmdValidate.getArenaChecked(arenaName);
 
             arena.remove();
             player.sendMessage(MinoDuelPlugin.getPrefix() + "§aDie Arena §2" + arenaName + " §awurde erfolgreich entfernt!");
         }
 
-        @Command(aliases = {"status", "checklist"},
+        @Command(aliases = {"status", "info"},
                 desc = "Zeigt den Status einer Arena an.",
                 usage = "[Arena]", min = 1)
         @CommandPermissions({"minoduel.arena.status"})
         @Console
-        public void checklist(CommandContext args, CommandSender player) throws CommandException {
-            String arenaName = args.getString(0);
-            Arena arena = Arenas.byName(arenaName);
-
-            if (arena == null) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");
-                return;
-            }
-
-            arena.sendChecklist(player);
+        public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
+            Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+            player.sendMessage("§6Arena: §e"+arena.getName());
+            player.sendMessage("§6Spawn 1: §e"+ arena.getFirstSpawn()); //TODO nicer message
+            player.sendMessage("§6Spawn 2: §e"+ arena.getSecondSpawn());
+            arena.sendChecklist(player); //TODO click on checklist to get commands suggested
         }
 
         @Command(aliases = {"set", "s"},
                 desc = "Setzt Arenaoptionen.")
         @NestedCommand(SetCommands.class)
         @CommandPermissions({"minoduel.arena.set"})
-        public void set() {
+        public void arenaSetOption() {
 
         }
 
         public class SetCommands {
-            @Command(aliases = {"join", "new"},
-                    desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
-                    usage = "<-a [Arena|'egal']>",
-                    flags = ":a") //FIXME
-            public void spawn() {
-                if (args.length < 3) {
-                    player.sendMessage("§cÜberprüfe bitte deine Argumente!");
-                    return true;
+            @Command(aliases = {"spawn", "sporn"}, //kek
+                    desc = "Setzt den Spawn einer Arena zu deiner Position!",
+                    usage = "[Arena] [1|2]", min = 2)
+            public void arenaSetSpawn(CommandContext args, Player player) throws CommandException {
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+
+                switch (args.getString(1)) { //No need to convert to int since there are only two cases & we can't pass the int anyways
+                    case "1":
+                        arena.setFirstSpawn(player.getLocation());
+                        break;
+                    case "2":
+                        arena.setSecondSpawn(player.getLocation());
+                        break;
+                    default:
+                        //@formatter:off
+                        new FancyMessage("Unbekannte Spawnzahl! ")
+                                    .color(RED)
+                                .then("Wolltest du vielleicht: ")
+                                    .color(YELLOW)
+                                .then("[Spawn 1 setzen] ")
+                                    .color(DARK_BLUE)
+                                    .tooltip("/mda set spawn " + arena.getName() + " 1")
+                                    .command("/mda set spawn " + arena.getName() + " 1")
+                                .then("[Spawn 2 setzen] ")
+                                    .color(DARK_RED)
+                                    .tooltip("/mda set spawn " + arena.getName() + " 2")
+                                    .command("/mda set spawn " + arena.getName() + " 2")
+                                .send(player);
+                        return;
+                    //@formatter:on
                 }
-                if (args[1].equalsIgnoreCase("1")) {
-                    Arenas.saveLocation("arenas." + args[2] + ".Spawn1", player.getLocation());
-                    player.sendMessage(MainClass.getPrefix() + "§7Du hast den §61. Spawn §7der Arena §6" + args[2] + " §7erfolgreich gesetzt!");
-                    return true;
-                } else if (args[1].equalsIgnoreCase("2")) {
-                    Arenas.saveLocation("arenas." + args[2] + ".Spawn2", player.getLocation());
-                    player.sendMessage(MainClass.getPrefix() + "§7Du hast den §62. Spawn §7der Arena §6" + args[2] + " §7erfolgreich gesetzt!");
-                    return true;
-                } else {
-                    player.sendMessage(MainClass.getPrefix() + "§cDu kannst nur den Spawn 1 und 2 setzen!");
-                    return true;
+
+                player.sendMessage(MinoDuelPlugin.getPrefix() + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
+            }
+
+            @Command(aliases = {"icon", "symbol"},
+                    desc = "Setzt das Icon einer Arena zu dem Item in deiner Hand!",
+                    usage = "[Arena]", min = 1)
+            public void arenaSetIcon(CommandContext args, Player player) throws CommandException {
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+
+                ItemStack newIcon = CmdValidate.validateStackNotEmpty(player.getItemInHand()); //CommandException if AIR or null
+
+                arena.setIconStack(newIcon);
+
+                player.sendMessage(MinoDuelPlugin.getPrefix() + "§aDu hast das Icon der Arena §2" + arena.getName() + " §agesetzt!");
+            }
+
+            @Command(aliases = {"kit"},
+                    desc = "Setzt das Kit einer Arena zu deinem aktuellen Inventar (-a: Nur Rüstung, -i: Nur Inventar)",
+                    usage = "<-a> <-i> [Arena]",
+                    flags = "ai", min = 1)
+            public void arenaSetKit(CommandContext args, Player player) throws CommandException {
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+
+                if (args.hasFlag('a') || !args.hasFlag('i')) {
+                    arena.setArmorKit(player.getInventory().getArmorContents());
+                    player.sendMessage(MinoDuelPlugin.getPrefix() + "§aRüstung für §2" + arena.getName() + "§a gesetzt!");
+                }
+
+                if (args.hasFlag('i') || !args.hasFlag('a')) {
+                    arena.setInventoryKit(player.getInventory().getContents());
+                    player.sendMessage(MinoDuelPlugin.getPrefix() + "§aHauptkit für §2" + arena.getName() + "§a gesetzt!");
                 }
             }
 
-            @Command(aliases = {"join", "new"},
-                    desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
-                    usage = "<-a [Arena|'egal']>",
-                    flags = ":a") //FIXME
-            public void icon() {
-                if (args.length < 2) {
-                    player.sendMessage("§cDu hast keinen Arenanamen angegeben!");
-                    return true;
-                }
-                if (player.getItemInHand().getType() == Material.AIR || player.getItemInHand() == null) {
-                    player.sendMessage(MainClass.getPrefix() + "§cDu hast kein §4Item §cin deiner §4Hand§c!");
-                    return true;
-                }
-                Arenas.setArenaIconItem(args[1], player.getItemInHand().getType());
-                player.sendMessage(MainClass.getPrefix() + "§7Du hast das §6Icon§7 der Arena §6" + args[1] + " §7gesetzt!");
-                return true;
-            }
+            @Command(aliases = {"reward"},
+                    desc = "Setzt die Arenabelohnung! (Inv ist ohne Rüstung, Hotbar ist Standard)",
+                    usage = "<-s *Hotbar*|Hand|Inv> <-r (Nur einen zufälligen Stack hergeben)> [Arena]",
+                    flags = "s:r", min = 1)
+            public void arenaSetReward(CommandContext args, Player player) throws CommandException {
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
 
-            @Command(aliases = {"join", "new"},
-                    desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
-                    usage = "<-a [Arena|'egal']>",
-                    flags = ":a") //FIXME
-            public void kit() {
-                if (args.length < 2) {
-                    player.sendMessage("§cDu hast keinen Arenanamen angegeben!");
-                    return true;
-                }
-                if (player.getInventory().getContents().length == 0) {
-                    player.sendMessage(MainClass.getPrefix() + "§cDu hast keine §4Items §cin deinem §4Inventar§c!");
-                    return true;
-                }
-                for (int i = 0; player.getInventory().getContents().length < i; i++) {
-                    if (player.getInventory().getContents()[i].getType() != Material.AIR || player.getInventory().getContents()[i] != null) {
-                        MainClass.inst().getConfig().set("arenas." + args[1] + ".items", player.getInventory().getContents()[i]);
-                    }
-                }
-                for (int i = 0; player.getInventory().getArmorContents().length < i; i++) {
-                    if (player.getInventory().getContents()[i].getType() != Material.AIR || player.getInventory().getContents()[i] != null) {
-                        MainClass.inst().getConfig().set("arenas." + args[1] + ".armor", player.getInventory().getArmorContents()[i]);
-                    }
-                }
-                MainClass.inst().saveConfig();
-                player.sendMessage(MainClass.getPrefix() + "§7Du hast erfolgreich die Items in der Arena §6" + args[1] + " §7gesetzt!");
-                return true;
-            }
+                List<ItemStack> stacks;
 
-            @Command(aliases = {"join", "new"},
-                    desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
-                    usage = "<-a [Arena|'egal']>",
-                    flags = ":a")
-            public void reward() {
-                if (args.length < 2) {
-                    player.sendMessage("§cBitte überprüfe deine Argumente!");
-                    return true;
+                switch (args.getFlag('s', "Hotbar").toLowerCase()) {
+                    case "hand":
+                        stacks = Lists.newArrayList(player.getItemInHand());
+                        break;
+                    case "inv":
+                    case "i":
+                    case "inventar":
+                        stacks = Lists.newArrayList(player.getInventory().getContents());
+                        break;
+                    case "hotbar":
+                    case "hb":
+                        stacks = Lists.newArrayList(player.getInventory().getContents()).stream()
+                                .limit(9) //9 Hotbar slots - IDs 0-8
+                                .collect(Collectors.toList());
+                        break;
+                    default:
+                        player.sendMessage("§cUnbekannte Quelle! Valide Quellen: -s [Hotbar|Hand|Inv]");
+                        return;
                 }
-                if (player.getInventory().getContents().length == 0) {
-                    player.sendMessage(MainClass.getPrefix() + "§cDu hast keine §4Items §cin deinem §4Inventar§c!");
-                    return true;
-                }
-                if (args[1].equalsIgnoreCase("global")) {
-                    for (int i = 0; player.getInventory().getContents().length < i; i++) {
-                        if (player.getInventory().getContents()[i].getType() != Material.AIR || player.getInventory().getContents()[i] != null) {
-                            MainClass.inst().getConfig().set("globalRewards", player.getInventory().getContents()[i]);
-                        }
-                    }
-                    MainClass.inst().saveConfig();
-                    player.sendMessage(MainClass.getPrefix() + "§7Du hast erfolgreich den globalen Reward gesetzt!");
-                    return true;
-                } else {
-                    if (Arenas.exists(args[1])) {
-                        for (int i = 0; player.getInventory().getContents().length < i; i++) {
-                            if (player.getInventory().getContents()[i].getType() != Material.AIR || player.getInventory().getContents()[i] != null) {
-                                MainClass.inst().getConfig().set("arenas" + args[1] + ".rewards", player.getInventory().getContents()[i]);
-                            }
-                        }
-                        MainClass.inst().saveConfig();
-                        player.sendMessage(MainClass.getPrefix() + "§7Du hast erfolgreich den Reward in Arena §e" + args[1] + "§7gesetzt!");
-                        return true;
-                    } else {
-                        player.sendMessage(MainClass.getPrefix() + "§7Die Arena §e" + args[1] + " §7existiert nicht!");
-                        return true;
-                    }
-                }
+
+                stacks.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
+
+                CmdValidate.validateNotEmpty(stacks, "Die Quelle (" + args.getFlag('s', "Hotbar") + ") ist leer!");
+
+                arena.setRewards(stacks);
+                arena.setDoAllRewards(!args.hasFlag('r')); //When randomness is not asked for, we wanna give everything
+
+                player.sendMessage("§aBelohnung für Arena §2" + arena.getName() + "§a gesetzt!");
             }
         }
     }

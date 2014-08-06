@@ -31,7 +31,7 @@ import java.util.UUID;
  */
 public final class Arenas {
 
-    static final Map<String, Arena> arenaCache = new CaseInsensitiveMap<>();
+    static final Map<String, MinoDuelArena> arenaCache = new CaseInsensitiveMap<>();
     public static final String DEFAULT_REWARDS_PATH = "default-rewards";
     private static List<ItemStack> defaultRewards;
     private static ItemStack anyArenaIcon;
@@ -175,8 +175,8 @@ public final class Arenas {
     public static Arena byName(String name) {
         Arena arena = arenaCache.get(name);
 
-        if (arena == null && MinoDuelPlugin.inst().getConfig().contains(Arena.CONFIG_PATH + "." + name)) {
-            Arena.reloadArenas(MinoDuelPlugin.getInstance().getConfig());
+        if (arena == null && MinoDuelPlugin.inst().getConfig().contains(MinoDuelArena.CONFIG_PATH + "." + name)) {
+            Arenas.reloadArenas(MinoDuelPlugin.getInstance().getConfig());
             arena = arenaCache.get(name);
         }
 
@@ -191,19 +191,42 @@ public final class Arenas {
      * @return the created Arena
      */
     public static Arena createArena(String name, FileConfiguration config) {
-        Arena arena = new Arena(config.getConfigurationSection(Arena.CONFIG_PATH).createSection(name));
+        MinoDuelArena arena = new MinoDuelArena(config.getConfigurationSection(MinoDuelArena.CONFIG_PATH).createSection(name));
         arenaCache.put(name, arena);
         return arena;
     }
 
     /**
-     * Reloads arenas from a given {@link org.bukkit.configuration.file.FileConfiguration}. Loads from path {@link Arena#CONFIG_PATH}.
+     * Reloads arenas from a given {@link org.bukkit.configuration.file.FileConfiguration}. Loads from path {@link MinoDuelArena#CONFIG_PATH}.
      * Existing objects are modified.
      *
      * @param source Where to get data from
      */
     public static void reloadArenas(FileConfiguration source) {
-        Arena.reloadArenas(source);
+        Map<String, MinoDuelArena> existingArenas = new HashMap<>(Arenas.arenaCache);
+        Arenas.arenaCache.clear();
+
+        if (source.contains(MinoDuelArena.CONFIG_PATH)) {
+            ConfigurationSection arenaSection = source.getConfigurationSection(MinoDuelArena.CONFIG_PATH);
+            for (String key : arenaSection.getKeys(false)) {
+                MinoDuelArena existingArena = existingArenas.get(key);
+                ConfigurationSection section = source.getConfigurationSection(MinoDuelArena.CONFIG_PATH + "." + key);
+
+                if (existingArena == null) {
+                    Arenas.arenaCache.put(key, MinoDuelArena.fromConfigSection(section));
+                } else {
+                    existingArena.updateFrom(section);
+                    Arenas.arenaCache.put(key, existingArena);
+                    existingArenas.remove(key);
+                }
+            }
+        }
+
+        for (Arena removedArena : existingArenas.values()) {
+            removedArena.getPlayers()
+                    .forEach(pi -> pi.getPlayer().sendMessage("§cDeine Arena wurde entfernt. Bitte entschuldige die Unannehmlichkeiten!"));
+            removedArena.endGame(null, false);
+        }
     }
 
     /**

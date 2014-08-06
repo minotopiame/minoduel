@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.arena.MinoDuelArena;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -212,7 +213,7 @@ public final class WaitingQueueManager {
 
         remove(plr1);
         remove(plr2);
-        arena.scheduleGame(plr1, plr2);
+        ((MinoDuelArena) arena).scheduleGame(plr1, plr2); //TODO impl detail
 
         return true;
     }

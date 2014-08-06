@@ -74,7 +74,7 @@ public abstract class ConfigurableArena implements Arena {
     public void remove() {
         Validate.validState(configSection != null, "Can't remove already removed arena!");
 
-        if (isOccupied()) { //FIXME
+        if (isOccupied()) {
             getPlayers().forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
             endGame(null);
         }
@@ -85,13 +85,8 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     @Override
-    public boolean isValid() { //TODO: Should we use validityChecklist.isDone() ? -> overhead considerable?
-        return configSection != null &&
-                firstSpawn != null &&
-                secondSpawn != null &&
-                inventoryKit != null &&
-                armorKit != null &&
-                iconStack != null;
+    public boolean isValid() {
+        return validityChecklist.isDone(); //Overhead is probably not that bad
     }
 
     @Override

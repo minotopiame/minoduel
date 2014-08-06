@@ -39,11 +39,6 @@ public abstract class AbstractQueueItem implements QueueItem {
     }
 
     @Override
-    public boolean canFight(@Nullable QueueItem item) {
-        return (item == null ? 0 : item.size()) + size() == 2;
-    }
-
-    @Override
     public boolean has(Player player) {
         return getPlayers().contains(player);
     }

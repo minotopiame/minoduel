@@ -3,7 +3,6 @@ package me.sebi7224.minoduel.queue;
 import me.sebi7224.minoduel.arena.Arena;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.common.annotation.Unused;
 import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
 import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 
@@ -35,9 +34,6 @@ public interface QueueItem {
      * @return how many players are represented by this queue item
      */
     int size();
-
-    @Unused
-    boolean canFight(@Nullable QueueItem item);
 
     /**
      * @return an immutable list of all players represented by this queue item.

@@ -14,7 +14,7 @@ import me.sebi7224.minoduel.arena.Arenas;
 import me.sebi7224.minoduel.cmd.CommandsAdmin;
 import me.sebi7224.minoduel.cmd.CommandsArena;
 import me.sebi7224.minoduel.cmd.CommandsPlayer;
-import me.sebi7224.minoduel.queue.WaitingQueueManager;
+import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import me.sebi7224.minoduel.util.IconMenu;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -126,7 +126,7 @@ public class MinoDuelPlugin extends JavaPlugin {
                     Arena arena = event.getArena();
 
                     player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
-                    WaitingQueueManager.enqueue(player, arena); //This takes care of teleportation etc if a match is found
+                    DuelWaitingQueue.enqueue(player, arena); //This takes care of teleportation etc if a match is found
                     player.sendMessage(getPrefix() + "Du bist nun in der Warteschlange" +
                             (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
                             "!");

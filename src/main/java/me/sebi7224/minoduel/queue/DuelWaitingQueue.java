@@ -28,12 +28,12 @@ import java.util.stream.Collectors;
  * @author <a href="http://xxyy.github.io/">xxyy</a>
  * @since 22.7.14 // 1.0
  */
-public final class WaitingQueueManager {
+public final class DuelWaitingQueue {
 
     public static final String POSITION_NOTIFICATION_FORMAT = "Du bist §e%d.§6 in der Warteschlange der Arena §e%s§6!";
     private static List<QueueItem> queue = new ArrayList<>();
 
-    private WaitingQueueManager() {
+    private DuelWaitingQueue() {
 
     }
 
@@ -121,7 +121,7 @@ public final class WaitingQueueManager {
             if (deep) {
                 return queue.stream()
                         .filter(other -> other.hasAny(item.getPlayers()))
-                        .map(WaitingQueueManager::remove)
+                        .map(DuelWaitingQueue::remove)
                         .filter(Objects::nonNull)
                         .findFirst().orElse(null);
             } else {
@@ -287,7 +287,7 @@ public final class WaitingQueueManager {
         }
 
         arena.scheduleGame(items).stream()
-                .forEach(WaitingQueueManager::remove); //Remove all items that the arena accepted
+                .forEach(DuelWaitingQueue::remove); //Remove all items that the arena accepted
 
         return true;
     }

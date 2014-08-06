@@ -2,7 +2,7 @@ package me.sebi7224.minoduel;
 
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
-import me.sebi7224.minoduel.queue.WaitingQueueManager;
+import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,7 +35,7 @@ public class MainListener implements Listener {
         if (arena != null) {
             arena.endGame(arena.getOther(evt.getPlayer()));
         } else {
-            WaitingQueueManager.remove(evt.getPlayer());
+            DuelWaitingQueue.remove(evt.getPlayer());
         }
     }
 
@@ -46,7 +46,7 @@ public class MainListener implements Listener {
         if (arena != null) {
             arena.endGame(arena.getOther(evt.getPlayer()));
         } else {
-            WaitingQueueManager.remove(evt.getPlayer());
+            DuelWaitingQueue.remove(evt.getPlayer());
         }
     }
 

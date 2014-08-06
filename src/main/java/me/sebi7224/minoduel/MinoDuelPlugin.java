@@ -147,7 +147,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         return MinoDuelPlugin.getInstance();
     }
 
-    public static String getPrefix() {
+    public String getPrefix() {
         return PREFIX;
     }
 

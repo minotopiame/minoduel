@@ -55,7 +55,7 @@ public class DualQueueItem extends AbstractQueueItem {
                 }
                 break;
             default:
-                throw new AssertionError("Unknown message type for " + getClass() + "!");
+                throw new AssertionError("Unknown message type for " + getClass() + ": "+type.name());
         }
 
         String finalResult = result; //Workaround: Variable used in lambda must be effectively final

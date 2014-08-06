@@ -91,7 +91,7 @@ public class CommandsAdmin {
             }
 
             if (arenas.isEmpty()) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§cKeine Arena entspricht deinem Suchkriterium!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arena entspricht deinem Suchkriterium!");
                 return;
             }
 

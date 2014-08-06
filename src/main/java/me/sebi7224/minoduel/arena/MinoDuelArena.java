@@ -110,7 +110,7 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
         if (winner != null) { //A winner has been determined
             PlayerInfo loser = players.getOther(winner);
 
-            Bukkit.broadcastMessage(MinoDuelPlugin.getPrefix() + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
+            Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
 
             //Treat winner nicely
@@ -118,7 +118,7 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
                     .forEach(winner.getPlayer().getInventory()::addItem);
         } else {
             if (sendUndecidedMessage) {
-                Bukkit.broadcastMessage(MinoDuelPlugin.getPrefix() + "§7Der Kampf zwischen §a" +
+                Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§7Der Kampf zwischen §a" +
                         players.getLeft().getPlayer().getName() +
                         "§7 und §a" + players.getRight().getPlayer().getName() +
                         " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
@@ -289,10 +289,10 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
             //Announce full minutes
             if (ticksLeft % 12 == 0) { //every minute
                 getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
+                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
             } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
                 getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
+                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
             } else if (ticksLeft == 0) {
                 MinoDuelArena.this.endGame(null);
             }
@@ -406,13 +406,13 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
         }
 
         protected void sendTeleportMessage() {
-            getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§eDu wirst jetzt gegen §a" +
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst jetzt gegen §a" +
                     MinoDuelArena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
-            getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§8Bitte stillhalten, du wirst in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
         }
 
         protected void sendStartMessage() {
-            getPlayer().sendMessage(MinoDuelPlugin.getPrefix() + "§eMögen die Spiele beginnen!");
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eMögen die Spiele beginnen!");
         }
 
         @Override

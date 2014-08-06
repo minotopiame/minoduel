@@ -231,7 +231,7 @@ public final class DuelWaitingQueue {
             }
 
             if (item.has(target)) {
-                target.sendMessage(MinoDuelPlugin.getPrefix() + String.format(POSITION_NOTIFICATION_FORMAT, queueSize,
+                target.sendMessage(MinoDuelPlugin.PREFIX + String.format(POSITION_NOTIFICATION_FORMAT, queueSize,
                         arena == null ? "(egal)" : arena.getName())); //Hmm maybe this could be generified
                 return true;
             }

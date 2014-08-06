@@ -52,12 +52,12 @@ public class CommandsArena {
             String arenaName = args.getString(0);
 
             if (Arenas.existsByName(arenaName)) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§cDie Arena §4" + arenaName + " §cexistiert bereits!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert bereits!");
                 return;
             }
 
             Arenas.createArena(arenaName, plugin.getConfig());
-            player.sendMessage(MinoDuelPlugin.getPrefix() + "§aDu hast die Arena §2" + arenaName + " §aerfolgreich erstellt!");
+            player.sendMessage(MinoDuelPlugin.PREFIX + "§aDu hast die Arena §2" + arenaName + " §aerfolgreich erstellt!");
         }
 
         @Command(aliases = {"remove", "delete", "rem"},
@@ -88,7 +88,7 @@ public class CommandsArena {
             Arena arena = CmdValidate.getArenaChecked(arenaName);
 
             arena.remove();
-            player.sendMessage(MinoDuelPlugin.getPrefix() + "§aDie Arena §2" + arenaName + " §awurde erfolgreich entfernt!");
+            player.sendMessage(MinoDuelPlugin.PREFIX + "§aDie Arena §2" + arenaName + " §awurde erfolgreich entfernt!");
         }
 
         @Command(aliases = {"status", "info"},
@@ -145,7 +145,7 @@ public class CommandsArena {
                     //@formatter:on
                 }
 
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
             }
 
             @Command(aliases = {"icon", "symbol"},
@@ -158,7 +158,7 @@ public class CommandsArena {
 
                 arena.setIconStack(newIcon);
 
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§aDu hast das Icon der Arena §2" + arena.getName() + " §agesetzt!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§aDu hast das Icon der Arena §2" + arena.getName() + " §agesetzt!");
             }
 
             @Command(aliases = {"kit"},
@@ -170,12 +170,12 @@ public class CommandsArena {
 
                 if (args.hasFlag('a') || !args.hasFlag('i')) {
                     arena.setArmorKit(player.getInventory().getArmorContents());
-                    player.sendMessage(MinoDuelPlugin.getPrefix() + "§aRüstung für §2" + arena.getName() + "§a gesetzt!");
+                    player.sendMessage(MinoDuelPlugin.PREFIX + "§aRüstung für §2" + arena.getName() + "§a gesetzt!");
                 }
 
                 if (args.hasFlag('i') || !args.hasFlag('a')) {
                     arena.setInventoryKit(player.getInventory().getContents());
-                    player.sendMessage(MinoDuelPlugin.getPrefix() + "§aHauptkit für §2" + arena.getName() + "§a gesetzt!");
+                    player.sendMessage(MinoDuelPlugin.PREFIX + "§aHauptkit für §2" + arena.getName() + "§a gesetzt!");
                 }
             }
 

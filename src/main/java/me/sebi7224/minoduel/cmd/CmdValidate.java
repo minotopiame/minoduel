@@ -41,7 +41,7 @@ public final class CmdValidate {
         Arena arena = Arenas.byName(arenaName);
 
         if (arena == null) {
-            throw new CommandException(MinoDuelPlugin.getPrefix() + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");
+            throw new CommandException(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");
         }
 
         return arena;

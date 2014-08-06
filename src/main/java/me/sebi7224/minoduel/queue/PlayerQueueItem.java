@@ -47,7 +47,7 @@ public class PlayerQueueItem extends AbstractQueueItem {
     }
 
     private String getMessage(QueueMessage type, Object... args) {
-        String result = MinoDuelPlugin.getPrefix();
+        String result = MinoDuelPlugin.PREFIX;
 
         switch (type) {
             case POSITION_NOTIFICATION:
@@ -58,7 +58,7 @@ public class PlayerQueueItem extends AbstractQueueItem {
                         (getPreferredArena() == null ? "(egal)" : getPreferredArena().getName()));
                 break;
             default:
-                throw new AssertionError("Unknown message type for " + getClass() + "!");
+                throw new AssertionError("Unknown message type for " + getClass() + ": "+type.name());
         }
 
         return result;

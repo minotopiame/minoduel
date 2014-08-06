@@ -6,10 +6,11 @@ import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
-import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import mkremins.fanciful.FancyMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
@@ -46,12 +47,12 @@ public class CommandsPlayer {
         @CommandPermissions({"minoduel.user.join"})
         public void playerJoin(CommandContext args, Player player) throws CommandException {
             if (!Arenas.anyExist()) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§cKeine Arenen vorhanden =(!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arenen vorhanden =(!");
                 return;
             }
 
             if (Arenas.isInGame(player)) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + " §eDu bist bereits in einem Kampf!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + " §eDu bist bereits in einem Kampf!");
                 return;
             }
 
@@ -72,7 +73,7 @@ public class CommandsPlayer {
             if (InventoryHelper.isInventoryEmpty(player)) {
                 plugin.getArenaMenu().open(player);
             } else {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§eDu musst zuerst dein Inventar leeren!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu musst zuerst dein Inventar leeren!");
             }
         }
 
@@ -84,7 +85,7 @@ public class CommandsPlayer {
             if (arenaToLeave != null) {
                 arenaToLeave.endGame(arenaToLeave.getOther(player));
             } else {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§eDu befindest dich in keinem Kampf!");
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu befindest dich in keinem Kampf!");
             }
         }
 
@@ -102,7 +103,7 @@ public class CommandsPlayer {
             arenas.removeIf(arena -> !arena.isValid());
 
             if (arenas.isEmpty()) {
-                player.sendMessage(MinoDuelPlugin.getPrefix() + "§cKeine Arena entspricht deinem Suchkriterium!"); return;
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arena entspricht deinem Suchkriterium!"); return;
             }
 
             player.sendMessage("§6========> §eMinoTopia §6| §e1vs1 §6<========");
@@ -129,8 +130,18 @@ public class CommandsPlayer {
             }
         }
 
+        @Command(aliases = {"position"},
+                desc = "Beginnt ein 1vs1-Duell mit einem anderen Spieler!",
+                usage = "[Spieler]", min = 1)
+        @CommandPermissions({"minoduel.user.duel"})
         public void playerDuel(CommandContext args, Player player) {
-            //TODO: actual duel, as in duel <player>
+            //noinspection deprecation
+            Player opponent = Bukkit.getPlayerExact(args.getString(0));
+
+            if(opponent == null) {
+                player.sendMessage(plugin.getPrefix() + "§cSorry, der Spieler §4"+args.getString(0)+"§c is nicht online.");
+            }
+             //TODO: actual duel, as in duel <player>
         }
 
         //TODO: sk89q must have some nice answer to help topics too probably. Find that!

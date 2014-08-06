@@ -1,11 +1,14 @@
 package me.sebi7224.minoduel.queue;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
+import me.sebi7224.minoduel.WaitingQueueManager;
 import me.sebi7224.minoduel.arena.Arena;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
+import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 
 import java.util.List;
 
@@ -19,7 +22,7 @@ public class PlayerQueueItem extends AbstractQueueItem {
     public static final int SIZE = 1;
     private final Player player;
 
-    protected PlayerQueueItem(Player player, Arena preferredArena) {
+    public PlayerQueueItem(@NotNull Player player, @Nullable Arena preferredArena) {
         super(SIZE, preferredArena);
         this.player = player;
     }
@@ -39,17 +42,51 @@ public class PlayerQueueItem extends AbstractQueueItem {
         return player;
     }
 
+    @Override
+    public boolean has(Player player) {
+        return player.equals(player);
+    }
+
     private String getMessage(QueueMessage type, Object... args) {
         String result = MinoDuelPlugin.getPrefix();
 
         switch (type) {
             case POSITION_NOTIFICATION:
-                result += String.format("Du bist §e%d.§6 in der Warteschlange der Arena §e%s§6!", args);
+                result += String.format(WaitingQueueManager.POSITION_NOTIFICATION_FORMAT, args);
                 break;
             default:
                 throw new AssertionError("Unknown message type for " + getClass() + "!");
         }
 
         return result;
+    }
+
+    @Override
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        PlayerQueueItem that = (PlayerQueueItem) o;
+
+        if (!player.equals(that.player)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + player.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("player", player)
+                .add("preferredArena", getPreferredArena())
+                .toString();
     }
 }

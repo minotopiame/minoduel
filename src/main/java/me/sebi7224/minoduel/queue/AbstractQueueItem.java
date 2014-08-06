@@ -7,6 +7,7 @@ import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 
 /**
  * Abstract implementation of a base queue item.
+ * Subclasses should implement their own equals() and hashCode() since this class does not take players into account.
  *
  * @author <a href="http://xxyy.github.io/">xxyy</a>
  * @since 6.8.14
@@ -38,5 +39,32 @@ public abstract class AbstractQueueItem implements QueueItem {
     @Override
     public boolean canFight(@Nullable QueueItem item) {
         return (item == null ? 0 : item.size()) + size() == 2;
+    }
+
+    @Override
+    public boolean has(Player player) {
+        return getPlayers().contains(player);
+    }
+
+    @Override
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractQueueItem)) return false;
+
+        AbstractQueueItem that = (AbstractQueueItem) o;
+
+        if (size != that.size) return false;
+        if (preferredArena != null ? !preferredArena.equals(that.preferredArena) : that.preferredArena != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = size;
+        result = 31 * result + (preferredArena != null ? preferredArena.hashCode() : 0);
+        return result;
     }
 }

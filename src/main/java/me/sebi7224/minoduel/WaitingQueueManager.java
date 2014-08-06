@@ -7,12 +7,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
-import me.sebi7224.minoduel.arena.MinoDuelArena;
+import me.sebi7224.minoduel.queue.PlayerQueueItem;
+import me.sebi7224.minoduel.queue.QueueItem;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import io.github.xxyy.common.collections.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +30,8 @@ import java.util.stream.Collectors;
  */
 public final class WaitingQueueManager {
 
-    public static final String POSITION_NOTIFICATION_FORMAT = MinoDuelPlugin.getPrefix() + "Du bist §e%d.§6 in der Warteschlange der Arena §e%s§6!";
-    private static List<Pair<Player, Arena>> queue = new ArrayList<>();
+    public static final String POSITION_NOTIFICATION_FORMAT = "Du bist §e%d.§6 in der Warteschlange der Arena §e%s§6!";
+    private static List<QueueItem> queue = new ArrayList<>();
 
     private WaitingQueueManager() {
 
@@ -43,11 +42,24 @@ public final class WaitingQueueManager {
      *
      * @param plr   Player to add, may not be NULL
      * @param arena Arena the player prefers or NULL if no preference was stated.
+     * @return the previous queue item for that player or NULL if none
      */
-    public static void enqueue(@NotNull Player plr, @Nullable Arena arena) {
-        remove(plr);
-        queue.add(new Pair<>(plr, arena));
+    public static QueueItem enqueue(@NotNull Player plr, @Nullable Arena arena) {
+        return enqueue(new PlayerQueueItem(plr, arena));
+    }
+
+    /**
+     * Adds an item to the end of the waiting queue. If the item is already present, it will first be removed and then
+     * re-added to the end of the queue.
+     *
+     * @param item the item to add to the queue
+     * @return the added item
+     */
+    public static QueueItem enqueue(@NotNull QueueItem item) {
+        QueueItem previous = remove(item, true);
+        queue.add(item);
         findMatches();
+        return previous;
     }
 
     /**
@@ -56,22 +68,66 @@ public final class WaitingQueueManager {
      * @param plr Player to check for
      * @return whether given player is queued
      */
-    public static boolean isQueued(Player plr) {
-        return queue.stream()
-                .filter(pair -> pair.getLeft().equals(plr))
-                .findAny().isPresent();
+    public static boolean isQueued(@NotNull Player plr) {
+        return getQueueItem(plr) != null;
     }
 
     /**
-     * Removes a Player from the queue, for example if they quit.
+     * Gets the queue item which holds given player.
+     *
+     * @param plr the player to find
+     * @return the queue item representing that player or NULL if none
+     */
+    @Nullable
+    public static QueueItem getQueueItem(@NotNull Player plr) {
+        return queue.stream()
+                .filter(item -> item.has(plr))
+                .findAny().orElse(null);
+    }
+
+    /**
+     * Removes a Player from the queue.
      * If given Player is not in the queue, no action is performed.
      *
-     * @param plr Player to remove
+     * @param plr the player to remove
+     * @return the {@link QueueItem} which held the player or NULL if the player wasn't in the queue.
      */
-    public static void remove(@NotNull Player plr) {
-        ImmutableList.copyOf(queue).stream()
-                .filter(pair -> pair.getLeft().equals(plr))
-                .forEach(queue::remove);
+    public static QueueItem remove(@NotNull Player plr) {
+        QueueItem previous = queue.stream()
+                .filter(item -> item.has(plr))
+                .findFirst().orElse(null);
+
+        return remove(previous, false);
+    }
+
+    /**
+     * Removes an item from the queue.
+     *
+     * @param item the item to remove from the queue
+     * @param deep if true, any item containing any of item's players will be removed
+     * @return the first removed item or NULL if the item wasn't in the queue
+     */
+    public static QueueItem remove(@Nullable QueueItem item, boolean deep) {
+        if (item == null) {
+            return null;
+        }
+
+        if (!queue.remove(item) && deep) {
+            return item.getPlayers().stream()
+                    .map(WaitingQueueManager::remove)
+                    .findFirst().orElse(null);
+        }
+
+        return item;
+    }
+
+    /**
+     * Removes an item from the queue. Shortcut for {@link #remove(QueueItem, boolean)} with deep=false
+     * @param item the item to remove from the queue
+     * @return the removed item or NULL if the item wasn't in the queue
+     */
+    public static QueueItem remove(@Nullable QueueItem item) {
+        return remove(item, false);
     }
 
     /**
@@ -80,23 +136,31 @@ public final class WaitingQueueManager {
      * This is automatically called when a new player is added to the queue.
      */
     public static void findMatches() {
-        Map<Arena, Player> arenaChoices = new HashMap<>();
+        Map<Arena, QueueItem> arenaChoices = new HashMap<>();
 
         if (queue.size() < 2) {
             return;
         }
 
-        ImmutableList.copyOf(queue).stream().forEach(pair -> { //Need to copy to avoid concurrent modification
-            Player match = arenaChoices.remove(pair.getRight()); //Get a player who chose the same arena
+        ImmutableList.copyOf(queue).stream().forEach(item -> { //Need to copy to avoid concurrent modification
+            if(item.size() == Arena.SIZE) { //If we can fill this arena immediately, do it!
+                if((item.getPreferredArena() == null || !arenaChoices.containsKey(item.getPreferredArena()))) { //If someone else is queued for that arena, let them go first since they came first actually
+                    tryPop(item.getPreferredArena(), item);
+                }
 
-            if (match == null) {
+                return; //No need for all that emotional match-finding
+            }
+
+            QueueItem match = arenaChoices.remove(item.getPreferredArena()); //Get an item preferring the same arena
+
+            if (match == null) { //If none, get an item that doesn't care
                 match = arenaChoices.get(null); //Get player w/o arena preference
             }
 
             if (match != null) { //If we found someone, start a game
-                tryPop(pair.getRight(), pair.getLeft(), match); //That method gets a random arena if NULL is passed
+                tryPop(item.getPreferredArena(), item, match); //That method gets a random arena if NULL is passed
             } else {
-                arenaChoices.put(pair.getRight(), pair.getLeft()); //If we found no match, queue this player to be matched
+                arenaChoices.put(item.getPreferredArena(), item); //If we found no match, queue this player to be matched
             }
         });
     }
@@ -107,9 +171,8 @@ public final class WaitingQueueManager {
     public static void notifyPositions() {
         Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
 
-        queue.stream().forEach(pair -> {
-            Arena arena = pair.getRight();
-            Player plr = pair.getLeft();
+        queue.stream().forEach(item -> {
+            Arena arena = item.getPreferredArena();
 
             if (arena == null && !queueSizes.isEmpty()) { //Select best arena w/ shortest wait time
                 arena = queueSizes.entrySet().stream() //From all queue sizes
@@ -118,14 +181,14 @@ public final class WaitingQueueManager {
             }
 
             Integer queueSize = queueSizes.getOrDefault(arena, 0); //Get arena's queue size
-            queueSize++;
+            queueSize += item.size();
             if (arena != null) { //We can't actually write anything back if we don't know which arena the player is queueing for :/
                 queueSizes.put(arena, queueSize); //Increase and put
             }
 
             String arenaName = arena == null ? "(egal)" : arena.getName();
 
-            plr.sendMessage(String.format(POSITION_NOTIFICATION_FORMAT, queueSize, arenaName));
+            item.sendMessage(QueueItem.QueueMessage.POSITION_NOTIFICATION, queueSize - item.size() + 1, arenaName);
         });
     }
 
@@ -139,9 +202,8 @@ public final class WaitingQueueManager {
     public static boolean notifyPosition(Player target) { //TODO: maybe we can un-spaghetti this some time
         Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
 
-        for(Pair<Player, Arena> pair : queue) {
-            Arena arena = pair.getRight();
-            Player plr = pair.getLeft();
+        for (QueueItem item : queue) {
+            Arena arena = item.getPreferredArena();
 
             if (arena == null && !queueSizes.isEmpty()) { //Select best arena w/ shortest wait time
                 arena = queueSizes.entrySet().stream() //From all queue sizes
@@ -150,14 +212,14 @@ public final class WaitingQueueManager {
             }
 
             Integer queueSize = queueSizes.getOrDefault(arena, 0); //Get arena's queue size
-            queueSize++;
+            queueSize += item.size();
             if (arena != null) { //We can't actually write anything back if we don't know which arena the player is queueing for :/
                 queueSizes.put(arena, queueSize); //Increase and put
             }
 
-            if(plr.equals(target)) {
-                plr.sendMessage(String.format(POSITION_NOTIFICATION_FORMAT, queueSize,
-                        arena == null ? "(egal)" : arena.getName()));
+            if (item.has(target)) {
+                target.sendMessage(MinoDuelPlugin.getPrefix() + String.format(POSITION_NOTIFICATION_FORMAT, queueSize,
+                        arena == null ? "(egal)" : arena.getName())); //Hmm maybe this could be generified
                 return true;
             }
         }
@@ -173,16 +235,16 @@ public final class WaitingQueueManager {
      * @return Ordered waiting queue for {@code arena}
      */
     public static List<Player> queueFor(@NotNull Arena arena, boolean strict) {
-        Predicate<Pair<Player, Arena>> predicate;
+        Predicate<QueueItem> predicate;
         if (strict) {
-            predicate = pair -> arena.equals(pair.getRight()); //Match same arena
+            predicate = item -> arena.equals(item.getPreferredArena()); //Match same arena
         } else {
-            predicate = pair -> pair.getRight() == null || arena.equals(pair.getRight()); //Match same arena or "don't care"
+            predicate = item -> item.getPreferredArena() == null || arena.equals(item.getPreferredArena()); //Match same arena or "don't care"
         }
 
         return queue.stream()
                 .filter(predicate)
-                .map(Pair::getLeft) //Get player out of pairs
+                .flatMap(item -> item.getPlayers().stream())
                 .collect(Collectors.toList());
     }
 
@@ -196,24 +258,23 @@ public final class WaitingQueueManager {
     public static ListMultimap<Arena, Player> getArenaQueues() {
         Multimap<Arena, Player> result = MultimapBuilder.hashKeys().arrayListValues().build();
 
-        queue.forEach(pair -> result.put(pair.getRight(), pair.getLeft()));
+        queue.forEach(item -> result.putAll(item.getPreferredArena(), item.getPlayers()));
 
         return ImmutableListMultimap.copyOf(result);
     }
 
     //Returns whether a game has been started with given arguments
-    private static boolean tryPop(Arena arena, Player plr1, Player plr2) {
+    private static boolean tryPop(Arena arena, QueueItem... items) {
         if (arena == null) {
-            arena = Arenas.any();
+            arena = Arenas.firstReady();
         }
 
-        if (!arena.isReady()) {
+        if (arena == null || !arena.isReady()) {
             return false;
         }
 
-        remove(plr1);
-        remove(plr2);
-        ((MinoDuelArena) arena).scheduleGame(plr1, plr2); //TODO impl detail
+        arena.scheduleGame(items).stream()
+                .forEach(WaitingQueueManager::remove); //Remove all items that the arena accepted
 
         return true;
     }

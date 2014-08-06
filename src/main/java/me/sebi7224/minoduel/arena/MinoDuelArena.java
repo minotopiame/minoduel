@@ -63,6 +63,8 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
         Validate.isTrue(isReady(), "This arena is currently not ready");
         Validate.notNull(plr1, "Player one is null");
         Validate.notNull(plr2, "Player two is null");
+        Validate.isTrue(!Arenas.isInGame(plr1), "Player one is currently in another game!");
+        Validate.isTrue(!Arenas.isInGame(plr2), "Player two is currently in another game!");
 
         this.players = new Couple<>(
                 new PlayerInfo(plr1, getFirstSpawn()),

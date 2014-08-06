@@ -1,5 +1,6 @@
-package me.sebi7224.minoduel;
+package me.sebi7224.minoduel.listener;
 
+import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import me.sebi7224.minoduel.queue.DuelWaitingQueue;
@@ -13,6 +14,11 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class MainListener implements Listener {
+    private final MinoDuelPlugin plugin;
+
+    public MainListener(MinoDuelPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent evt) {
@@ -30,24 +36,24 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onLeave(PlayerQuitEvent evt) {
-        Arena arena = Arenas.getPlayerArena(evt.getPlayer());
-
-        if (arena != null) {
-            arena.endGame(arena.getOther(evt.getPlayer()));
-        } else {
-            DuelWaitingQueue.remove(evt.getPlayer());
-        }
+        onDisconnect(evt.getPlayer());
     }
 
     @EventHandler
     public void onKick(PlayerKickEvent evt) {
-        Arena arena = Arenas.getPlayerArena(evt.getPlayer());
+        onDisconnect(evt.getPlayer());
+    }
+
+    private void onDisconnect(Player plr) {
+        Arena arena = Arenas.getPlayerArena(plr);
 
         if (arena != null) {
-            arena.endGame(arena.getOther(evt.getPlayer()));
+            arena.endGame(arena.getOther(plr));
         } else {
-            DuelWaitingQueue.remove(evt.getPlayer());
+            DuelWaitingQueue.remove(plr);
         }
+
+        plugin.getRequestManager().removeAll(plr);
     }
 
     @EventHandler

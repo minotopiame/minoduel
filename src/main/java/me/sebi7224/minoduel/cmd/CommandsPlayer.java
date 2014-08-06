@@ -8,15 +8,19 @@ import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.queue.DualQueueItem;
 import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.util.Collection;
 
+import static org.bukkit.ChatColor.*;
+import static org.bukkit.ChatColor.DARK_GREEN;
 import static org.bukkit.ChatColor.GOLD;
 import static org.bukkit.ChatColor.YELLOW;
 
@@ -57,14 +61,7 @@ public class CommandsPlayer {
             }
 
             if (args.hasFlag('a')) {
-                String arenaName = args.getFlag('a');
-                Arena arena = null; //Allow for "any arena"
-                if (!arenaName.equalsIgnoreCase("egal") && !arenaName.equalsIgnoreCase("null")) {
-                    arena = Arenas.byName(arenaName);
-                    if (arena == null) {
-                        throw new CommandException("Unbekannte Arena! Probiere /1vs1 arenas!");
-                    }
-                }
+                Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'));
 
                 DuelWaitingQueue.enqueue(player, arena);
                 return;
@@ -95,7 +92,7 @@ public class CommandsPlayer {
         @CommandPermissions({"minoduel.user.arenas"})
         public void adminListArenas(CommandContext args, Player player) throws CommandException {
             Collection<Arena> arenas = Arenas.all();
-            if(args.argsLength() >= 1) { //If we have a filter
+            if (args.argsLength() >= 1) { //If we have a filter
                 String search = args.getString(0).toLowerCase(); //Get that
                 arenas.removeIf(arena -> !arena.getName().toLowerCase().contains(search)); //And remove non-matching arenas
             }
@@ -103,7 +100,8 @@ public class CommandsPlayer {
             arenas.removeIf(arena -> !arena.isValid());
 
             if (arenas.isEmpty()) {
-                player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arena entspricht deinem Suchkriterium!"); return;
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arena entspricht deinem Suchkriterium!");
+                return;
             }
 
             player.sendMessage("§6========> §eMinoTopia §6| §e1vs1 §6<========");
@@ -117,7 +115,7 @@ public class CommandsPlayer {
                 usage = "")
         @CommandPermissions({"minoduel.user.arenas"})
         public void playerPosition(CommandContext args, Player player) {
-            if(!DuelWaitingQueue.notifyPosition(player)) {
+            if (!DuelWaitingQueue.notifyPosition(player)) {
                 //@formatter:off
                 new FancyMessage("Du bist nicht in der Warteschlange! ")
                          .color(YELLOW)
@@ -130,18 +128,80 @@ public class CommandsPlayer {
             }
         }
 
-        @Command(aliases = {"position"},
-                desc = "Beginnt ein 1vs1-Duell mit einem anderen Spieler!",
-                usage = "[Spieler]", min = 1)
+        @Command(aliases = {"duel", "fite"},
+                desc = "Beginnt ein 1vs1-Duell mit einem anderen Spieler! (-c bricht ein Duell ab)",
+                usage = " <-c> [Spieler] <Arena>", min = 1,
+                flags = "c")
         @CommandPermissions({"minoduel.user.duel"})
-        public void playerDuel(CommandContext args, Player player) {
+        public void playerDuel(CommandContext args, Player player) throws CommandException {
             //noinspection deprecation
             Player opponent = Bukkit.getPlayerExact(args.getString(0));
 
-            if(opponent == null) {
-                player.sendMessage(plugin.getPrefix() + "§cSorry, der Spieler §4"+args.getString(0)+"§c is nicht online.");
+            if (opponent == null) {
+                player.sendMessage(plugin.getPrefix() + "§cSorry, der Spieler §4" + args.getString(0) + "§c is nicht online.");
+                if (args.hasFlag('c')) {
+                    player.sendMessage(plugin.getPrefix() + "§aAlle Anfragen wurde entfernt, als er/sie den Server verlassen hat.");
+                }
+                return;
             }
-             //TODO: actual duel, as in duel <player>
+
+            boolean opponentInGame = Arenas.isInGame(opponent);
+
+            if (args.hasFlag('c')) {
+                if (plugin.getRequestManager().remove(opponent, player).isPresent()) {
+                    player.sendMessage(plugin.getPrefix() + "§aDu hast die Duellanfrage an §2" + opponent.getName() + " §azurückgezogen.");
+                    opponent.sendMessage(plugin.getPrefix() + "§4" + player.getName() + " §chat die Duellanfrage an dich zurückgezogen.");
+                } else if (plugin.getRequestManager().remove(player, opponent).isPresent()) {
+                    player.sendMessage(plugin.getPrefix() + "§aDu hast die Duellanfrage von §2" + opponent.getName() + " §aabgelehnt.");
+                    opponent.sendMessage(plugin.getPrefix() + "§4" + player.getName() + " §chat deine Duellanfrage abgelehnt!");
+                } else {
+                    player.sendMessage(plugin.getPrefix() + "§cDu hast §4" + opponent.getName() + "§c keine Anfrage geschickt!");
+                }
+                return;
+            }
+
+            if (opponentInGame) {
+                player.sendMessage(plugin.getPrefix() + opponent.getName() + " ist gerade im Kampf.");
+            }
+
+            if (plugin.getRequestManager().hasPending(player, opponent)) { //If this is an answer to a request
+                if (opponentInGame) {
+                    player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. Bitte versuche es später erneut."); //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight
+                } else {
+                    DuelWaitingQueue.enqueue(new DualQueueItem(plugin.getRequestManager().remove(player, opponent).get(), opponent, player));
+                }
+            } else if (plugin.getRequestManager().hasPending(opponent, player)) {
+                player.sendMessage(plugin.getPrefix() + "Du hast §e" + opponent.getName() + "§6 bereits eine Anfrage geschickt!"); //TODO: which arena?
+                new FancyMessage("Möchtest du diese zurückziehen? (hier klicken)")
+                        .color(GOLD)
+                        .tooltip("/1vs1 duel -c " + opponent.getName())
+                        .command("/1vs1 duel -c " + opponent.getName())
+                        .send(player);
+            } else {
+                Arena arena = CmdValidate.getArenaOrNull(args.getString(1, null));
+                plugin.getRequestManager().request(opponent, player, arena);
+                //@formatter:off
+                opponent.sendMessage(plugin.getPrefix() + "§1§l" + player.getName() + "§9§l möchte sich mit dir" +
+                        (arena == null ? "" : " in der Arena §1§l" + arena.getName() + "§9§l") +
+                        " duellieren!");
+                plugin.getFancifulPrefix().then("[Annehmen] <-- ")
+                            .color(DARK_GREEN)
+                            .tooltip("/1vs1 duel " + player.getName())
+                            .command("/1vs1 duel " + player.getName())
+                        .then("klick (i)") //Let's hope that users actually understand that lol
+                            .color(GOLD)
+                            .tooltip("Wähle eine der Optionen.",
+                                    "Du kannst die Anfrage auch jederzeit später bearbeiten,",
+                                    "die Befehle dafür siehst du, wenn du deine Maus über eine Option bewegst.",
+                                    "Wenn du oder "+player.getName()+" offline gehen, wird die ANfrag automatisch gelöscht.")
+                        .then(" --> [Ablehnen]")
+                            .color(DARK_RED)
+                            .tooltip("/1vs1 duel -c " + player.getName())
+                            .command("/1vs1 duel -c " + player.getName())
+                        .send(opponent);
+                //@formatter:on
+                player.sendMessage(plugin.getPrefix() + "§e" + opponent.getName() + "§6 hat deine Anfrage erhalten. Bitte warte nun, bis er/sie diese annimmt.");
+            }
         }
 
         //TODO: sk89q must have some nice answer to help topics too probably. Find that!

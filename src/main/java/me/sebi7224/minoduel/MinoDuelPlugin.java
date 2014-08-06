@@ -14,8 +14,12 @@ import me.sebi7224.minoduel.arena.Arenas;
 import me.sebi7224.minoduel.cmd.CommandsAdmin;
 import me.sebi7224.minoduel.cmd.CommandsArena;
 import me.sebi7224.minoduel.cmd.CommandsPlayer;
+import me.sebi7224.minoduel.listener.MainListener;
 import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import me.sebi7224.minoduel.util.IconMenu;
+import mkremins.fanciful.FancyMessage;
+import mkremins.fanciful.TextualComponent;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -25,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 public class MinoDuelPlugin extends JavaPlugin {
@@ -35,8 +40,11 @@ public class MinoDuelPlugin extends JavaPlugin {
     }
 
     public static final String PREFIX = "§6[§a1vs1§6] ";
+    private static final FancyMessage FANCIFUL_PREFIX = new FancyMessage("[").color(ChatColor.GOLD).then("1vs1").color(ChatColor.GREEN).then("] ").color(ChatColor.GOLD);
     private static MinoDuelPlugin instance;
     private long teleportDelayTicks;
+    private IconMenu arenaMenu;
+    private DuelRequestManager requestManager = new DuelRequestManager();
     private CommandsManager<CommandSender> commandsManager = new CommandsManager<CommandSender>() {
         @Override
         public boolean hasPermission(CommandSender sender, String perm) {
@@ -45,14 +53,13 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         @Override
         protected boolean hasPermission(Method method, CommandSender player) { //sneaky hack bcuz @Console has no effect by default
-            if(method.isAnnotationPresent(Console.class) && !(player instanceof Player)) {
+            if (method.isAnnotationPresent(Console.class) && !(player instanceof Player)) {
                 throw new PlayerOnlyCommandException("Du kannst diesen Befehl nur als Spieler ausführen!");
             }
 
             return super.hasPermission(method, player);
         }
     };
-    private IconMenu arenaMenu;
 
     @Override
     public void onEnable() {
@@ -76,7 +83,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         reg.register(CommandsArena.class);
 
         //Register Bukkit API stuffs
-        getServer().getPluginManager().registerEvents(new MainListener(), this);
+        getServer().getPluginManager().registerEvents(new MainListener(this), this);
 
         //Automagically save config every 5 minutes to minimize data-loss on crash
         getServer().getScheduler().runTaskTimer(this, this::saveConfig,
@@ -111,7 +118,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         } catch (CommandException | PlayerOnlyCommandException e) {
             sender.sendMessage("§c" + e.getMessage());
         } catch (IllegalStateException | IllegalArgumentException ise) {
-            sender.sendMessage("§cInterner Fehler: "+ise.getMessage()+" - Sollte dies öfter auftreten, melde dies bitte im Forum!");
+            sender.sendMessage("§cInterner Fehler: " + ise.getMessage() + " - Sollte dies öfter auftreten, melde dies bitte im Forum!");
             ise.printStackTrace();
         }
 
@@ -157,5 +164,17 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public IconMenu getArenaMenu() {
         return arenaMenu;
+    }
+
+    public DuelRequestManager getRequestManager() {
+        return requestManager;
+    }
+
+    public FancyMessage getFancifulPrefix() {
+        try {
+            return FANCIFUL_PREFIX.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

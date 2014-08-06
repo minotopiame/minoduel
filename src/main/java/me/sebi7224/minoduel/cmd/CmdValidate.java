@@ -46,4 +46,19 @@ public final class CmdValidate {
 
         return arena;
     }
+
+    public static Arena getArenaOrNull(String arenaName) throws CommandException {
+        arenaName = arenaName == null ? null : arenaName.toLowerCase(); //Save an if statement, save a kitten!
+        if(arenaName == null || arenaName.contains("null") || arenaName.contains("egal")) {
+            return null;
+        }
+
+        Arena arena = Arenas.byName(arenaName);
+
+        if (arena == null) {
+            throw new CommandException(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");
+        }
+
+        return arena;
+    }
 }

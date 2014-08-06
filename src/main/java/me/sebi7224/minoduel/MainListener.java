@@ -2,6 +2,7 @@ package me.sebi7224.minoduel;
 
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.queue.WaitingQueueManager;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

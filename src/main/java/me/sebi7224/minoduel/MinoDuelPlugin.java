@@ -14,6 +14,7 @@ import me.sebi7224.minoduel.arena.Arenas;
 import me.sebi7224.minoduel.cmd.CommandsAdmin;
 import me.sebi7224.minoduel.cmd.CommandsArena;
 import me.sebi7224.minoduel.cmd.CommandsPlayer;
+import me.sebi7224.minoduel.queue.WaitingQueueManager;
 import me.sebi7224.minoduel.util.IconMenu;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;

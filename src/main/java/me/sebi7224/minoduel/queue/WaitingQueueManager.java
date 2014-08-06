@@ -1,14 +1,13 @@
-package me.sebi7224.minoduel;
+package me.sebi7224.minoduel.queue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
-import me.sebi7224.minoduel.queue.PlayerQueueItem;
-import me.sebi7224.minoduel.queue.QueueItem;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

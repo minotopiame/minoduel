@@ -3,7 +3,6 @@ package me.sebi7224.minoduel.queue;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
-import me.sebi7224.minoduel.WaitingQueueManager;
 import me.sebi7224.minoduel.arena.Arena;
 import org.bukkit.entity.Player;
 

@@ -6,7 +6,7 @@ import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
-import me.sebi7224.minoduel.WaitingQueueManager;
+import me.sebi7224.minoduel.queue.WaitingQueueManager;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import mkremins.fanciful.FancyMessage;

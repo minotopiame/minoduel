@@ -9,11 +9,15 @@ import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.WaitingQueueManager;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
+import mkremins.fanciful.FancyMessage;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.util.Collection;
+
+import static org.bukkit.ChatColor.GOLD;
+import static org.bukkit.ChatColor.YELLOW;
 
 /**
  * Handles MinoDuel player commands.
@@ -107,8 +111,22 @@ public class CommandsPlayer {
             }
         }
 
+        @Command(aliases = {"position"},
+                desc = "Zeigt deine Position in der Warteschlange.",
+                usage = "")
+        @CommandPermissions({"minoduel.user.arenas"})
         public void playerPosition(CommandContext args, Player player) {
-            //TODO: show player position in queue
+            if(!WaitingQueueManager.notifyPosition(player)) {
+                //@formatter:off
+                new FancyMessage("Du bist nicht in der Warteschlange! ")
+                         .color(YELLOW)
+                        .then("[Beitreten]")
+                            .color(GOLD)
+                            .tooltip("/1vs1 join")
+                            .suggest("/1vs1 join")
+                        .send(player);
+                //@formatter:on
+            }
         }
 
         public void playerDuel(CommandContext args, Player player) {

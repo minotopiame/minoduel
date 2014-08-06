@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  */
 public final class WaitingQueueManager {
 
+    public static final String POSITION_NOTIFICATION_FORMAT = MinoDuelPlugin.getPrefix() + "Du bist §e%d.§6 in der Warteschlange der Arena §e%s§6!";
     private static List<Pair<Player, Arena>> queue = new ArrayList<>();
 
     private WaitingQueueManager() {
@@ -100,7 +101,7 @@ public final class WaitingQueueManager {
     }
 
     /**
-     * Notifies each queued player of their position in the respectivequeue.
+     * Notifies each queued player of their position in the respective queue.
      */
     public static void notifyPositions() {
         Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
@@ -109,7 +110,7 @@ public final class WaitingQueueManager {
             Arena arena = pair.getRight();
             Player plr = pair.getLeft();
 
-            if(arena == null && !queueSizes.isEmpty()) { //Select best arena w/ shortest wait time
+            if (arena == null && !queueSizes.isEmpty()) { //Select best arena w/ shortest wait time
                 arena = queueSizes.entrySet().stream() //From all queue sizes
                         .min((entry1, entry2) -> entry1.getValue().compareTo(entry2.getValue())).get() //Get the one with the shortest queue
                         .getKey(); //And retrieve its arena's name
@@ -117,14 +118,50 @@ public final class WaitingQueueManager {
 
             Integer queueSize = queueSizes.getOrDefault(arena, 0); //Get arena's queue size
             queueSize++;
-            if(arena != null) { //We can't actually write anything back if we don't know which arena the player is queueing for :/
+            if (arena != null) { //We can't actually write anything back if we don't know which arena the player is queueing for :/
                 queueSizes.put(arena, queueSize); //Increase and put
             }
 
             String arenaName = arena == null ? "(egal)" : arena.getName();
 
-            plr.sendMessage(MinoDuelPlugin.getPrefix() + "Du bist §e" + queueSize + ".§6 in der Warteschlange der Arena §e" + arenaName + "§6!");
+            plr.sendMessage(String.format(POSITION_NOTIFICATION_FORMAT, queueSize, arenaName));
         });
+    }
+
+    /**
+     * Notifies a single player of their position in the queue, and for which arena they are queuing for.<br>
+     * <b>If you want to notify every player in the queue, {@link #notifyPositions()} is far more efficient!</b>
+     *
+     * @param target the player to notify
+     * @return true if a notification was sent.
+     */
+    public static boolean notifyPosition(Player target) { //TODO: maybe we can un-spaghetti this some time
+        Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
+
+        for(Pair<Player, Arena> pair : queue) {
+            Arena arena = pair.getRight();
+            Player plr = pair.getLeft();
+
+            if (arena == null && !queueSizes.isEmpty()) { //Select best arena w/ shortest wait time
+                arena = queueSizes.entrySet().stream() //From all queue sizes
+                        .min((entry1, entry2) -> entry1.getValue().compareTo(entry2.getValue())).get() //Get the one with the shortest queue
+                        .getKey(); //And retrieve its arena's name
+            }
+
+            Integer queueSize = queueSizes.getOrDefault(arena, 0); //Get arena's queue size
+            queueSize++;
+            if (arena != null) { //We can't actually write anything back if we don't know which arena the player is queueing for :/
+                queueSizes.put(arena, queueSize); //Increase and put
+            }
+
+            if(plr.equals(target)) {
+                plr.sendMessage(String.format(POSITION_NOTIFICATION_FORMAT, queueSize,
+                        arena == null ? "(egal)" : arena.getName()));
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

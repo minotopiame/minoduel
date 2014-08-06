@@ -7,6 +7,7 @@ import io.github.xxyy.common.annotation.Unused;
 import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
 import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -58,7 +59,30 @@ public interface QueueItem {
      */
     boolean has(Player player);
 
+    /**
+     * Checks whether this item contains any of the passed players.
+     * @param players the players to check
+     * @return whether any of the passed players is represented by this item
+     */
+    boolean hasAny(Collection<Player> players);
+
+    /**
+     * This is called when this item is removed from the queue.
+     * This isn't called when this item is pushed to an arena.
+     * @param cause the player who caused the removal or NULL if the item was removed as a whole
+     */
+    void onRemoval(Player cause);
+
     public enum QueueMessage {
-        POSITION_NOTIFICATION
+        /**
+         * The item is notified of its position.
+         * Arguments: int (position), String (Arena name)
+         */
+        POSITION_NOTIFICATION,
+        /**
+         * The item is notified of its removal.
+         * Argument: Player (player who caused the removal or NULL if the item was removed as a whole)
+         */
+        REMOVAL_NOTIFICATION
     }
 }

@@ -54,6 +54,10 @@ public class PlayerQueueItem extends AbstractQueueItem {
             case POSITION_NOTIFICATION:
                 result += String.format(WaitingQueueManager.POSITION_NOTIFICATION_FORMAT, args);
                 break;
+            case REMOVAL_NOTIFICATION:
+                result += String.format("Du hast die Warteschlange der Arena %s verlassen!",
+                        (getPreferredArena() == null ? "(egal)" : getPreferredArena().getName()));
+                break;
             default:
                 throw new AssertionError("Unknown message type for " + getClass() + "!");
         }

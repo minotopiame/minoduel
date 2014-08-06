@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -97,7 +98,12 @@ public final class WaitingQueueManager {
                 .filter(item -> item.has(plr))
                 .findFirst().orElse(null);
 
-        return remove(previous, false);
+        if(previous != null) {
+            queue.remove(previous);
+            previous.onRemoval(plr);
+        }
+
+        return previous;
     }
 
     /**
@@ -112,10 +118,18 @@ public final class WaitingQueueManager {
             return null;
         }
 
-        if (!queue.remove(item) && deep) {
-            return item.getPlayers().stream()
-                    .map(WaitingQueueManager::remove)
-                    .findFirst().orElse(null);
+        if (!queue.remove(item)) {
+            if (deep) {
+                return queue.stream()
+                        .filter(other -> other.hasAny(item.getPlayers()))
+                        .map(WaitingQueueManager::remove)
+                        .filter(Objects::nonNull)
+                        .findFirst().orElse(null);
+            } else {
+                return null;
+            }
+        } else {
+            item.onRemoval(null);
         }
 
         return item;

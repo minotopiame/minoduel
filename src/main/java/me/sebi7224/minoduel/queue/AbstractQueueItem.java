@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 
+import java.util.Collection;
+
 /**
  * Abstract implementation of a base queue item.
  * Subclasses should implement their own equals() and hashCode() since this class does not take players into account.
@@ -44,6 +46,16 @@ public abstract class AbstractQueueItem implements QueueItem {
     @Override
     public boolean has(Player player) {
         return getPlayers().contains(player);
+    }
+
+    @Override
+    public boolean hasAny(Collection<Player> players) {
+        return players.stream().anyMatch(this::has);
+    }
+
+    @Override
+    public void onRemoval(Player cause) {
+        sendMessage(QueueMessage.REMOVAL_NOTIFICATION, cause);
     }
 
     @Override

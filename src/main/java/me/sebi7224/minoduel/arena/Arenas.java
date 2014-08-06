@@ -149,6 +149,16 @@ public final class Arenas {
     }
 
     /**
+     * Gets the first ready arena.
+     * @return a ready arena or NULL if no arenas are ready.
+     */
+    public static Arena firstReady() {
+        return arenaCache.values().stream()
+                .filter(Arena::isReady)
+                .findAny().orElse(null);
+    }
+
+    /**
      * @return An immutable view of all known arenas
      */
     public static Collection<Arena> all() {

@@ -51,7 +51,7 @@ public class PlayerQueueItem extends AbstractQueueItem {
 
         switch (type) {
             case POSITION_NOTIFICATION:
-                result += String.format(DuelWaitingQueue.POSITION_NOTIFICATION_FORMAT, args);
+                result += String.format(WaitingQueueManager.POSITION_NOTIFICATION_FORMAT, args);
                 break;
             case REMOVAL_NOTIFICATION:
                 result += String.format("Du hast die Warteschlange der Arena %s verlassen!",

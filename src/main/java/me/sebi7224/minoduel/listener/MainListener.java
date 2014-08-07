@@ -3,7 +3,6 @@ package me.sebi7224.minoduel.listener;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
-import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,7 +49,7 @@ public class MainListener implements Listener {
         if (arena != null) {
             arena.endGame(arena.getOther(plr));
         } else {
-            DuelWaitingQueue.remove(plr);
+            plugin.getQueueManager().remove(plr);
         }
 
         plugin.getRequestManager().removeAll(plr);

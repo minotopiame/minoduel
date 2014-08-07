@@ -9,18 +9,16 @@ import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import me.sebi7224.minoduel.queue.DualQueueItem;
-import me.sebi7224.minoduel.queue.DuelWaitingQueue;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.util.Collection;
 
-import static org.bukkit.ChatColor.*;
 import static org.bukkit.ChatColor.DARK_GREEN;
+import static org.bukkit.ChatColor.DARK_RED;
 import static org.bukkit.ChatColor.GOLD;
 import static org.bukkit.ChatColor.YELLOW;
 
@@ -63,7 +61,7 @@ public class CommandsPlayer {
             if (args.hasFlag('a')) {
                 Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'));
 
-                DuelWaitingQueue.enqueue(player, arena);
+                plugin.getQueueManager().enqueue(player, arena);
                 return;
             }
 
@@ -115,7 +113,7 @@ public class CommandsPlayer {
                 usage = "")
         @CommandPermissions({"minoduel.user.arenas"})
         public void playerPosition(CommandContext args, Player player) {
-            if (!DuelWaitingQueue.notifyPosition(player)) {
+            if (!plugin.getQueueManager().notifyPosition(player)) {
                 //@formatter:off
                 new FancyMessage("Du bist nicht in der Warteschlange! ")
                          .color(YELLOW)
@@ -133,7 +131,7 @@ public class CommandsPlayer {
                 usage = " <-c> [Spieler] <Arena>", min = 1,
                 flags = "c")
         @CommandPermissions({"minoduel.user.duel"})
-        public void playerDuel(CommandContext args, Player player) throws CommandException {
+        public void playerDuel(CommandContext args, Player player) throws CommandException { //TODO: Something to show players their pending requests (w/ clickable JSON link)
             //noinspection deprecation
             Player opponent = Bukkit.getPlayerExact(args.getString(0));
 
@@ -168,7 +166,7 @@ public class CommandsPlayer {
                 if (opponentInGame) {
                     player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. Bitte versuche es später erneut."); //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight
                 } else {
-                    DuelWaitingQueue.enqueue(new DualQueueItem(plugin.getRequestManager().remove(player, opponent).get(), opponent, player));
+                    plugin.getQueueManager().enqueue(new DualQueueItem(plugin.getRequestManager().remove(player, opponent).get(), opponent, player));
                 }
             } else if (plugin.getRequestManager().hasPending(opponent, player)) {
                 player.sendMessage(plugin.getPrefix() + "Du hast §e" + opponent.getName() + "§6 bereits eine Anfrage geschickt!"); //TODO: which arena?

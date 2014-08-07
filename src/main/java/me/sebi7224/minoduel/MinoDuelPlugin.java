@@ -15,10 +15,9 @@ import me.sebi7224.minoduel.cmd.CommandsAdmin;
 import me.sebi7224.minoduel.cmd.CommandsArena;
 import me.sebi7224.minoduel.cmd.CommandsPlayer;
 import me.sebi7224.minoduel.listener.MainListener;
-import me.sebi7224.minoduel.queue.DuelWaitingQueue;
+import me.sebi7224.minoduel.queue.WaitingQueueManager;
 import me.sebi7224.minoduel.util.IconMenu;
 import mkremins.fanciful.FancyMessage;
-import mkremins.fanciful.TextualComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -29,7 +28,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 public class MinoDuelPlugin extends JavaPlugin {
@@ -45,6 +43,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     private long teleportDelayTicks;
     private IconMenu arenaMenu;
     private DuelRequestManager requestManager = new DuelRequestManager();
+    private WaitingQueueManager queueManager = new WaitingQueueManager();
     private CommandsManager<CommandSender> commandsManager = new CommandsManager<CommandSender>() {
         @Override
         public boolean hasPermission(CommandSender sender, String perm) {
@@ -133,7 +132,7 @@ public class MinoDuelPlugin extends JavaPlugin {
                     Arena arena = event.getArena();
 
                     player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
-                    DuelWaitingQueue.enqueue(player, arena); //This takes care of teleportation etc if a match is found
+                    getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
                     player.sendMessage(getPrefix() + "Du bist nun in der Warteschlange" +
                             (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
                             "!");
@@ -168,6 +167,10 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public DuelRequestManager getRequestManager() {
         return requestManager;
+    }
+
+    public WaitingQueueManager getQueueManager() {
+        return queueManager;
     }
 
     public FancyMessage getFancifulPrefix() {

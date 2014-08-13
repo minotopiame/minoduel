@@ -132,7 +132,7 @@ public class CommandsPlayer {
                 flags = "c")
         @CommandPermissions({"minoduel.user.duel"})
         public void playerDuel(CommandContext args, Player player) throws CommandException { //TODO: Something to show players their pending requests (w/ clickable JSON link)
-            //noinspection deprecation
+            @SuppressWarnings("deprecation")
             Player opponent = Bukkit.getPlayerExact(args.getString(0));
 
             if (opponent == null) {

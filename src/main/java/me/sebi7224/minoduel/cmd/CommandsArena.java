@@ -51,6 +51,7 @@ public class CommandsArena {
         }
 
         @Command(aliases = {"create", "new"},
+                usage = "<Name>",
                 desc = "Erstellt eine neue Arena.", min = 1)
         @CommandPermissions({"minoduel.arena.create"})
         public void arenaCreate(CommandContext args, Player player) throws CommandException {
@@ -67,7 +68,7 @@ public class CommandsArena {
 
         @Command(aliases = {"remove", "delete", "rem"},
                 desc = "Löscht eine Arena.",
-                usage = "[Arena]",
+                usage = "<Arena>",
                 flags = "y", min = 1)
         @CommandPermissions({"minoduel.arena.remove"})
         public void arenaRemove(CommandContext args, Player player) throws CommandException {
@@ -98,7 +99,7 @@ public class CommandsArena {
 
         @Command(aliases = {"status", "info"},
                 desc = "Zeigt den Status einer Arena an.",
-                usage = "[Arena]", min = 1)
+                usage = "<Arena>", min = 1)
         @CommandPermissions({"minoduel.arena.status"})
         @Console
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
@@ -126,7 +127,7 @@ public class CommandsArena {
 
             @Command(aliases = {"spawn", "sporn"}, //kek
                     desc = "Setzt den Spawn einer Arena zu deiner Position!",
-                    usage = "[Arena] [1|2]", min = 2)
+                    usage = "<Arena> <1|2>", min = 2)
             public void arenaSetSpawn(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));
 
@@ -161,7 +162,7 @@ public class CommandsArena {
 
             @Command(aliases = {"icon", "symbol"},
                     desc = "Setzt das Icon einer Arena zu dem Item in deiner Hand!",
-                    usage = "[Arena]", min = 1)
+                    usage = "<Arena>", min = 1)
             public void arenaSetIcon(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));
 
@@ -174,7 +175,7 @@ public class CommandsArena {
 
             @Command(aliases = {"kit"},
                     desc = "Setzt das Kit einer Arena zu deinem aktuellen Inventar (-a: Nur Rüstung, -i: Nur Inventar)",
-                    usage = "<-a> <-i> [Arena]",
+                    usage = "[-a] [-i] <Arena>",
                     flags = "ai", min = 1)
             public void arenaSetKit(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));
@@ -192,7 +193,7 @@ public class CommandsArena {
 
             @Command(aliases = {"reward"},
                     desc = "Setzt die Arenabelohnung! (Inv ist ohne Rüstung, Hotbar ist Standard)",
-                    usage = "<-s *Hotbar*|Hand|Inv> <-r (Nur einen zufälligen Stack hergeben)> [Arena]",
+                    usage = "[-s *Hotbar*|Hand|Inv] [-r (Nur einen zufälligen Stack hergeben)] <Arena>",
                     flags = "s:r", min = 1)
             public void arenaSetReward(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));

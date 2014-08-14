@@ -49,7 +49,7 @@ public class CommandsAdmin {
 
         @Command(aliases = {"reward"},
                 desc = "Setzt die Standardbelohnung! (Inv ist ohne Rüstung, Hotbar ist Standard)",
-                usage = "<-s *Hotbar*|Hand|Inv>",
+                usage = "[-s *Hotbar*|Hand|Inv]",
                 flags = "s:")
         @CommandPermissions({"minoduel.admin.setreward"})
         public void adminSetDefaultReward(CommandContext args, Player player) throws CommandException {

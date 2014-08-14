@@ -49,7 +49,7 @@ public class CommandsPlayer {
 
         @Command(aliases = {"join", "new"},
                 desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
-                usage = "<-a [Arena|'egal']>",
+                usage = "[-a (Arena)|egal]",
                 flags = "a:")
         @CommandPermissions({"minoduel.user.join"})
         public void playerJoin(CommandContext args, Player player) throws CommandException {
@@ -133,7 +133,7 @@ public class CommandsPlayer {
 
         @Command(aliases = {"duel", "fite"},
                 desc = "Beginnt ein 1vs1-Duell mit einem anderen Spieler! (-c bricht ein Duell ab)",
-                usage = " <-c> [Spieler] <Arena>", min = 1,
+                usage = "[-c] <Spieler> [Arena]", min = 1,
                 flags = "c")
         @CommandPermissions({"minoduel.user.duel"})
         public void playerDuel(CommandContext args, Player player) throws CommandException { //TODO: Something to show players their pending requests (w/ clickable JSON link)

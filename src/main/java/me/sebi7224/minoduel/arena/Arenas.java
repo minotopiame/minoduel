@@ -31,8 +31,8 @@ import java.util.UUID;
  */
 public final class Arenas {
 
-    static final Map<String, MinoDuelArena> arenaCache = new CaseInsensitiveMap<>();
     public static final String DEFAULT_REWARDS_PATH = "default-rewards";
+    static final Map<String, MinoDuelArena> arenaCache = new CaseInsensitiveMap<>();
     private static List<ItemStack> defaultRewards;
     private static ItemStack anyArenaIcon;
     private static Map<UUID, Arena> playersInGame = new HashMap<>();
@@ -201,6 +201,10 @@ public final class Arenas {
      * @return the created Arena
      */
     public static Arena createArena(String name, FileConfiguration config) {
+        if (!config.contains(MinoDuelArena.CONFIG_PATH)) {
+            config.createSection(MinoDuelArena.CONFIG_PATH);
+        }
+
         MinoDuelArena arena = new MinoDuelArena(config.getConfigurationSection(MinoDuelArena.CONFIG_PATH).createSection(name));
         arenaCache.put(name, arena);
         return arena;

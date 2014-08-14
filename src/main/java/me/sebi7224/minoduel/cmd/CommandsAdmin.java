@@ -29,6 +29,11 @@ import static org.bukkit.ChatColor.YELLOW;
  * @since 4.8.14 // 1.0
  */
 public class CommandsAdmin {
+    @SuppressWarnings("UnusedParameters")
+    public CommandsAdmin(MinoDuelPlugin plugin) {
+
+    }
+
     @Command(aliases = {"mdm", "mdmod", "mdadmin"}, desc = "Administrationsbefehle für MinoDuel")
     @NestedCommand(SubCommands.class)
     public static void mdmMain() {
@@ -91,7 +96,7 @@ public class CommandsAdmin {
             }
 
             if (arenas.isEmpty()) {
-                player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arena entspricht deinem Suchkriterium!");
+                player.sendMessage(plugin.getPrefix() + "§cKeine Arena entspricht deinem Suchkriterium!");
                 return;
             }
 

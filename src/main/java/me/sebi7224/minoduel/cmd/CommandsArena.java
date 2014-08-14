@@ -32,6 +32,11 @@ import static org.bukkit.ChatColor.YELLOW;
  * @since 4.8.14 // 1.0
  */
 public class CommandsArena {
+    @SuppressWarnings("UnusedParameters")
+    public CommandsArena(MinoDuelPlugin plugin) {
+
+    }
+
     @Command(aliases = {"mdarena", "mda"}, desc = "Arenamanagement für MinoDuel")
     @NestedCommand(SubCommands.class)
     public static void mdaMain() {
@@ -112,7 +117,13 @@ public class CommandsArena {
 
         }
 
-        public class SetCommands {
+        public static class SetCommands {
+            private final MinoDuelPlugin plugin;
+
+            public SetCommands(MinoDuelPlugin plugin) {
+                this.plugin = plugin;
+            }
+
             @Command(aliases = {"spawn", "sporn"}, //kek
                     desc = "Setzt den Spawn einer Arena zu deiner Position!",
                     usage = "[Arena] [1|2]", min = 2)
@@ -145,7 +156,7 @@ public class CommandsArena {
                     //@formatter:on
                 }
 
-                player.sendMessage(MinoDuelPlugin.PREFIX + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
+                player.sendMessage(plugin.getPrefix() + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
             }
 
             @Command(aliases = {"icon", "symbol"},

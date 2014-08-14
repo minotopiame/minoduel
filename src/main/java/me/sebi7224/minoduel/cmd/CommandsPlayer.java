@@ -29,13 +29,18 @@ import static org.bukkit.ChatColor.YELLOW;
  * @since 5.8.14
  */
 public class CommandsPlayer {
+    @SuppressWarnings("UnusedParameters")
+    public CommandsPlayer(MinoDuelPlugin plugin) {
+
+    }
+
     @Command(aliases = {"1vs1", "mdu"}, desc = "Spielerbefehle von MinoDuel")
     @NestedCommand(SubCommands.class)
     public static void mduMain() {
         //body is ignored
     }
 
-    public class SubCommands {
+    public static class SubCommands {
         private final MinoDuelPlugin plugin;
 
         public SubCommands(MinoDuelPlugin plugin) {

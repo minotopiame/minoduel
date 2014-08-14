@@ -16,6 +16,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import io.github.xxyy.common.util.LocationHelper;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,9 +106,9 @@ public class CommandsArena {
         @Console
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
             Arena arena = CmdValidate.getArenaChecked(args.getString(0));
-            player.sendMessage("§6Arena: §e"+arena.getName());
-            player.sendMessage("§6Spawn 1: §e"+ arena.getFirstSpawn()); //TODO nicer message
-            player.sendMessage("§6Spawn 2: §e"+ arena.getSecondSpawn());
+            player.sendMessage("§6Arena: §e" + arena.getName());
+            player.sendMessage("§6Spawn 1: §e" + LocationHelper.prettyPrint(arena.getFirstSpawn()));
+            player.sendMessage("§6Spawn 2: §e" + LocationHelper.prettyPrint(arena.getSecondSpawn()));
             arena.sendChecklist(player); //TODO click on checklist to get commands suggested
         }
 
@@ -229,6 +231,19 @@ public class CommandsArena {
                 arena.setDoAllRewards(!args.hasFlag('r')); //When randomness is not asked for, we wanna give everything
 
                 player.sendMessage("§aBelohnung für Arena §2" + arena.getName() + "§a gesetzt!");
+            }
+
+            @Command(aliases = {"enabled"},
+                    desc = "Aktiviert oder deaktiviert die Arena",
+                    usage = "<Arena> <true|false>", min = 2)
+            public void arenaSetEnabled(CommandContext args, Player player) throws CommandException {
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+
+                arena.setEnabled(CmdValidate.getBooleanChecked(args.getString(1)));
+
+                player.sendMessage("§aDie Arena §2" + arena.getName() + "§a wurde " +
+                        (arena.isEnabled() ? "§2" : "§4de") +
+                        "aktiviert§a!");
             }
         }
     }

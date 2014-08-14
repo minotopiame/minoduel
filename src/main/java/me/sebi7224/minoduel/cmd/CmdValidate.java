@@ -61,4 +61,21 @@ public final class CmdValidate {
 
         return arena;
     }
+
+    public static boolean getBooleanChecked(String str) throws CommandException {
+        switch (str.toLowerCase()) {
+            case "true":
+            case "on":
+            case "yes":
+            case "ja":
+                return true;
+            case "false":
+            case "off":
+            case "no":
+            case "nein":
+                return false;
+            default:
+                throw new CommandException("Das ist kein bool'scher Wert: " + str + " Valide bool'sche Werte: true/ja und false/nein");
+        }
+    }
 }

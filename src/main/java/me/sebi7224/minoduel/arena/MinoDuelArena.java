@@ -4,7 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.queue.QueueItem;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.games.util.RunnableTeleportLater;
+import io.github.xxyy.common.util.XyValidate;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
@@ -28,7 +29,7 @@ import java.util.Locale;
  * @author <a href="http://xxyy.github.io/">xxyy</a>
  * @since 19.7.14 // 1.0
  */
-public class MinoDuelArena extends ConfigurableArena { //TODO: It should be possible to put arenas out of service temporarily
+public class MinoDuelArena extends ConfigurableArena {
 
     private Couple<PlayerInfo> players = null;
     private RunnableArenaTick tickTask = new RunnableArenaTick();
@@ -77,10 +78,10 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
 
     @SuppressWarnings("deprecation") //updateInventory
     private void startGame() {
-        Validate.validState(isValid(), "This arena is currently not valid");
-        Validate.validState(isOccupied(), "Cannot start game in empty arena!");
-        Validate.validState(players.getLeft().isValid(), "left player is invalid: " + players.getLeft().getName());
-        Validate.validState(players.getRight().isValid(), "right player is invalid: " + players.getRight().getName());
+        XyValidate.validateState(isValid(), "This arena is currently not valid");
+        XyValidate.validateState(isOccupied(), "Cannot start game in empty arena!");
+        XyValidate.validateState(players.getLeft().isValid(), "left player is invalid: " + players.getLeft().getName());
+        XyValidate.validateState(players.getRight().isValid(), "right player is invalid: " + players.getRight().getName());
 
         this.players.forEach(PlayerInfo::sendStartMessage);
 
@@ -178,7 +179,7 @@ public class MinoDuelArena extends ConfigurableArena { //TODO: It should be poss
 
     @Override
     public PlayerInfo getOther(@NotNull Player plr) {
-        Validate.validState(isValid(), "Arena is invalid!");
+        XyValidate.validateState(isValid(), "Arena is invalid!");
 
         if (players.getLeft().getPlayer().equals(plr)) {
             return players.getRight();

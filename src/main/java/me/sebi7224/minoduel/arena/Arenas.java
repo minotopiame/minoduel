@@ -2,8 +2,8 @@ package me.sebi7224.minoduel.arena;
 
 import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
+import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
-import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

@@ -99,6 +99,8 @@ public interface Arena {
 
     ItemStack[] getArmorKit();
 
+    boolean isEnabled();
+
     void setArmorKit(ItemStack[] armorKit);
 
     void setInventoryKit(ItemStack[] inventoryKit);
@@ -112,6 +114,8 @@ public interface Arena {
     void setRewards(List<ItemStack> specificRewards);
 
     void setDoAllRewards(boolean doAllRewards);
+
+    void setEnabled(boolean enabled);
 
     String getName();
 }

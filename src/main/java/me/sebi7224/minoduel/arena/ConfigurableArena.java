@@ -2,7 +2,6 @@ package me.sebi7224.minoduel.arena;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.math.RandomUtils;
-import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import io.github.xxyy.common.checklist.Checklist;
 import io.github.xxyy.common.checklist.renderer.CommandSenderRenderer;
+import io.github.xxyy.common.util.XyValidate;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
 import io.github.xxyy.lib.intellij_annotations.Nullable;
 
@@ -33,6 +33,7 @@ public abstract class ConfigurableArena implements Arena {
     private static final String INVENTORY_KIT_PATH = "items";
     private static final String ARMOR_KIT_PATH = "armor";
     private static final String REWARD_ALL_PATH = "reward-all";
+    private static final String ENABLED_PATH = "enabled";
     private static final CommandSenderRenderer CHECKLIST_RENDERER = new CommandSenderRenderer.Builder()
             .brackets(true).uncheckedEmpty(false).build();
     protected final String name;
@@ -45,13 +46,15 @@ public abstract class ConfigurableArena implements Arena {
     private ItemStack[] armorKit;
     protected List<ItemStack> specificRewards;
     private boolean doAllRewards = true;
+    private boolean enabled = true;
 
     private Checklist validityChecklist = new Checklist()
             .append("Arena existiert", () -> configSection != null)
             .append("Spawn 1 gesetzt", () -> firstSpawn != null)
             .append("Spawn 2 gesetzt", () -> secondSpawn != null)
             .append("Kit gesetzt", () -> inventoryKit != null && armorKit != null)
-            .append("Icon gesetzt", () -> iconStack != null);
+            .append("Icon gesetzt", () -> iconStack != null)
+            .append("Arena aktiviert", () -> enabled);
 
     public ConfigurableArena(@NotNull ConfigurationSection storageBackend) {
         this.configSection = storageBackend;
@@ -73,7 +76,7 @@ public abstract class ConfigurableArena implements Arena {
 
     @Override
     public void remove() {
-        Validate.validState(configSection != null, "Can't remove already removed arena!");
+        XyValidate.validateState(configSection != null, "Can't remove already removed arena!");
 
         if (isOccupied()) {
             getPlayers().forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
@@ -168,6 +171,19 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        validateHasConfig();
+
+        configSection.set(ENABLED_PATH, enabled);
+        this.enabled = enabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
     public ItemStack[] getInventoryKit() {
         return inventoryKit;
     }
@@ -226,6 +242,7 @@ public abstract class ConfigurableArena implements Arena {
         this.iconStack = configSection.getItemStack(ICON_STACK_PATH);
         this.specificRewards = (List<ItemStack>) configSection.getList(SPECIFIC_REWARD_PATH, new ArrayList<ItemStack>());
         this.doAllRewards = configSection.getBoolean(REWARD_ALL_PATH, doAllRewards);
+        this.enabled = configSection.getBoolean(ENABLED_PATH, enabled);
 
         if (configSection.contains(INVENTORY_KIT_PATH)) {
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(INVENTORY_KIT_PATH);
@@ -239,6 +256,6 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     private void validateHasConfig() {
-        Validate.validState(configSection != null, "The arena %s has been removed!", getName());
+        XyValidate.validateState(configSection != null, "The arena %s has been removed!", getName());
     }
 }

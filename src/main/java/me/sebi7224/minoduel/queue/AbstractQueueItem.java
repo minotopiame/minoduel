@@ -3,7 +3,7 @@ package me.sebi7224.minoduel.queue;
 import me.sebi7224.minoduel.arena.Arena;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
+import io.github.xxyy.lib.intellij_annotations.Nullable;
 
 import java.util.Collection;
 

@@ -12,8 +12,8 @@ import org.bukkit.inventory.ItemStack;
 
 import io.github.xxyy.common.checklist.Checklist;
 import io.github.xxyy.common.checklist.renderer.CommandSenderRenderer;
-import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
-import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
+import io.github.xxyy.lib.intellij_annotations.NotNull;
+import io.github.xxyy.lib.intellij_annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -13,9 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import io.github.xxyy.common.collections.CaseInsensitiveMap;
-import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
-import io.github.xxyy.common.lib.com.intellij.annotations.Nullable;
 import io.github.xxyy.common.util.inventory.ItemStackFactory;
+import io.github.xxyy.lib.intellij_annotations.NotNull;
+import io.github.xxyy.lib.intellij_annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;

@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import io.github.xxyy.common.collections.Couple;
-import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
+import io.github.xxyy.lib.intellij_annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;

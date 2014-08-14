@@ -14,9 +14,9 @@ import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.games.util.RunnableTeleportLater;
-import io.github.xxyy.common.lib.com.intellij.annotations.NotNull;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
+import io.github.xxyy.lib.intellij_annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;

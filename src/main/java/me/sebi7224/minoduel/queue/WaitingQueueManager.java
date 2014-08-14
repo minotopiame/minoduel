@@ -1,16 +1,17 @@
 package me.sebi7224.minoduel.queue;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import io.github.xxyy.lib.guava17.collect.ImmutableListMultimap;
+import io.github.xxyy.lib.guava17.collect.ListMultimap;
+import io.github.xxyy.lib.guava17.collect.Multimap;
+import io.github.xxyy.lib.guava17.collect.MultimapBuilder;
+import io.github.xxyy.lib.intellij_annotations.NotNull;
+import io.github.xxyy.lib.intellij_annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;

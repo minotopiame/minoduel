@@ -127,11 +127,11 @@ public class CommandsArena {
 
             @Command(aliases = {"spawn", "sporn"}, //kek
                     desc = "Setzt den Spawn einer Arena zu deiner Position!",
-                    usage = "<Arena> <1|2>", min = 2)
+                    usage = "<Arena> <1|2>", min = 1)
             public void arenaSetSpawn(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));
 
-                switch (args.getString(1)) { //No need to convert to int since there are only two cases & we can't pass the int anyways
+                switch (args.getString(1, "ui")) { //No need to convert to int since there are only two cases & we can't pass the int anyways
                     case "1":
                         arena.setFirstSpawn(player.getLocation());
                         break;

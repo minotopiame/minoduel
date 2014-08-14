@@ -224,7 +224,7 @@ public final class Arenas {
             ConfigurationSection arenaSection = source.getConfigurationSection(MinoDuelArena.CONFIG_PATH);
             for (String key : arenaSection.getKeys(false)) {
                 MinoDuelArena existingArena = existingArenas.get(key);
-                ConfigurationSection section = source.getConfigurationSection(MinoDuelArena.CONFIG_PATH + "." + key);
+                ConfigurationSection section = arenaSection.getConfigurationSection(key);
 
                 if (existingArena == null) {
                     Arenas.arenaCache.put(key, MinoDuelArena.fromConfigSection(section));

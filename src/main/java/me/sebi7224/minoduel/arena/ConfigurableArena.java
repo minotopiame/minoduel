@@ -41,16 +41,17 @@ public abstract class ConfigurableArena implements Arena {
     protected Location firstSpawn;
     protected Location secondSpawn;
     protected ItemStack iconStack;
+    private ItemStack[] inventoryKit;
+    private ItemStack[] armorKit;
+    protected List<ItemStack> specificRewards;
+    private boolean doAllRewards = true;
+
     private Checklist validityChecklist = new Checklist()
             .append("Arena existiert", () -> configSection != null)
             .append("Spawn 1 gesetzt", () -> firstSpawn != null)
             .append("Spawn 2 gesetzt", () -> secondSpawn != null)
             .append("Kit gesetzt", () -> inventoryKit != null && armorKit != null)
             .append("Icon gesetzt", () -> iconStack != null);
-    protected List<ItemStack> specificRewards;
-    private ItemStack[] inventoryKit;
-    private ItemStack[] armorKit;
-    private boolean doAllRewards = true;
 
     public ConfigurableArena(@NotNull ConfigurationSection storageBackend) {
         this.configSection = storageBackend;

@@ -41,16 +41,16 @@ public abstract class ConfigurableArena implements Arena {
     protected Location firstSpawn;
     protected Location secondSpawn;
     protected ItemStack iconStack;
-    protected List<ItemStack> specificRewards;
-    private ItemStack[] inventoryKit;
-    private ItemStack[] armorKit;
-    private boolean doAllRewards = true;
     private Checklist validityChecklist = new Checklist()
-            .append("Arena gelöscht!", () -> configSection != null)
+            .append("Arena existiert", () -> configSection != null)
             .append("Spawn 1 gesetzt", () -> firstSpawn != null)
             .append("Spawn 2 gesetzt", () -> secondSpawn != null)
             .append("Kit gesetzt", () -> inventoryKit != null && armorKit != null)
             .append("Icon gesetzt", () -> iconStack != null);
+    protected List<ItemStack> specificRewards;
+    private ItemStack[] inventoryKit;
+    private ItemStack[] armorKit;
+    private boolean doAllRewards = true;
 
     public ConfigurableArena(@NotNull ConfigurationSection storageBackend) {
         this.configSection = storageBackend;
@@ -111,6 +111,15 @@ public abstract class ConfigurableArena implements Arena {
         return doAllRewards ? specificRewards : ImmutableList.of(specificRewards.get(RandomUtils.nextInt(specificRewards.size())));
     }
 
+    @Override
+    public void setRewards(List<ItemStack> specificRewards) {
+        validateHasConfig();
+
+        specificRewards.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
+        this.configSection.set(SPECIFIC_REWARD_PATH, specificRewards);
+        this.specificRewards = specificRewards;
+    }
+
     public abstract boolean isOccupied();
 
     /**
@@ -124,51 +133,16 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     @Override
-    public Location getSecondSpawn() {
-        return secondSpawn;
-    }
-
-    @Override
-    public ItemStack getIconStack() {
-        return iconStack.clone();
-    }
-
-    @Override
-    public ItemStack[] getInventoryKit() {
-        return inventoryKit;
-    }
-
-    @Override
-    public ItemStack[] getArmorKit() {
-        return armorKit;
-    }
-
-    protected ConfigurationSection getConfigSection() {
-        return configSection;
-    }
-
-    @Override
-    public void setArmorKit(ItemStack[] armorKit) {
-        validateHasConfig();
-
-        configSection.set(ARMOR_KIT_PATH, armorKit);
-        this.armorKit = armorKit;
-    }
-
-    @Override
-    public void setInventoryKit(ItemStack[] inventoryKit) {
-        validateHasConfig();
-
-        configSection.set(INVENTORY_KIT_PATH, inventoryKit);
-        this.inventoryKit = inventoryKit;
-    }
-
-    @Override
     public void setFirstSpawn(Location firstSpawn) {
         validateHasConfig();
 
         Arenas.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
         this.firstSpawn = firstSpawn;
+    }
+
+    @Override
+    public Location getSecondSpawn() {
+        return secondSpawn;
     }
 
     @Override
@@ -180,6 +154,11 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     @Override
+    public ItemStack getIconStack() {
+        return iconStack.clone();
+    }
+
+    @Override
     public void setIconStack(ItemStack iconStack) {
         validateHasConfig();
 
@@ -188,12 +167,33 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     @Override
-    public void setRewards(List<ItemStack> specificRewards) {
+    public ItemStack[] getInventoryKit() {
+        return inventoryKit;
+    }
+
+    @Override
+    public void setInventoryKit(ItemStack[] inventoryKit) {
         validateHasConfig();
 
-        specificRewards.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
-        this.configSection.set(SPECIFIC_REWARD_PATH, specificRewards);
-        this.specificRewards = specificRewards;
+        configSection.set(INVENTORY_KIT_PATH, inventoryKit);
+        this.inventoryKit = inventoryKit;
+    }
+
+    @Override
+    public ItemStack[] getArmorKit() {
+        return armorKit;
+    }
+
+    @Override
+    public void setArmorKit(ItemStack[] armorKit) {
+        validateHasConfig();
+
+        configSection.set(ARMOR_KIT_PATH, armorKit);
+        this.armorKit = armorKit;
+    }
+
+    protected ConfigurationSection getConfigSection() {
+        return configSection;
     }
 
     @Override

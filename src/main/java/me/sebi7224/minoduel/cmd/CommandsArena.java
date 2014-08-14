@@ -144,7 +144,8 @@ public class CommandsArena {
                                     .color(RED)
                                 .then("Wolltest du vielleicht: ")
                                     .color(YELLOW)
-                                .then("[Spawn 1 setzen] ")
+                                .send(player);
+                        new FancyMessage("[Spawn 1 setzen] ")
                                     .color(DARK_BLUE)
                                     .tooltip("/mda set spawn " + arena.getName() + " 1")
                                     .command("/mda set spawn " + arena.getName() + " 1")

@@ -59,6 +59,7 @@ public class MinoDuelPlugin extends JavaPlugin {
             return super.hasPermission(method, player);
         }
     };
+    private CommandHelpHelper helpHelper = new CommandHelpHelper(commandsManager);
 
     @Override
     public void onEnable() {
@@ -98,9 +99,10 @@ public class MinoDuelPlugin extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) { //sk89q command framework - https://forums.bukkit.org/threads/tut-using-sk89qs-command-framework.185423/
         try {
-            commandsManager.execute(command.getName(), args, sender, sender);
+            commandsManager.execute(command.getName(), args, sender, /* method args: */ sender);
         } catch (MissingNestedCommandException mnce) {
             sender.sendMessage("§c" + mnce.getUsage());
+            helpHelper.sendNestedHelp(sender, command, args);
         } catch (CommandUsageException cue) {
             sender.sendMessage("§c" + cue.getMessage());
             sender.sendMessage("§c" + cue.getUsage());
@@ -109,7 +111,7 @@ public class MinoDuelPlugin extends JavaPlugin {
                 sender.sendMessage("§cZahl benötigt, Zeichenkette übergeben.");
             } else {
                 sender.sendMessage("§cEin Fehler ist aufgetreten, wir bitten um Verzeihung. " +
-                        "Sollte dies erneut passieren, bitte melde das im Forum: http://minotopia.me/forum/");
+                        "Sollte dies erneut passieren, bitte melde das im Forum (Mit der aktuellen Uhrzeit): http://minotopia.me/forum/");
                 wce.printStackTrace();
             }
         } catch (CommandPermissionsException cpe) {
@@ -123,6 +125,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         return true;
     }
+
 
     private void initArenaMenu() {
         arenaMenu = new IconMenu("§8Wähle eine Arena!", //Title

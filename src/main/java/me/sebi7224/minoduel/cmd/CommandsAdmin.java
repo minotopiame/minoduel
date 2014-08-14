@@ -48,9 +48,11 @@ public class CommandsAdmin {
         }
 
         @Command(aliases = {"reward"},
-                desc = "Setzt die Standardbelohnung! (Inv ist ohne Rüstung, Hotbar ist Standard)",
+                desc = "Setzt die Standardbelohnung!",
+                help = "Setzt die Standardbelohnung.\n" +
+                        "-s spezifiziert die Quelle der Items - Deine Hotbar, deine Hand oder dein Inv(entar) - Wenn nicht angegeben, wird deine Hotbar verwendet.",
                 usage = "[-s *Hotbar*|Hand|Inv]",
-                flags = "s:")
+                flags = "s:", max = 0)
         @CommandPermissions({"minoduel.admin.setreward"})
         public void adminSetDefaultReward(CommandContext args, Player player) throws CommandException {
             List<ItemStack> stacks;

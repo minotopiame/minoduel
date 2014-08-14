@@ -177,9 +177,13 @@ public class CommandsArena {
             }
 
             @Command(aliases = {"kit"},
-                    desc = "Setzt das Kit einer Arena zu deinem aktuellen Inventar (-a: Nur Rüstung, -i: Nur Inventar)",
-                    usage = "[-a] [-i] <Arena>",
-                    flags = "ai", min = 1)
+                    desc = "Setzt das Kit einer Arena zu deinem aktuellen Inventar",
+                    help = "Setzt das Kit einer Arena.\n" +
+                            "-a: Verwendet nur deine Rüstung\n" +
+                            "-i: Verwendet nur dein Inventar\n" +
+                            "Weder -i noch -a: Verwendet deine Rüstung & dein Inventar",
+                    usage = "<Arena>",
+                    flags = "ai", min = 1, max = 1)
             public void arenaSetKit(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));
 
@@ -195,9 +199,12 @@ public class CommandsArena {
             }
 
             @Command(aliases = {"reward"},
-                    desc = "Setzt die Arenabelohnung! (Inv ist ohne Rüstung, Hotbar ist Standard)",
-                    usage = "[-s *Hotbar*|Hand|Inv] [-r (Nur einen zufälligen Stack hergeben)] <Arena>",
-                    flags = "s:r", min = 1)
+                    desc = "Setzt die Arenabelohnung!",
+                    help = "Setzt die Belohnung einer Arena.\n" +
+                            "-s: Quelle der Belohnung; Mögliche Werte: Hotbar (Standard), Hand, Inv\n" +
+                            "-r: Gibt einen zufälligen Stack der Quelle als Belohnung her (Ganze Belohnung wird gespeichert, Stack wird bei jedem Gewinn neu gewählt)",
+                    usage = "[-s *Hotbar*|Hand|Inv] <Arena>",
+                    flags = "s:r", min = 1, max = 1)
             public void arenaSetReward(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));
 
@@ -234,7 +241,7 @@ public class CommandsArena {
             }
 
             @Command(aliases = {"enabled"},
-                    desc = "Aktiviert oder deaktiviert die Arena",
+                    desc = "Aktiviert oder deaktiviert eine Arena",
                     usage = "<Arena> <true|false>", min = 2)
             public void arenaSetEnabled(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0));

@@ -133,7 +133,7 @@ public class CommandsPlayer {
 
         @Command(aliases = {"duel", "fite"},
                 desc = "Beginnt ein 1vs1-Duell mit einem anderen Spieler! (-c bricht ein Duell ab)",
-                usage = "[-c] <Spieler> [Arena]", min = 1,
+                usage = "<Spieler> [Arena]", min = 1,
                 flags = "c")
         @CommandPermissions({"minoduel.user.duel"})
         public void playerDuel(CommandContext args, Player player) throws CommandException { //TODO: Something to show players their pending requests (w/ clickable JSON link)
@@ -206,7 +206,5 @@ public class CommandsPlayer {
                 player.sendMessage(plugin.getPrefix() + "§e" + opponent.getName() + "§6 hat deine Anfrage erhalten. Bitte warte nun, bis er/sie diese annimmt.");
             }
         }
-
-        //TODO: sk89q must have some nice answer to help topics too probably. Find that!
     }
 }

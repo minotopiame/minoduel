@@ -91,7 +91,7 @@ public class CommandsPlayer {
             }
         }
 
-        @Command(aliases = {"arenas"},
+        @Command(aliases = {"arenas", "list"},
                 desc = "Listet alle Arenen auf.",
                 usage = "[Suchbegriff]")
         @CommandPermissions({"minoduel.user.arenas"})

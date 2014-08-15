@@ -39,7 +39,7 @@ public class CommandsArena {
 
     }
 
-    @Command(aliases = {"mdarena", "mda"}, desc = "Arenamanagement für MinoDuel")
+    @Command(aliases = {"mda", "mdarena"}, desc = "Arenamanagement für MinoDuel")
     @NestedCommand(SubCommands.class)
     public static void mdaMain() {
         //body is ignored
@@ -99,7 +99,7 @@ public class CommandsArena {
             player.sendMessage(MinoDuelPlugin.PREFIX + "§aDie Arena §2" + arenaName + " §awurde erfolgreich entfernt!");
         }
 
-        @Command(aliases = {"status"},
+        @Command(aliases = {"status", "info"},
                 desc = "Zeigt den Status einer Arena an.",
                 usage = "<Arena>", min = 1)
         @CommandPermissions({"minoduel.arena.status"})
@@ -127,7 +127,7 @@ public class CommandsArena {
                 this.plugin = plugin;
             }
 
-            @Command(aliases = {"spawn"},
+            @Command(aliases = {"spawn", "sporn"}, //kek
                     desc = "Setzt den Spawn einer Arena zu deiner Position!",
                     usage = "<Arena> <1|2>", min = 1)
             public void arenaSetSpawn(CommandContext args, Player player) throws CommandException {

@@ -67,9 +67,6 @@ public class CommandHelpHelper {
         } else {
             Set<String> encounteredMethods = new HashSet<>(subCommands.size());
 
-            System.out.println(StringUtils.join(subCommands.values(), ';')); //TODO debug code
-            System.out.println(StringUtils.join(subCommands.keySet(), ','));
-
             messages = subCommands.values().stream()
                     .filter(meth -> encounteredMethods.add(meth.getName())) //Returns false if name is already present - Prevents aliases showing multiple times
                     .map(meth -> buildHelpLine(commandKey, meth)) //lelelelelel we're breaking bad now

@@ -126,7 +126,7 @@ public class CommandsAdmin {
         @Console
         public void adminDebug(CommandContext args, CommandSender player) {
             for (Map.Entry<Method, Map<String, Method>> entry : plugin.getCommandsManager().getMethods().entrySet()) { //FIXME debug code
-                StringBuilder stringBuilder = new StringBuilder(entry.getKey().getName()).append(" -> {");
+                StringBuilder stringBuilder = new StringBuilder(entry.getKey() == null ? "null" : entry.getKey().getName()).append(" -> {");
                 for (Map.Entry<String, Method> entry1 : entry.getValue().entrySet()) {
                     stringBuilder.append(entry1.getKey()).append("=>").append(entry1.getValue().getName()).append(",");
                 }

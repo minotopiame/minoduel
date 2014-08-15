@@ -122,7 +122,7 @@ public class CommandsAdmin {
             }
         }
 
-        @Command(aliases = "debug", desc = "debug stuff")
+        @Command(aliases = {"debug"}, desc = "debug stuff")
         @Console
         public void adminDebug(CommandContext args, CommandSender player) {
             for (Map.Entry<Method, Map<String, Method>> entry : plugin.getCommandsManager().getMethods().entrySet()) { //FIXME debug code

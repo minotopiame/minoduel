@@ -86,6 +86,8 @@ public class CommandsPlayer {
 
             if (arenaToLeave != null) {
                 arenaToLeave.endGame(arenaToLeave.getOther(player));
+            } else if (plugin.getQueueManager().remove(player) != null) {
+                player.sendMessage(plugin.getPrefix() + "§aDu hast die Warteschlange verlassen.");
             } else {
                 player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu befindest dich in keinem Kampf!");
             }

@@ -50,7 +50,7 @@ public class CommandsAdmin {
         @Command(aliases = {"reward"},
                 desc = "Setzt die Standardbelohnung!",
                 help = "Setzt die Standardbelohnung.\n" +
-                        "-s: Quelle der Items - Hotbar, Hand oder Inventar - Standard: Hotbar",
+                        "-s: Quelle der Items (Standard: Hotbar)",
                 usage = "[-s Hotbar|Hand|Inv]",
                 flags = "s:", max = 0)
         @CommandPermissions({"minoduel.admin.setreward"})

@@ -201,8 +201,9 @@ public class CommandsArena {
             @Command(aliases = {"reward"},
                     desc = "Setzt die Arenabelohnung!",
                     help = "Setzt die Belohnung einer Arena.\n" +
-                            "-s: Quelle der Belohnung; Mögliche Werte: Hotbar (Standard), Hand, Inv\n" +
-                            "-r: Gibt einen zufälligen Stack der Quelle als Belohnung her (Ganze Belohnung wird gespeichert, Stack wird bei jedem Gewinn neu gewählt)",
+                            "-s: Quelle der Belohnung\n" +
+                            "-r: Gibt jedem Gewinner nur einen zufälligen\n" +
+                            "    Stack aus der Belohnung",
                     usage = "[-s *Hotbar*|Hand|Inv] <Arena>",
                     flags = "s:r", min = 1, max = 1)
             public void arenaSetReward(CommandContext args, Player player) throws CommandException {

@@ -37,15 +37,7 @@ public class CommandHelpHelper {
         String[] newArgs = new String[args.length + 1];
         System.arraycopy(args, 0, newArgs, 1, args.length);
         newArgs[0] = command.getName();
-        if (!sendNestedHelp(null, sender, newArgs, 0)) {
-            for (Map.Entry<Method, Map<String, Method>> entry : commandsManager.getMethods().entrySet()) { //FIXME debug code
-                StringBuilder stringBuilder = new StringBuilder(entry.getKey().getName()).append(" -> {");
-                for (Map.Entry<String, Method> entry1 : entry.getValue().entrySet()) {
-                    stringBuilder.append(entry1.getKey()).append("=>").append(entry1.getValue().getName()).append(",");
-                }
-                System.out.println(stringBuilder.append("}"));
-            }
-        }
+        sendNestedHelp(null, sender, newArgs, 0);
     }
 
     private boolean sendNestedHelp(Method parent, CommandSender sender, String[] args, int level) {
@@ -74,6 +66,9 @@ public class CommandHelpHelper {
             messages = messageCache.get(commandKey);
         } else {
             Set<String> encounteredMethods = new HashSet<>(subCommands.size());
+
+            System.out.println(StringUtils.join(subCommands.values(), ';')); //TODO debug code
+            System.out.println(StringUtils.join(subCommands.keySet(), ','));
 
             messages = subCommands.values().stream()
                     .filter(meth -> encounteredMethods.add(meth.getName())) //Returns false if name is already present - Prevents aliases showing multiple times

@@ -183,4 +183,8 @@ public class MinoDuelPlugin extends JavaPlugin {
             throw new AssertionError(e);
         }
     }
+
+    public CommandsManager<CommandSender> getCommandsManager() { //TODO temp debug
+        return commandsManager;
+    }
 }

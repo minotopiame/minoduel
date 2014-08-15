@@ -5,17 +5,21 @@ import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
+import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.Arenas;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.bukkit.ChatColor.GOLD;
@@ -115,6 +119,18 @@ public class CommandsAdmin {
                             .tooltip("Hier klicken für mehr Info")
                         .send(player);
                 //@formatter:on
+            }
+        }
+
+        @Command(aliases = "debug", desc = "debug stuff")
+        @Console
+        public void adminDebug(CommandContext args, CommandSender player) {
+            for (Map.Entry<Method, Map<String, Method>> entry : plugin.getCommandsManager().getMethods().entrySet()) { //FIXME debug code
+                StringBuilder stringBuilder = new StringBuilder(entry.getKey().getName()).append(" -> {");
+                for (Map.Entry<String, Method> entry1 : entry.getValue().entrySet()) {
+                    stringBuilder.append(entry1.getKey()).append("=>").append(entry1.getValue().getName()).append(",");
+                }
+                System.out.println(stringBuilder.append("}"));
             }
         }
     }

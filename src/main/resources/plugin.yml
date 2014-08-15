@@ -5,17 +5,3 @@ authors: [sebi7224, xxyy98]
 website: http://minotopia.me/
 
 main: me.sebi7224.minoduel.MinoDuelPlugin
-
-commands:
-  mdu:
-    description: Spielerbefehle von MinoDuel
-    usage: /<command> help
-    aliases: [1vs1]
-  mdm:
-    description: Moderationsbefehle von MinoDuel
-    usage: /<command> help
-    aliases: [mdmod, mdadmin, minoduel]
-  mda:
-    description: Arenabefehle von MinoDuel
-    usage: /<command> help
-    aliases: [mdarena]

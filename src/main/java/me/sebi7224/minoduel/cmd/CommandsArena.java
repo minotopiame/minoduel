@@ -68,7 +68,7 @@ public class CommandsArena {
             player.sendMessage(MinoDuelPlugin.PREFIX + "§aDu hast die Arena §2" + arenaName + " §aerfolgreich erstellt!");
         }
 
-        @Command(aliases = {"remove", "delete", "rem"},
+        @Command(aliases = {"remove"},
                 desc = "Löscht eine Arena.",
                 usage = "<Arena>",
                 flags = "y", min = 1)
@@ -99,7 +99,7 @@ public class CommandsArena {
             player.sendMessage(MinoDuelPlugin.PREFIX + "§aDie Arena §2" + arenaName + " §awurde erfolgreich entfernt!");
         }
 
-        @Command(aliases = {"status", "info"},
+        @Command(aliases = {"status"},
                 desc = "Zeigt den Status einer Arena an.",
                 usage = "<Arena>", min = 1)
         @CommandPermissions({"minoduel.arena.status"})
@@ -112,7 +112,7 @@ public class CommandsArena {
             arena.sendChecklist(player); //TODO click on checklist to get commands suggested
         }
 
-        @Command(aliases = {"set", "s"},
+        @Command(aliases = {"set"},
                 desc = "Setzt Arenaoptionen.")
         @NestedCommand(SetCommands.class)
         @CommandPermissions({"minoduel.arena.set"})
@@ -127,7 +127,7 @@ public class CommandsArena {
                 this.plugin = plugin;
             }
 
-            @Command(aliases = {"spawn", "sporn"}, //kek
+            @Command(aliases = {"spawn"},
                     desc = "Setzt den Spawn einer Arena zu deiner Position!",
                     usage = "<Arena> <1|2>", min = 1)
             public void arenaSetSpawn(CommandContext args, Player player) throws CommandException {
@@ -163,7 +163,7 @@ public class CommandsArena {
                 player.sendMessage(plugin.getPrefix() + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
             }
 
-            @Command(aliases = {"icon", "symbol"},
+            @Command(aliases = {"icon"},
                     desc = "Setzt das Icon einer Arena zu dem Item in deiner Hand!",
                     usage = "<Arena>", min = 1)
             public void arenaSetIcon(CommandContext args, Player player) throws CommandException {
@@ -179,9 +179,9 @@ public class CommandsArena {
             @Command(aliases = {"kit"},
                     desc = "Setzt das Kit einer Arena zu deinem aktuellen Inventar",
                     help = "Setzt das Kit einer Arena.\n" +
-                            "-a: Verwendet nur deine Rüstung\n" +
-                            "-i: Verwendet nur dein Inventar\n" +
-                            "Weder -i noch -a: Verwendet deine Rüstung & dein Inventar",
+                            "-a: Setzt nur deine Rüstung\n" +
+                            "-i: Setzt nur dein Inventar\n" +
+                            "Keines: Setzt beides",
                     usage = "<Arena>",
                     flags = "ai", min = 1, max = 1)
             public void arenaSetKit(CommandContext args, Player player) throws CommandException {

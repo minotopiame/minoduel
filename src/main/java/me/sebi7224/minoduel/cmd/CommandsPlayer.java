@@ -47,10 +47,12 @@ public class CommandsPlayer {
             this.plugin = plugin;
         }
 
-        @Command(aliases = {"join", "new"},
-                desc = "Lässt dich eine Arena auswählen, um ein 1vs1 zu beginnen! (Verwende -a, um das Menü zu unterdrücken)",
+        @Command(aliases = {"join"},
+                desc = "Betritt 1vs1",
+                help = "Lässt dich eine Arena auswählen.\n" +
+                        "-a: Arena direkt wählen, kein Menü",
                 usage = "[-a (Arena)|egal]",
-                flags = "a:")
+                flags = "a:", max = 0)
         @CommandPermissions({"minoduel.user.join"})
         public void playerJoin(CommandContext args, Player player) throws CommandException {
             if (!Arenas.anyExist()) {
@@ -78,7 +80,7 @@ public class CommandsPlayer {
         }
 
         @Command(aliases = {"leave"},
-                desc = "Gib deinen aktuellen Kampf auf!")
+                desc = "Gibt deinen aktuellen Kampf auf")
         public void playerLeave(CommandContext args, Player player) throws CommandException {
             Arena arenaToLeave = Arenas.getPlayerArena(player);
 

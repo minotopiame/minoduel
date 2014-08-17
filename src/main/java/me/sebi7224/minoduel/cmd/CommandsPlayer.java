@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.bukkit.ChatColor.DARK_GREEN;
@@ -102,7 +103,7 @@ public class CommandsPlayer {
                 usage = "[Suchbegriff]")
         @CommandPermissions({"minoduel.user.arenas"})
         public void adminListArenas(CommandContext args, Player player) throws CommandException {
-            Collection<Arena> arenas = plugin.getArenaManager().all();
+            Collection<Arena> arenas = new ArrayList<>(plugin.getArenaManager().all());
             if (args.argsLength() >= 1) { //If we have a filter
                 String search = args.getString(0).toLowerCase(); //Get that
                 arenas.removeIf(arena -> !arena.getName().toLowerCase().contains(search)); //And remove non-matching arenas

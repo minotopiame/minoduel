@@ -68,6 +68,11 @@ public class CommandsPlayer {
                 Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'), plugin.getArenaManager());
 
                 plugin.getQueueManager().enqueue(player, arena);
+
+                player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
+                        (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
+                        "!");
+
                 return;
             }
 

@@ -15,6 +15,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git://git@bitbucket.org:minotopia/minoduel.git</connection>
+    </scm>
+
     <repositories>
         <repository>
             <id>md5-repo</id>

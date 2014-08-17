@@ -34,21 +34,21 @@ public class MinoDuelArena extends ConfigurableArena {
     private Couple<PlayerInfo> players = null;
     private RunnableArenaTick tickTask = new RunnableArenaTick();
 
-    public MinoDuelArena(@NotNull ConfigurationSection storageBackend) {
-        super(storageBackend);
+    public MinoDuelArena(@NotNull ConfigurationSection storageBackend, ArenaManager arenaManager) {
+        super(storageBackend, arenaManager);
     }
 
     @Override
     public Collection<QueueItem> scheduleGame(@NotNull QueueItem... items) {
         Validate.isTrue(items.length == SIZE, "Can only accept SIZE queue items!");
 
-        if(items[0].size() + items[1].size() == SIZE) {
+        if (items[0].size() + items[1].size() == SIZE) {
             scheduleGame(items[0].getFirst(), items[1].getFirst());
             return ImmutableList.of(items[0], items[1]);
-        } else if(items[0].size() == SIZE) {
+        } else if (items[0].size() == SIZE) {
             scheduleGame(items[0].getPlayers());
             return ImmutableList.of(items[0]);
-        } else if(items[1].size() == SIZE) {
+        } else if (items[1].size() == SIZE) {
             scheduleGame(items[1].getPlayers());
             return ImmutableList.of(items[1]);
         } else { //No possible method to match any of these into this arena
@@ -64,8 +64,8 @@ public class MinoDuelArena extends ConfigurableArena {
         Validate.isTrue(isReady(), "This arena is currently not ready");
         Validate.notNull(plr1, "Player one is null");
         Validate.notNull(plr2, "Player two is null");
-        Validate.isTrue(!Arenas.isInGame(plr1), "Player one is currently in another game!");
-        Validate.isTrue(!Arenas.isInGame(plr2), "Player two is currently in another game!");
+        Validate.isTrue(!getArenaManager().isInGame(plr1), "Player one is currently in another game!");
+        Validate.isTrue(!getArenaManager().isInGame(plr2), "Player two is currently in another game!");
 
         this.players = new Couple<>(
                 new PlayerInfo(plr1, getFirstSpawn()),
@@ -230,8 +230,8 @@ public class MinoDuelArena extends ConfigurableArena {
      * @param section Section to get an Arena from.
      * @return An Arena corresponding to {@code section}.
      */
-    public static MinoDuelArena fromConfigSection(ConfigurationSection section) {
-        MinoDuelArena arena = new MinoDuelArena(section);
+    public static MinoDuelArena fromConfigSection(ConfigurationSection section, ArenaManager arenaManager) {
+        MinoDuelArena arena = new MinoDuelArena(section, arenaManager);
         arena.updateFromConfig();
         return arena;
     }
@@ -326,7 +326,7 @@ public class MinoDuelArena extends ConfigurableArena {
             this.previousExperience = plr.getTotalExperience();
             this.previousLocation = plr.getLocation();
 
-            Arenas.setPlayerArena(player, MinoDuelArena.this);
+            getArenaManager().setPlayerArena(player, MinoDuelArena.this);
         }
 
         /**
@@ -346,7 +346,7 @@ public class MinoDuelArena extends ConfigurableArena {
             player.setExhaustion(0.0F);
             player.setSaturation(9.6F); //Notch's Golden apple - balance between prev sat and taking away eventual golden apples consumed during the fight
             InventoryHelper.clearInventory(player);
-            Arenas.setPlayerArena(player, null);
+            getArenaManager().setPlayerArena(player, null);
             this.player = null; //Don't keep Player ref in case this object is accidentally kept
         }
 

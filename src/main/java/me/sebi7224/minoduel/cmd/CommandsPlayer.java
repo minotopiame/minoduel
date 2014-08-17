@@ -7,7 +7,6 @@ import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
 import me.sebi7224.minoduel.queue.DualQueueItem;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Bukkit;
@@ -55,25 +54,25 @@ public class CommandsPlayer {
                 flags = "a:", max = 0)
         @CommandPermissions({"minoduel.user.join"})
         public void playerJoin(CommandContext args, Player player) throws CommandException {
-            if (!Arenas.anyExist()) {
+            if (!plugin.getArenaManager().anyExist()) {
                 player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arenen vorhanden =(!");
                 return;
             }
 
-            if (Arenas.isInGame(player)) {
+            if (plugin.getArenaManager().isInGame(player)) {
                 player.sendMessage(MinoDuelPlugin.PREFIX + " §eDu bist bereits in einem Kampf!");
                 return;
             }
 
             if (args.hasFlag('a')) {
-                Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'));
+                Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'), plugin.getArenaManager());
 
                 plugin.getQueueManager().enqueue(player, arena);
                 return;
             }
 
             if (InventoryHelper.isInventoryEmpty(player)) {
-                plugin.getArenaMenu().open(player);
+                plugin.getArenaManager().getArenaMenu().open(player);
             } else {
                 player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu musst zuerst dein Inventar leeren!");
             }
@@ -82,7 +81,7 @@ public class CommandsPlayer {
         @Command(aliases = {"leave"},
                 desc = "Gibt deinen aktuellen Kampf auf")
         public void playerLeave(CommandContext args, Player player) throws CommandException {
-            Arena arenaToLeave = Arenas.getPlayerArena(player);
+            Arena arenaToLeave = plugin.getArenaManager().getPlayerArena(player);
 
             if (arenaToLeave != null) {
                 arenaToLeave.endGame(arenaToLeave.getOther(player));
@@ -98,7 +97,7 @@ public class CommandsPlayer {
                 usage = "[Suchbegriff]")
         @CommandPermissions({"minoduel.user.arenas"})
         public void adminListArenas(CommandContext args, Player player) throws CommandException {
-            Collection<Arena> arenas = Arenas.all();
+            Collection<Arena> arenas = plugin.getArenaManager().all();
             if (args.argsLength() >= 1) { //If we have a filter
                 String search = args.getString(0).toLowerCase(); //Get that
                 arenas.removeIf(arena -> !arena.getName().toLowerCase().contains(search)); //And remove non-matching arenas
@@ -152,7 +151,7 @@ public class CommandsPlayer {
                 return;
             }
 
-            boolean opponentInGame = Arenas.isInGame(opponent);
+            boolean opponentInGame = plugin.getArenaManager().isInGame(opponent);
 
             if (args.hasFlag('c')) {
                 if (plugin.getRequestManager().remove(opponent, player).isPresent()) {
@@ -185,7 +184,7 @@ public class CommandsPlayer {
                         .command("/1vs1 duel -c " + opponent.getName())
                         .send(player);
             } else {
-                Arena arena = CmdValidate.getArenaOrNull(args.getString(1, null));
+                Arena arena = CmdValidate.getArenaOrNull(args.getString(1, null), plugin.getArenaManager());
                 plugin.getRequestManager().request(opponent, player, arena);
                 //@formatter:off
                 opponent.sendMessage(plugin.getPrefix() + "§1§l" + player.getName() + "§9§l möchte sich mit dir" +

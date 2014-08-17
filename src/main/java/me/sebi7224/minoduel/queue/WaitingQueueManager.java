@@ -3,7 +3,7 @@ package me.sebi7224.minoduel.queue;
 import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.arena.ArenaManager;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.lib.guava17.collect.ImmutableListMultimap;
@@ -33,9 +33,10 @@ public class WaitingQueueManager {
     public static final String POSITION_NOTIFICATION_FORMAT = "Du bist §e%d.§6 in der Warteschlange der Arena §e%s§6!";
 
     private List<QueueItem> queue = new ArrayList<>();
+    private final ArenaManager arenaManager;
 
-    public WaitingQueueManager() {
-
+    public WaitingQueueManager(ArenaManager arenaManager) {
+        this.arenaManager = arenaManager;
     }
 
     /**
@@ -183,7 +184,7 @@ public class WaitingQueueManager {
      * Notifies each queued player of their position in the respective queue.
      */
     public void notifyPositions() {
-        Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
+        Map<Arena, Integer> queueSizes = new HashMap<>(arenaManager.all().size());
 
         queue.stream().forEach(item -> {
             Arena arena = item.getPreferredArena();
@@ -214,7 +215,7 @@ public class WaitingQueueManager {
      * @return true if a notification was sent.
      */
     public boolean notifyPosition(Player target) { //TODO: maybe we can un-spaghetti this some time
-        Map<Arena, Integer> queueSizes = new HashMap<>(Arenas.all().size());
+        Map<Arena, Integer> queueSizes = new HashMap<>(arenaManager.all().size());
 
         for (QueueItem item : queue) {
             Arena arena = item.getPreferredArena();
@@ -280,7 +281,7 @@ public class WaitingQueueManager {
     //Returns whether a game has been started with given arguments
     private boolean tryPop(Arena arena, QueueItem... items) {
         if (arena == null) {
-            arena = Arenas.firstReady();
+            arena = arenaManager.firstReady();
         }
 
         if (arena == null || !arena.isReady()) {

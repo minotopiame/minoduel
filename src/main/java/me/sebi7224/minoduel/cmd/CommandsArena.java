@@ -9,7 +9,6 @@ import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -59,12 +58,12 @@ public class CommandsArena {
         public void arenaCreate(CommandContext args, Player player) throws CommandException {
             String arenaName = args.getString(0);
 
-            if (Arenas.existsByName(arenaName)) {
+            if (plugin.getArenaManager().existsByName(arenaName)) {
                 player.sendMessage(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert bereits!");
                 return;
             }
 
-            Arenas.createArena(arenaName, plugin.getConfig());
+            plugin.getArenaManager().createArena(arenaName, plugin.getConfig());
             player.sendMessage(MinoDuelPlugin.PREFIX + "§aDu hast die Arena §2" + arenaName + " §aerfolgreich erstellt!");
         }
 
@@ -93,7 +92,7 @@ public class CommandsArena {
                 //@formatter:on
             }
 
-            Arena arena = CmdValidate.getArenaChecked(arenaName);
+            Arena arena = CmdValidate.getArenaChecked(arenaName, plugin.getArenaManager());
 
             arena.remove();
             player.sendMessage(MinoDuelPlugin.PREFIX + "§aDie Arena §2" + arenaName + " §awurde erfolgreich entfernt!");
@@ -105,7 +104,7 @@ public class CommandsArena {
         @CommandPermissions({"minoduel.arena.status"})
         @Console
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
-            Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+            Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
             player.sendMessage("§6Arena: §e" + arena.getName());
             player.sendMessage("§6Spawn 1: §e" + LocationHelper.prettyPrint(arena.getFirstSpawn()));
             player.sendMessage("§6Spawn 2: §e" + LocationHelper.prettyPrint(arena.getSecondSpawn()));
@@ -131,7 +130,7 @@ public class CommandsArena {
                     desc = "Setzt den Spawn einer Arena zu deiner Position!",
                     usage = "<Arena> <1|2>", min = 1)
             public void arenaSetSpawn(CommandContext args, Player player) throws CommandException {
-                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
 
                 switch (args.getString(1, "ui")) { //No need to convert to int since there are only two cases & we can't pass the int anyways
                     case "1":
@@ -167,7 +166,7 @@ public class CommandsArena {
                     desc = "Setzt das Icon einer Arena zu dem Item in deiner Hand!",
                     usage = "<Arena>", min = 1)
             public void arenaSetIcon(CommandContext args, Player player) throws CommandException {
-                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
 
                 ItemStack newIcon = CmdValidate.validateStackNotEmpty(player.getItemInHand()); //CommandException if AIR or null
 
@@ -185,7 +184,7 @@ public class CommandsArena {
                     usage = "<Arena>",
                     flags = "ai", min = 1, max = 1)
             public void arenaSetKit(CommandContext args, Player player) throws CommandException {
-                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
 
                 if (args.hasFlag('a') || !args.hasFlag('i')) {
                     arena.setArmorKit(player.getInventory().getArmorContents());
@@ -207,7 +206,7 @@ public class CommandsArena {
                     usage = "[-s *Hotbar*|Hand|Inv] <Arena>",
                     flags = "s:r", min = 1, max = 1)
             public void arenaSetReward(CommandContext args, Player player) throws CommandException {
-                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
 
                 List<ItemStack> stacks;
 
@@ -245,7 +244,7 @@ public class CommandsArena {
                     desc = "Aktiviert oder deaktiviert eine Arena",
                     usage = "<Arena> <true|false>", min = 2)
             public void arenaSetEnabled(CommandContext args, Player player) throws CommandException {
-                Arena arena = CmdValidate.getArenaChecked(args.getString(0));
+                Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
 
                 arena.setEnabled(CmdValidate.getBooleanChecked(args.getString(1)));
 

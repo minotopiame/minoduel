@@ -42,9 +42,11 @@ public abstract class ConfigurableArena implements Arena {
     protected Location firstSpawn;
     protected Location secondSpawn;
     protected ItemStack iconStack;
+    protected List<ItemStack> specificRewards;
+
+    private final ArenaManager arenaManager;
     private ItemStack[] inventoryKit;
     private ItemStack[] armorKit;
-    protected List<ItemStack> specificRewards;
     private boolean doAllRewards = true;
     private boolean enabled = true;
 
@@ -56,8 +58,9 @@ public abstract class ConfigurableArena implements Arena {
             .append("Icon gesetzt", () -> iconStack != null)
             .append("Arena aktiviert", () -> enabled);
 
-    public ConfigurableArena(@NotNull ConfigurationSection storageBackend) {
+    public ConfigurableArena(@NotNull ConfigurationSection storageBackend, ArenaManager arenaManager) {
         this.configSection = storageBackend;
+        this.arenaManager = arenaManager;
         this.name = storageBackend.getName();
     }
 
@@ -84,7 +87,7 @@ public abstract class ConfigurableArena implements Arena {
         }
 
         configSection.getParent().set(configSection.getName(), null);
-        Arenas.arenaCache.remove(getName());
+        arenaManager.arenaCache.remove(getName());
         configSection = null;
     }
 
@@ -109,7 +112,7 @@ public abstract class ConfigurableArena implements Arena {
     @Override
     public List<ItemStack> getRewards() {
         if (specificRewards == null || specificRewards.isEmpty()) {
-            return Arenas.getDefaultRewards();
+            return arenaManager.getDefaultRewards();
         }
 
         return doAllRewards ? specificRewards : ImmutableList.of(specificRewards.get(RandomUtils.nextInt(specificRewards.size())));
@@ -140,7 +143,7 @@ public abstract class ConfigurableArena implements Arena {
     public void setFirstSpawn(Location firstSpawn) {
         validateHasConfig();
 
-        Arenas.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
+        arenaManager.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
         this.firstSpawn = firstSpawn;
     }
 
@@ -153,7 +156,7 @@ public abstract class ConfigurableArena implements Arena {
     public void setSecondSpawn(Location secondSpawn) {
         validateHasConfig();
 
-        Arenas.saveLocation(configSection.createSection(SECOND_SPAWN_PATH), secondSpawn);
+        arenaManager.saveLocation(configSection.createSection(SECOND_SPAWN_PATH), secondSpawn);
         this.secondSpawn = secondSpawn;
     }
 
@@ -226,6 +229,10 @@ public abstract class ConfigurableArena implements Arena {
         return name;
     }
 
+    public ArenaManager getArenaManager() {
+        return arenaManager;
+    }
+
     //protected utlity methods
     protected void updateFrom(ConfigurationSection section) {
         this.configSection = section;
@@ -237,8 +244,8 @@ public abstract class ConfigurableArena implements Arena {
     protected void updateFromConfig() {
         validateHasConfig();
 
-        this.firstSpawn = Arenas.getLocation(configSection.getConfigurationSection("spawn1"));
-        this.secondSpawn = Arenas.getLocation(configSection.getConfigurationSection("spawn2"));
+        this.firstSpawn = arenaManager.getLocation(configSection.getConfigurationSection("spawn1"));
+        this.secondSpawn = arenaManager.getLocation(configSection.getConfigurationSection("spawn2"));
         this.iconStack = configSection.getItemStack(ICON_STACK_PATH);
         this.specificRewards = (List<ItemStack>) configSection.getList(SPECIFIC_REWARD_PATH, new ArrayList<ItemStack>());
         this.doAllRewards = configSection.getBoolean(REWARD_ALL_PATH, doAllRewards);

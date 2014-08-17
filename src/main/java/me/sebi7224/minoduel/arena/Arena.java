@@ -118,4 +118,6 @@ public interface Arena {
     void setEnabled(boolean enabled);
 
     String getName();
+
+    ArenaManager getArenaManager();
 }

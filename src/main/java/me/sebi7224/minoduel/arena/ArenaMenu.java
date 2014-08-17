@@ -1,9 +1,8 @@
-package me.sebi7224.minoduel.util;
+package me.sebi7224.minoduel.arena;
 
 import me.sebi7224.minoduel.MinoDuelPlugin;
-import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,26 +19,49 @@ import io.github.xxyy.common.util.inventory.ItemStackFactory;
  * A simple icon menu framework, adapted to MinoDuel.
  * @since 1.0
  */
-public class IconMenu implements Listener {
+public class ArenaMenu implements Listener {
 
     private final String name;
-    private final int size;
     private OptionClickEventHandler handler;
-    private MinoDuelPlugin plugin;
-
     private Arena[] optionArenas;
+    private int size;
 
-    public IconMenu(String name, int size, OptionClickEventHandler handler, MinoDuelPlugin plugin) {
-        this.name = name;
+    private final MinoDuelPlugin plugin;
+    private final ArenaManager arenaManager;
 
-        this.size = size;
-        this.handler = handler;
+    public ArenaMenu(ArenaManager arenaManager, MinoDuelPlugin plugin) {
+        this.arenaManager = arenaManager;
+        this.name = "§8Wähle eine Arena!";
+
+        this.handler = event -> {
+            Player player = event.getPlayer();
+            Arena arena = event.getArena();
+
+            player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
+            plugin.getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
+            player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
+                    (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
+                    "!");
+        };
         this.plugin = plugin;
-        this.optionArenas = new Arena[size];
+
+        refresh();
+
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    public IconMenu setArena(int position, Arena arena) {
+    public void refresh() {
+        this.optionArenas = new Arena[size];
+        this.size = InventoryHelper.validateInventorySize(optionArenas.length + 1);
+
+        int i = 0;
+        for (Arena arena : arenaManager.all()) {
+            setArena(i, arena);
+            i++;
+        }
+    }
+
+    public ArenaMenu setArena(int position, Arena arena) {
         optionArenas[position] = arena;
         return this;
     }
@@ -48,7 +70,7 @@ public class IconMenu implements Listener {
         Inventory inventory = Bukkit.createInventory(player, size, name);
         for (int i = 0; i < optionArenas.length; i++) {
             if (optionArenas[i] == null) {
-                inventory.setItem(i, Arenas.getAnyArenaIcon());
+                inventory.setItem(i, arenaManager.getAnyArenaIcon());
             } else {
                 inventory.setItem(i, getIcon(optionArenas[i]));
             }
@@ -59,7 +81,6 @@ public class IconMenu implements Listener {
     public void destroy() {
         HandlerList.unregisterAll(this);
         handler = null;
-        plugin = null;
         optionArenas = null;
     }
 

@@ -9,24 +9,19 @@ import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.MissingNestedCommandException;
 import com.sk89q.minecraft.util.commands.SimpleInjector;
 import com.sk89q.minecraft.util.commands.WrappedCommandException;
-import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.arena.ArenaManager;
 import me.sebi7224.minoduel.cmd.CommandsAdmin;
 import me.sebi7224.minoduel.cmd.CommandsArena;
 import me.sebi7224.minoduel.cmd.CommandsPlayer;
 import me.sebi7224.minoduel.listener.MainListener;
 import me.sebi7224.minoduel.queue.WaitingQueueManager;
-import me.sebi7224.minoduel.util.IconMenu;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.lang.reflect.Method;
 
@@ -41,9 +36,6 @@ public class MinoDuelPlugin extends JavaPlugin {
     private static final FancyMessage FANCIFUL_PREFIX = new FancyMessage("[").color(ChatColor.GOLD).then("1vs1").color(ChatColor.GREEN).then("] ").color(ChatColor.GOLD);
     private static MinoDuelPlugin instance;
     private long teleportDelayTicks;
-    private IconMenu arenaMenu;
-    private DuelRequestManager requestManager = new DuelRequestManager();
-    private WaitingQueueManager queueManager = new WaitingQueueManager();
     private CommandsManager<CommandSender> commandsManager = new CommandsManager<CommandSender>() {
         @Override
         public boolean hasPermission(CommandSender sender, String perm) {
@@ -59,7 +51,10 @@ public class MinoDuelPlugin extends JavaPlugin {
             return super.hasPermission(method, player);
         }
     };
+    private DuelRequestManager requestManager = new DuelRequestManager();
     private CommandHelpHelper helpHelper = new CommandHelpHelper(commandsManager);
+    private ArenaManager arenaManager = new ArenaManager(this);
+    private WaitingQueueManager queueManager = new WaitingQueueManager(arenaManager);
 
     @Override
     public void onEnable() {
@@ -72,8 +67,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
 
         //Load arenas
-        Arenas.reloadArenas(getConfig());
-        initArenaMenu();
+        arenaManager.reloadArenas(getConfig());
 
         //Register dem commands
         commandsManager.setInjector(new SimpleInjector(this));
@@ -126,28 +120,6 @@ public class MinoDuelPlugin extends JavaPlugin {
         return true;
     }
 
-
-    private void initArenaMenu() {
-        arenaMenu = new IconMenu("§8Wähle eine Arena!", //Title
-                InventoryHelper.validateInventorySize(Arenas.all().size() + 1), //Round arena amount up to next valid inv size - Need +1 so that at least one "any arena" option is included
-                event -> {
-                    Player player = event.getPlayer();
-                    Arena arena = event.getArena();
-
-                    player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
-                    getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
-                    player.sendMessage(getPrefix() + "Du bist nun in der Warteschlange" +
-                            (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
-                            "!");
-                }, this);
-
-        int i = 0;
-        for (Arena arena : Arenas.all()) {
-            arenaMenu.setArena(i, arena);
-            i++;
-        }
-    }
-
     public long getTeleportDelayTicks() {
         return teleportDelayTicks;
     }
@@ -162,10 +134,6 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public static MinoDuelPlugin getInstance() {
         return instance;
-    }
-
-    public IconMenu getArenaMenu() {
-        return arenaMenu;
     }
 
     public DuelRequestManager getRequestManager() {
@@ -186,5 +154,9 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public CommandsManager<CommandSender> getCommandsManager() { //TODO temp debug
         return commandsManager;
+    }
+
+    public ArenaManager getArenaManager() {
+        return arenaManager;
     }
 }

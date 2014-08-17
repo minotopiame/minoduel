@@ -3,7 +3,7 @@ package me.sebi7224.minoduel.cmd;
 import com.sk89q.minecraft.util.commands.CommandException;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
+import me.sebi7224.minoduel.arena.ArenaManager;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,7 +22,7 @@ public final class CmdValidate {
     }
 
     public static ItemStack validateStackNotEmpty(ItemStack stack) throws CommandException {
-        if(stack == null || stack.getType() == Material.AIR) {
+        if (stack == null || stack.getType() == Material.AIR) {
             throw new CommandException("§cDu hast nichts in der Hand!");
         }
 
@@ -30,15 +30,15 @@ public final class CmdValidate {
     }
 
     public static <T extends Collection<?>> T validateNotEmpty(T t, String message) throws CommandException {
-        if(t.isEmpty()) {
+        if (t.isEmpty()) {
             throw new CommandException(message);
         }
 
         return t;
     }
 
-    public static Arena getArenaChecked(String arenaName) throws CommandException {
-        Arena arena = Arenas.byName(arenaName);
+    public static Arena getArenaChecked(String arenaName, ArenaManager arenaManager) throws CommandException {
+        Arena arena = arenaManager.byName(arenaName);
 
         if (arena == null) {
             throw new CommandException(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");
@@ -47,13 +47,13 @@ public final class CmdValidate {
         return arena;
     }
 
-    public static Arena getArenaOrNull(String arenaName) throws CommandException {
+    public static Arena getArenaOrNull(String arenaName, ArenaManager arenaManager) throws CommandException {
         arenaName = arenaName == null ? null : arenaName.toLowerCase(); //Save an if statement, save a kitten!
-        if(arenaName == null || arenaName.contains("null") || arenaName.contains("egal")) {
+        if (arenaName == null || arenaName.contains("null") || arenaName.contains("egal")) {
             return null;
         }
 
-        Arena arena = Arenas.byName(arenaName);
+        Arena arena = arenaManager.byName(arenaName);
 
         if (arena == null) {
             throw new CommandException(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert nicht!");

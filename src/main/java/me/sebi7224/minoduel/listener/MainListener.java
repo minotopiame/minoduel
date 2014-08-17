@@ -2,7 +2,6 @@ package me.sebi7224.minoduel.listener;
 
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,7 +25,7 @@ public class MainListener implements Listener {
         }
 
         Player victim = (Player) evt.getEntity();
-        Arena arena = Arenas.getPlayerArena(victim);
+        Arena arena = plugin.getArenaManager().getPlayerArena(victim);
 
         if (arena != null && victim.getHealth() - evt.getDamage() <= 0) {
             arena.endGame(arena.getOther(victim));
@@ -44,7 +43,7 @@ public class MainListener implements Listener {
     }
 
     private void onDisconnect(Player plr) {
-        Arena arena = Arenas.getPlayerArena(plr);
+        Arena arena = plugin.getArenaManager().getPlayerArena(plr);
 
         if (arena != null) {
             arena.endGame(arena.getOther(plr));
@@ -57,7 +56,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent evt) {
-        if (Arenas.isInGame(evt.getPlayer()) &&
+        if (plugin.getArenaManager().isInGame(evt.getPlayer()) &&
                 !evt.getPlayer().hasPermission("minoduel.command.bypass") &&
                 !evt.getMessage().toLowerCase().startsWith("/1vs1 leave") &&
                 !evt.getMessage().toLowerCase().startsWith("/mdu leave")) {

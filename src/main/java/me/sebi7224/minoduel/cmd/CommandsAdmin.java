@@ -8,7 +8,6 @@ import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.Arenas;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -81,7 +80,7 @@ public class CommandsAdmin {
 
             CmdValidate.validateNotEmpty(stacks, "Die Quelle (" + args.getFlag('s', "Hotbar") + ") ist leer!");
 
-            Arenas.setDefaultRewards(stacks);
+            plugin.getArenaManager().setDefaultRewards(stacks);
 
             player.sendMessage("§aStandardbelohnung gesetzt!");
         }
@@ -91,7 +90,7 @@ public class CommandsAdmin {
                 usage = "[Suchbegriff]")
         @CommandPermissions({"minoduel.user.arenas"})
         public void playerListArenas(CommandContext args, Player player) throws CommandException {
-            Collection<Arena> arenas = Arenas.all();
+            Collection<Arena> arenas = plugin.getArenaManager().all();
             if (args.argsLength() >= 1) { //If we have a filter
                 String search = args.getString(0).toLowerCase(); //Get that
                 arenas.removeIf(arena -> !arena.getName().toLowerCase().contains(search)); //And remove non-matching arenas

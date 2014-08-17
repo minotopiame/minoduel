@@ -5,11 +5,13 @@ import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
+import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -88,8 +90,8 @@ public class CommandsAdmin {
         @Command(aliases = {"arenas"},
                 desc = "Listet alle Arenen auf.",
                 usage = "[Suchbegriff]")
-        @CommandPermissions({"minoduel.user.arenas"})
-        public void playerListArenas(CommandContext args, Player player) throws CommandException {
+        @CommandPermissions({"minoduel.admin.arenas"})
+        public void adminListArenas(CommandContext args, Player player) throws CommandException {
             Collection<Arena> arenas = plugin.getArenaManager().all();
             if (args.argsLength() >= 1) { //If we have a filter
                 String search = args.getString(0).toLowerCase(); //Get that
@@ -115,6 +117,15 @@ public class CommandsAdmin {
                         .send(player);
                 //@formatter:on
             }
+        }
+
+        @Command(aliases = {"version"},
+                desc = "Zeigt Versionsinfos an.")
+        @CommandPermissions({"minoduel.admin.version"})
+        @Console
+        public void adminVersion(CommandContext args, CommandSender sender) {
+            sender.sendMessage("§eMinoDuel Copyright (C) 2014 sebi7224, xxyy98. All rights reserved.");
+            sender.sendMessage("§eVersion " + MinoDuelPlugin.VERSION.toString());
         }
     }
 }

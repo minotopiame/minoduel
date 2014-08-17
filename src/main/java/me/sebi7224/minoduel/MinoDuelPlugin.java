@@ -23,10 +23,13 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import io.github.xxyy.common.version.PluginVersion;
+
 import java.lang.reflect.Method;
 
 public class MinoDuelPlugin extends JavaPlugin {
     private static class PlayerOnlyCommandException extends RuntimeException { //Hack to work around hasPermission(...) not declaring the checked CommandException exception
+
         public PlayerOnlyCommandException(String desc) {
             super(desc);
         }
@@ -34,6 +37,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public static final String PREFIX = "§6[§a1vs1§6] ";
     private static final FancyMessage FANCIFUL_PREFIX = new FancyMessage("[").color(ChatColor.GOLD).then("1vs1").color(ChatColor.GREEN).then("] ").color(ChatColor.GOLD);
+    public static final PluginVersion VERSION = PluginVersion.ofClass(MinoDuelPlugin.class);
     private static MinoDuelPlugin instance;
     private long teleportDelayTicks;
     private CommandsManager<CommandSender> commandsManager = new CommandsManager<CommandSender>() {
@@ -83,6 +87,8 @@ public class MinoDuelPlugin extends JavaPlugin {
         //Automagically save config every 5 minutes to minimize data-loss on crash
         getServer().getScheduler().runTaskTimer(this, this::saveConfig,
                 5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
+
+        getLogger().info("Enabled " + VERSION.toString() + "!");
     }
 
     @Override

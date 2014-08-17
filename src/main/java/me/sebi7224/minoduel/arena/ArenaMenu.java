@@ -56,7 +56,9 @@ public class ArenaMenu implements Listener {
 
         int i = 0;
         for (Arena arena : arenaManager.all()) {
-            setArena(i, arena);
+            if (arena.isValid()) {
+                setArena(i, arena);
+            }
             i++;
         }
     }

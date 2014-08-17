@@ -50,6 +50,15 @@ public class CommandHelpHelper {
             return false;
         }
 
+        if (level == 0) {
+            com.sk89q.minecraft.util.commands.Command cmd = method.getAnnotation(com.sk89q.minecraft.util.commands.Command.class);
+            String help = cmd.help().isEmpty() ? cmd.desc() : cmd.help();
+
+            for (String line : help.split("\n")) {
+                sender.sendMessage("§e" + line);
+            }
+        }
+
         if (method.isAnnotationPresent(NestedCommand.class) && (args.length - level - 1) > 0) { //Whether we proceed to the next level
             if (sendNestedHelp(method, sender, args, level + 1)) {
                 return true; //true -> Help was sent

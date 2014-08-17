@@ -33,7 +33,7 @@ public class CommandsAdmin {
 
     }
 
-    @Command(aliases = {"mdg", "mdm", "mdadmin"}, desc = "Globale Befehle für MinoDuel für MinoDuel")
+    @Command(aliases = {"mdg", "mdm", "mdadmin"}, desc = "Globale Verwaltungsbefehle für MinoDuel.")
     @NestedCommand(SubCommands.class)
     public static void mdmMain() {
 

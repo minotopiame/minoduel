@@ -33,7 +33,7 @@ public class CommandsPlayer {
 
     }
 
-    @Command(aliases = {"1vs1", "mdu"}, desc = "Spielerbefehle von MinoDuel")
+    @Command(aliases = {"1vs1", "mdu"}, desc = "MinoDuel - 1vs1 auf MinoTopia.")
     @NestedCommand(SubCommands.class)
     public static void mduMain() {
         //body is ignored

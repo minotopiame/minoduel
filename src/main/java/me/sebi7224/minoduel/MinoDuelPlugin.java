@@ -67,6 +67,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
 
         //Load arenas
+        arenaManager.initialise();
         arenaManager.reloadArenas(getConfig());
 
         //Register dem commands

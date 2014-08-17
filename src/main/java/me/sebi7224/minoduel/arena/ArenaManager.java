@@ -35,12 +35,15 @@ public class ArenaManager {
     protected final Map<String, MinoDuelArena> arenaCache = new CaseInsensitiveMap<>();
     private final Map<UUID, Arena> playersInGame = new HashMap<>();
     private final MinoDuelPlugin plugin;
-    private final ArenaMenu arenaMenu;
+    private ArenaMenu arenaMenu;
     private List<ItemStack> defaultRewards;
     private ItemStack anyArenaIcon;
 
     public ArenaManager(MinoDuelPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    public void initialise() {
         this.arenaMenu = new ArenaMenu(this, plugin);
     }
 

@@ -38,7 +38,7 @@ public class CommandsArena {
 
     }
 
-    @Command(aliases = {"mda", "mdarena"}, desc = "Arenamanagement für MinoDuel")
+    @Command(aliases = {"mda", "mdarena"}, desc = "Arenamanagement für MinoDuel.")
     @NestedCommand(SubCommands.class)
     public static void mdaMain() {
         //body is ignored

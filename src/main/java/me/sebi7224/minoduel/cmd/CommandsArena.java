@@ -105,7 +105,7 @@ public class CommandsArena {
         @Console
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
             Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
-            player.sendMessage("§6Arena: §e" + arena.getName());
+            player.sendMessage("§6Arena: " + (arena.isValid() ? "§a" : "§c") + arena.getName());
             player.sendMessage("§6Spawn 1: §e" + LocationHelper.prettyPrint(arena.getFirstSpawn()));
             player.sendMessage("§6Spawn 2: §e" + LocationHelper.prettyPrint(arena.getSecondSpawn()));
             arena.sendChecklist(player); //TODO click on checklist to get commands suggested

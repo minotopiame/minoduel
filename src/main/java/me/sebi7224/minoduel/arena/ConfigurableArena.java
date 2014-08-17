@@ -54,7 +54,8 @@ public abstract class ConfigurableArena implements Arena {
             .append("Arena existiert", () -> configSection != null)
             .append("Spawn 1 gesetzt", () -> firstSpawn != null)
             .append("Spawn 2 gesetzt", () -> secondSpawn != null)
-            .append("Kit gesetzt", () -> inventoryKit != null && armorKit != null)
+            .append("Kit gesetzt (Inventar)", () -> inventoryKit != null)
+            .append("Kit gesetzt (Rüstung)", () -> armorKit != null)
             .append("Icon gesetzt", () -> iconStack != null)
             .append("Arena aktiviert", () -> enabled);
 

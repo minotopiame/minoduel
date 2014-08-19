@@ -4,12 +4,12 @@ import me.sebi7224.minoduel.arena.Arena;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 
+import io.github.xxyy.common.misc.NullableOptional;
 import io.github.xxyy.lib.guava17.collect.Multimap;
 import io.github.xxyy.lib.guava17.collect.MultimapBuilder;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
 import io.github.xxyy.lib.intellij_annotations.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -40,19 +40,17 @@ public class DuelRequestManager {
      * @param requester the player who initially requested the duel
      * @return an Optional containing the preferred arena if such request was found
      */
-    public Optional<Arena> remove(@NotNull Player target, @NotNull Player requester) {
+    public NullableOptional<Arena> remove(@NotNull Player target, @NotNull Player requester) {
         DuelRequest duelRequest = pendingDuelRequests.get(target.getUniqueId()).stream()
                 .filter(rq -> rq.from.equals(requester.getUniqueId()))
                 .findFirst().orElse(null);
 
         if (duelRequest != null) {
             pendingDuelRequests.remove(target.getUniqueId(), requester.getUniqueId());
-            if (duelRequest.preferredArena != null) { //Optional#of(Object) throws a NPE if null is passed
-                return Optional.of(duelRequest.preferredArena);
-            }
+            return NullableOptional.of(duelRequest.preferredArena);
         }
 
-        return Optional.empty();
+        return NullableOptional.of();
     }
 
     /**

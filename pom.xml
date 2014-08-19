@@ -13,6 +13,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <xyc.version>3.0.1-SNAPSHOT</xyc.version>
     </properties>
 
     <scm>
@@ -52,12 +53,17 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.github.xxyy</groupId>
-            <artifactId>common</artifactId>
-            <version>2.5.4-SNAPSHOT</version>
+            <groupId>io.github.xxyy.common</groupId>
+            <artifactId>xyc-bukkit</artifactId>
+            <version>${xyc.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sk89q</groupId>
+            <groupId>io.github.xxyy.common</groupId>
+            <artifactId>xyc-games</artifactId>
+            <version>${xyc.version}</version>
+        </dependency>
+        <dependency>
+        <groupId>com.sk89q</groupId>
             <artifactId>command-framework-bukkit</artifactId>
             <version>0.5-SNAPSHOT</version>
         </dependency>
@@ -65,6 +71,24 @@
             <groupId>mkremins</groupId>
             <artifactId>fanciful</artifactId>
             <version>0.2.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xxyy.common</groupId>
+            <artifactId>xyc-bukkit-test</artifactId>
+            <version>${xyc.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -125,8 +149,8 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>io.github.xxyy:common</include>
-                            <include>${project.groupId}:${project.artifactId}</include>
+                            <include>io.github.xxyy.common:xyc-bukkit</include>
+                            <include>io.github.xxyy.common:xyc-games</include>
                             <include>mkremins:fanciful</include>
                             <include>com.sk89q:command-framework-bukkit</include>
                         </includes>
@@ -149,6 +173,7 @@
                             <shadedPattern>me.sebi7224.lib.commons_lang3</shadedPattern>
                         </relocation>
                     </relocations>
+                    <!--<minimizeJar>true</minimizeJar>--> <!-- Not working due to this: http://jira.codehaus.org/browse/MSHADE-174 https://stackoverflow.com/questions/24415677/unable-to-shade-jar-with-maven-invokespecial-static/24417179 -->
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
             </plugin>

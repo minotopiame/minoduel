@@ -58,11 +58,13 @@ public abstract class ConfigurableArena implements Arena {
             .append("Kit gesetzt (Rüstung)", () -> armorKit != null)
             .append("Icon gesetzt", () -> iconStack != null)
             .append("Arena aktiviert", () -> enabled);
+    private boolean lastValidity = false;
 
     public ConfigurableArena(@NotNull ConfigurationSection storageBackend, ArenaManager arenaManager) {
         this.configSection = storageBackend;
         this.arenaManager = arenaManager;
         this.name = storageBackend.getName();
+        lastValidity = isValid();
     }
 
     @Override
@@ -94,7 +96,14 @@ public abstract class ConfigurableArena implements Arena {
 
     @Override
     public boolean isValid() {
-        return validityChecklist.isDone(); //Overhead is probably not that bad
+        boolean valid = validityChecklist.isDone(); //Overhead is probably not that bad
+
+        if (valid != lastValidity) {
+            arenaManager.registerValidityChange(this);
+            lastValidity = valid;
+        }
+
+        return valid;
     }
 
     @Override

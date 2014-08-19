@@ -64,9 +64,9 @@ public class ArenaManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public List<ItemStack> getDefaultRewards() {
         if (defaultRewards == null) {
-            //noinspection unchecked
             defaultRewards = (List<ItemStack>) MinoDuelPlugin.inst().getConfig().getList(DEFAULT_REWARDS_PATH);
 
             if (defaultRewards == null || defaultRewards.isEmpty()) {
@@ -195,7 +195,6 @@ public class ArenaManager {
 
         MinoDuelArena arena = new MinoDuelArena(config.getConfigurationSection(MinoDuelArena.CONFIG_PATH).createSection(name), this);
         arenaCache.put(name, arena);
-        arenaMenu.refresh();
 
         return arena;
     }
@@ -255,5 +254,9 @@ public class ArenaManager {
 
     public ArenaMenu getArenaMenu() {
         return arenaMenu;
+    }
+
+    protected void registerValidityChange(@SuppressWarnings("UnusedParameters") Arena arena) {
+        arenaMenu.refresh();
     }
 }

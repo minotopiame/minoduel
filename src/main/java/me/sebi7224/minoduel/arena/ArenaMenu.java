@@ -17,12 +17,12 @@ import io.github.xxyy.common.util.inventory.ItemStackFactory;
 
 /**
  * A simple icon menu framework, adapted to MinoDuel.
+ *
  * @since 1.0
  */
 public class ArenaMenu implements Listener {
 
     private final String name;
-    private OptionClickEventHandler handler;
     private Arena[] optionArenas;
     private int size;
 
@@ -32,17 +32,6 @@ public class ArenaMenu implements Listener {
     public ArenaMenu(ArenaManager arenaManager, MinoDuelPlugin plugin) {
         this.arenaManager = arenaManager;
         this.name = "§8Wähle eine Arena!";
-
-        this.handler = event -> {
-            Player player = event.getPlayer();
-            Arena arena = event.getArena();
-
-            player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
-            plugin.getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
-            player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
-                    (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
-                    "!");
-        };
         this.plugin = plugin;
 
         refresh();
@@ -82,7 +71,6 @@ public class ArenaMenu implements Listener {
 
     public void destroy() {
         HandlerList.unregisterAll(this);
-        handler = null;
         optionArenas = null;
     }
 
@@ -91,12 +79,17 @@ public class ArenaMenu implements Listener {
         if (event.getInventory().getTitle().equals(name)) {
             event.setCancelled(true);
             int slot = event.getRawSlot();
-            if (slot >= 0 && slot < size/* && optionArenas[slot] != null*/) {
-                OptionClickEvent e = new OptionClickEvent((Player) event.getWhoClicked(), slot, optionArenas[slot]);
-                handler.onOptionClick(e);
-                if (e.willClose()) {
-                    InventoryHelper.closeInventoryLater(event.getWhoClicked(), this.plugin);
-                }
+            if (slot >= 0 && slot < size) {
+                Player player = (Player) event.getWhoClicked();
+                Arena arena = optionArenas[slot];
+
+                player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
+                plugin.getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
+                player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
+                        (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
+                        "!");
+
+                InventoryHelper.closeInventoryLater(event.getWhoClicked(), this.plugin);
             }
         }
     }
@@ -111,43 +104,4 @@ public class ArenaMenu implements Listener {
                 .defaultDisplayName("§6" + arena.getName())
                 .produce();
     }
-
-    public interface OptionClickEventHandler {
-        public void onOptionClick(OptionClickEvent event);
-    }
-
-    public class OptionClickEvent {
-        private final Player player;
-        private final int position;
-        private final Arena arena;
-        private boolean close;
-
-        public OptionClickEvent(Player player, int position, Arena arena) {
-            this.player = player;
-            this.position = position;
-            this.arena = arena;
-            this.close = true;
-        }
-
-        public Player getPlayer() {
-            return player;
-        }
-
-        public int getPosition() {
-            return position;
-        }
-
-        public Arena getArena() {
-            return arena;
-        }
-
-        public boolean willClose() {
-            return close;
-        }
-
-        public void setWillClose(boolean close) {
-            this.close = close;
-        }
-    }
-
 }

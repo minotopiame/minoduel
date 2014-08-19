@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -99,7 +98,7 @@ public class WaitingQueueManager {
                 .filter(item -> item.has(plr))
                 .findFirst().orElse(null);
 
-        if(previous != null) {
+        if (previous != null) {
             queue.remove(previous);
             previous.onRemoval(plr);
         }
@@ -121,14 +120,15 @@ public class WaitingQueueManager {
 
         if (!queue.remove(item)) {
             if (deep) {
-                return queue.stream()
-                        .filter(other -> other.hasAny(item.getPlayers()))
-                        .map(this::remove)
-                        .filter(Objects::nonNull)
-                        .findFirst().orElse(null);
-            } else {
-                return null;
+                for (QueueItem deepItem : queue) {
+                    if (deepItem.hasAny(item.getPlayers())) {
+                        remove(deepItem, false);
+                        return deepItem;
+                    }
+                }
             }
+
+            return null;
         } else {
             item.onRemoval(null);
         }
@@ -138,6 +138,7 @@ public class WaitingQueueManager {
 
     /**
      * Removes an item from the queue. Shortcut for {@link #remove(QueueItem, boolean)} with deep=false
+     *
      * @param item the item to remove from the queue
      * @return the removed item or NULL if the item wasn't in the queue
      */
@@ -158,8 +159,8 @@ public class WaitingQueueManager {
         }
 
         ImmutableList.copyOf(queue).stream().forEach(item -> { //Need to copy to avoid concurrent modification
-            if(item.size() == Arena.SIZE) { //If we can fill this arena immediately, do it!
-                if((item.getPreferredArena() == null || !arenaChoices.containsKey(item.getPreferredArena()))) { //If someone else is queued for that arena, let them go first since they came first actually
+            if (item.size() == Arena.SIZE) { //If we can fill this arena immediately, do it!
+                if ((item.getPreferredArena() == null || !arenaChoices.containsKey(item.getPreferredArena()))) { //If someone else is queued for that arena, let them go first since they came first actually
                     tryPop(item.getPreferredArena(), item);
                 }
 

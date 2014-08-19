@@ -122,7 +122,7 @@ public class MinoDuelArena extends ConfigurableArena {
                 Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§7Der Kampf zwischen §a" +
                         players.getLeft().getPlayer().getName() +
                         "§7 und §a" + players.getRight().getPlayer().getName() +
-                        " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
+                        " §7 ist unentschieden ausgegangen! (§6" + this.getName() + "§7)");
             }
         }
 

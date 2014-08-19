@@ -299,7 +299,7 @@ public class WaitingQueueManager {
         }
 
         arena.scheduleGame(items).stream()
-                .forEach(this::remove); //Remove all items that the arena accepted
+                .forEach(queue::remove); //Remove all items that the arena accepted
 
         return true;
     }

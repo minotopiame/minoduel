@@ -47,7 +47,9 @@ public class DuelRequestManager {
 
         if (duelRequest != null) {
             pendingDuelRequests.remove(target.getUniqueId(), requester.getUniqueId());
-            return Optional.of(duelRequest.preferredArena);
+            if (duelRequest.preferredArena != null) { //Optional#of(Object) throws a NPE if null is passed
+                return Optional.of(duelRequest.preferredArena);
+            }
         }
 
         return Optional.empty();

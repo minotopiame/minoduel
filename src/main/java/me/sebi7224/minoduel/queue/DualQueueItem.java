@@ -42,7 +42,7 @@ public class DualQueueItem extends AbstractQueueItem {
                 result += String.format("Ihr seid §e%d.§6 in der Warteschlange der Arena §e%s§6!", args);
                 break;
             case REMOVAL_NOTIFICATION:
-                Validate.isTrue(args[0] instanceof Player, "Illegal argument for REMOVAL_NOTIFICATION: %s!", args[0]);
+                Validate.isTrue(args[0] == null || args[0] instanceof Player, "Illegal argument for REMOVAL_NOTIFICATION: ", args[0]);
                 Player cause = (Player) args[0];
 
                 if (cause == null) {

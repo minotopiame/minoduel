@@ -76,6 +76,11 @@ public interface QueueItem {
          */
         POSITION_NOTIFICATION,
         /**
+         * The item is notified that it is removed because of a server reload.
+         * Arguments: none
+         */
+        RELOAD_REMOVED,
+        /**
          * The item is notified of its removal.
          * Argument: Player (player who caused the removal or NULL if the item was removed as a whole)
          */

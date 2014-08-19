@@ -95,6 +95,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     public void onDisable() {
         //Make sure we save the config and make it impossible to override by editing manually.
         saveConfig();
+        queueManager.notifyReload();
     }
 
     @Override

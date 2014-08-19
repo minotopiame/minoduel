@@ -57,6 +57,9 @@ public class PlayerQueueItem extends AbstractQueueItem {
                 result += String.format("Du hast die Warteschlange der Arena %s verlassen!",
                         (getPreferredArena() == null ? "(egal)" : getPreferredArena().getName()));
                 break;
+            case RELOAD_REMOVED:
+                result += "Du hast die Warteschlange wegen eines Serverreloads verlassen. Wir bitten, die Unannehmlichkeiten zu entschuldigen.";
+                break;
             default:
                 throw new AssertionError("Unknown message type for " + getClass() + ": "+type.name());
         }

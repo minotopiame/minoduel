@@ -279,6 +279,15 @@ public class WaitingQueueManager {
         return ImmutableListMultimap.copyOf(result);
     }
 
+    /**
+     * Notifies the queue manager of a reload occurring. THis will cause all items to be notified and then forcefully
+     * removed.
+     */
+    public void notifyReload() {
+        queue.forEach(item -> item.sendMessage(QueueItem.QueueMessage.RELOAD_REMOVED));
+        queue.clear();
+    }
+
     //Returns whether a game has been started with given arguments
     private boolean tryPop(Arena arena, QueueItem... items) {
         if (arena == null) {

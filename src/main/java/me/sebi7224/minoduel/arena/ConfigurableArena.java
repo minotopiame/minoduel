@@ -99,8 +99,8 @@ public abstract class ConfigurableArena implements Arena {
         boolean valid = validityChecklist.isDone(); //Overhead is probably not that bad
 
         if (valid != lastValidity) {
-            arenaManager.registerValidityChange(this);
             lastValidity = valid;
+            arenaManager.registerValidityChange(this);
         }
 
         return valid;

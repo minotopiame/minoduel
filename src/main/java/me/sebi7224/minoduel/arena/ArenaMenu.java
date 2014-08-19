@@ -108,6 +108,7 @@ public class ArenaMenu implements Listener {
     private ItemStack getIcon(Arena arena) {
         return new ItemStackFactory(arena.getIconStack())
                 .lore(arena.getPlayerString())
+                .defaultDisplayName("§6" + arena.getName())
                 .produce();
     }
 

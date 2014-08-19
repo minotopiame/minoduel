@@ -10,6 +10,7 @@ import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import mkremins.fanciful.FancyMessage;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -106,8 +107,9 @@ public class CommandsArena {
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
             Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
             player.sendMessage("§6Arena: " + (arena.isValid() ? "§a" : "§c") + arena.getName());
-            player.sendMessage("§6Spawn 1: §e" + LocationHelper.prettyPrint(arena.getFirstSpawn()));
-            player.sendMessage("§6Spawn 2: §e" + LocationHelper.prettyPrint(arena.getSecondSpawn()));
+            sendLocationInfo(player, arena.getFirstSpawn(), "Spawn 1: ");
+            sendLocationInfo(player, arena.getSecondSpawn(), "Spawn 2: ");
+
             arena.sendChecklist(player); //TODO click on checklist to get commands suggested
         }
 
@@ -252,6 +254,19 @@ public class CommandsArena {
                         (arena.isEnabled() ? "§2" : "§4de") +
                         "aktiviert§a!");
             }
+        }
+
+        private void sendLocationInfo(CommandSender player, Location location, String desc) {
+            //@formatter:off
+            String tpCommand = LocationHelper.createTpCommand(location, player.getName());
+            new FancyMessage(desc)
+                        .color(GOLD)
+                    .then(LocationHelper.prettyPrint(location))
+                        .color(YELLOW)
+                        .tooltip("Hier klicken zum Teleportieren:", tpCommand)
+                        .command(tpCommand)
+                    .send(player);
+            //@formatter:on
         }
     }
 }

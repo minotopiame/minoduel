@@ -13,7 +13,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <xyc.version>3.0.2-SNAPSHOT</xyc.version>
+        <xyc.version>3.0.2.0-SNAPSHOT</xyc.version>
     </properties>
 
     <scm>

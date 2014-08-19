@@ -42,8 +42,8 @@ public class PlayerQueueItem extends AbstractQueueItem {
     }
 
     @Override
-    public boolean has(Player player) {
-        return player.equals(player);
+    public boolean has(Player other) {
+        return player.equals(other);
     }
 
     private String getMessage(QueueMessage type, Object... args) {

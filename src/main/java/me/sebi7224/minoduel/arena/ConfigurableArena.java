@@ -268,7 +268,7 @@ public abstract class ConfigurableArena implements Arena {
 
         if (configSection.contains(ARMOR_KIT_PATH)) {
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(ARMOR_KIT_PATH);
-            this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[4]);
+            this.armorKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[4]);
         }
     }
 

@@ -105,16 +105,14 @@ public class MinoDuelArena extends ConfigurableArena {
         Validate.isTrue(winner == null || winner.getArena().equals(this));
         Validate.isTrue(players != null);
 
-        //Clean up players - teleport them back etc
-        players.forEach(PlayerInfo::invalidate);
-
         tickTask.reset();
 
         if (winner != null) { //A winner has been determined
             PlayerInfo loser = players.getOther(winner);
 
-            Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§a" + winner.getPlayer().getName() + " §7hat gegen §c" + loser.getPlayer().getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
+            Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
+            //TODO: stats in MySQL w/ fancy leaderboard on website
 
             //Treat winner nicely
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
@@ -127,6 +125,9 @@ public class MinoDuelArena extends ConfigurableArena {
                         " §7 is unentschieden ausgegangen! (§6" + this.getName() + "§7)");
             }
         }
+
+        //Clean up players - teleport them back etc
+        players.forEach(PlayerInfo::invalidate);
 
         players = null;
     }

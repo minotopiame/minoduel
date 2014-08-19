@@ -180,6 +180,7 @@ public class CommandsPlayer {
                 if (opponentInGame) {
                     player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. Bitte versuche es später erneut."); //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight
                 } else {
+                    plugin.getRequestManager().remove(player, opponent);
                     plugin.getQueueManager().enqueue(new DualQueueItem(plugin.getRequestManager().remove(player, opponent).get(), opponent, player));
                 }
             } else if (plugin.getRequestManager().hasPending(opponent, player)) {

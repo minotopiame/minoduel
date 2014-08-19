@@ -66,11 +66,13 @@ public class DuelRequestManagerTest {
         duelRequestManager.request(PLAYER_1, PLAYER_4, null);
         duelRequestManager.request(PLAYER_3, PLAYER_1, null);
         duelRequestManager.request(PLAYER_3, PLAYER_2, null);
+        duelRequestManager.request(PLAYER_4, PLAYER_3, null);
 
         duelRequestManager.removeAll(PLAYER_3);
 
         assertFalse("removeAll doesn't remove all (1)", duelRequestManager.hasPending(PLAYER_3, PLAYER_1));
         assertFalse("removeAll doesn't remove all (2)", duelRequestManager.hasPending(PLAYER_3, PLAYER_2));
+        assertFalse("removeAll doesn't remove all (3)", duelRequestManager.hasPending(PLAYER_4, PLAYER_3));
         assertTrue("removeAll removes *everything*", duelRequestManager.hasPending(PLAYER_1, PLAYER_4));
     }
 }

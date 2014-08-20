@@ -108,7 +108,7 @@ public class MinoDuelArena extends ConfigurableArena {
         if (winner != null) { //A winner has been determined
             PlayerInfo loser = players.getOther(winner);
 
-            Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7 gewonnen! (§6" + this.getName() + "§7)");
+            Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7gewonnen! (§6" + this.getName() + "§7)");
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
             //TODO: stats in MySQL w/ fancy leaderboard on website
 

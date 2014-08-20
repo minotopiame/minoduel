@@ -41,7 +41,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
     @Override
     public Collection<QueueItem> scheduleGame(@NotNull QueueItem... items) {
-        Validate.isTrue(items.length == SIZE, "Expected maximum of SIZE queue items, given: ", items.length);
+        Validate.isTrue(items.length <= SIZE, "Expected maximum of SIZE queue items, given: ", items.length);
 
         Collection<QueueItem> fitItems = whichCanFit(items);
         if (!fitItems.isEmpty()) {

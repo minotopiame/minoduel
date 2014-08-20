@@ -70,9 +70,11 @@ public class CommandsPlayer {
 
                 plugin.getQueueManager().enqueue(player, arena);
 
-                player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
-                        (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
-                        "!");
+                if (plugin.getQueueManager().isQueued(player)) {
+                    player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
+                            (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
+                            "!");
+                }
 
                 return;
             }

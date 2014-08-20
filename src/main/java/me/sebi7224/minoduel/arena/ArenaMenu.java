@@ -85,9 +85,12 @@ public class ArenaMenu implements Listener {
 
                 player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
                 plugin.getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
-                player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
-                        (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
-                        "!");
+
+                if (plugin.getQueueManager().isQueued(player)) {
+                    player.sendMessage(plugin.getPrefix() + "Du bist nun in der Warteschlange" +
+                            (arena == null ? "" : " für die Arena §e" + arena.getName() + "§6") +
+                            "!");
+                }
 
                 InventoryHelper.closeInventoryLater(event.getWhoClicked(), this.plugin);
             }

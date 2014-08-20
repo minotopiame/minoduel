@@ -53,7 +53,7 @@ public class DualQueueItem extends AbstractQueueItem {
                     cause.sendMessage(result + String.format("Du hast das Duell mit §e%s§6 abgebrochen!", getOther(cause).getName()));
                     getOther(cause).sendMessage(result + String.format("%s §chat das Duell mit dir abgebrochen! (Was für eine nette Person lol)", cause.getName()));
                 }
-                break;
+                return;
             case RELOAD_REMOVED:
                 result += "Ihr habt die Warteschlange wegen eines Serverreloads verlassen. Wir bitten, die Unannehmlichkeiten zu entschuldigen.";
                 break; //TODO: This should be persisted over reloads http://bugs.nowak-at.net/view.php?id=185

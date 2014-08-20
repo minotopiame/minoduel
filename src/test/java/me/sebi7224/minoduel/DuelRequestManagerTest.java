@@ -51,6 +51,7 @@ public class DuelRequestManagerTest {
         NullableOptional<Arena> return1 = duelRequestManager.remove(PLAYER_1, PLAYER_2);
         assertTrue("remove returns an Optional which is not present for removed value!", return1.isPresent());
         assertEquals("remove returns wrong arena object!", testArena, return1.get());
+        assertFalse("remove doesn't actually remove", duelRequestManager.hasPending(PLAYER_1, PLAYER_2));
     }
 
     @Test
@@ -59,6 +60,7 @@ public class DuelRequestManagerTest {
         NullableOptional<Arena> return1 = duelRequestManager.remove(PLAYER_1, PLAYER_2);
         assertTrue("remove returns an Optional which is not present for removed value!", return1.isPresent());
         assertNull("remove returns non-null Arena when null was set!", return1.get());
+        assertFalse("remove doesn't actually remove", duelRequestManager.hasPending(PLAYER_1, PLAYER_2));
     }
 
     @Test

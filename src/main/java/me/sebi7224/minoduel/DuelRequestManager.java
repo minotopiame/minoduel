@@ -46,7 +46,7 @@ public class DuelRequestManager {
                 .findFirst().orElse(null);
 
         if (duelRequest != null) {
-            pendingDuelRequests.remove(target.getUniqueId(), requester.getUniqueId());
+            pendingDuelRequests.get(target.getUniqueId()).removeIf(rq -> rq.from.equals(requester.getUniqueId()));
             return NullableOptional.of(duelRequest.preferredArena);
         }
 

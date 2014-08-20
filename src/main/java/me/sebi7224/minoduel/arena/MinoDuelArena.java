@@ -22,6 +22,7 @@ import io.github.xxyy.lib.intellij_annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Represents a MinoDuel arena as loaded from configuration.
@@ -42,18 +43,15 @@ public class MinoDuelArena extends ConfigurableArena {
     public Collection<QueueItem> scheduleGame(@NotNull QueueItem... items) {
         Validate.isTrue(items.length == SIZE, "Expected maximum of SIZE queue items, given: ", items.length);
 
-        if (items[0].size() + items[1].size() == SIZE) {
-            scheduleGame(items[0].getFirst(), items[1].getFirst());
-            return ImmutableList.of(items[0], items[1]);
-        } else if (items[0].size() == SIZE) {
-            scheduleGame(items[0].getPlayers());
-            return ImmutableList.of(items[0]);
-        } else if (items[1].size() == SIZE) {
-            scheduleGame(items[1].getPlayers());
-            return ImmutableList.of(items[1]);
-        } else { //No possible method to match any of these into this arena
-            return ImmutableList.of();
+        Collection<QueueItem> fitItems = whichCanFit(items);
+        if (!fitItems.isEmpty()) {
+            scheduleGame(fitItems.stream()
+                            .flatMap(item -> item.getPlayers().stream())
+                            .collect(Collectors.toList())
+            );
         }
+
+        return fitItems;
     }
 
     private void scheduleGame(@NotNull List<Player> players) {
@@ -235,6 +233,28 @@ public class MinoDuelArena extends ConfigurableArena {
         MinoDuelArena arena = new MinoDuelArena(section, arenaManager);
         arena.updateFromConfig();
         return arena;
+    }
+
+    public static Collection<QueueItem> whichCanFit(@NotNull QueueItem... items) {
+        if (items.length > SIZE) {
+            throw new UnsupportedOperationException("Cannot fit more than " + SIZE + " items: " + items.length);
+        }
+
+        if (items.length == 1) {
+            if (items[0].size() == SIZE) {
+                return ImmutableList.copyOf(items);
+            }
+        } else {
+            if (items[0].size() + items[1].size() == SIZE) {
+                return ImmutableList.copyOf(items);
+            } else if (items[0].size() == SIZE) {
+                return ImmutableList.of(items[0]);
+            } else if (items[1].size() == SIZE) {
+                return ImmutableList.of(items[1]);
+            }
+        }
+
+        return ImmutableList.of();
     }
 
     //////// OVERRIDDEN OBJECT METHODS /////////////////////////////////////////////////////////////////////////////////

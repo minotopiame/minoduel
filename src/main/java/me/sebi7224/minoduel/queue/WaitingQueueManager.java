@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.ArenaManager;
+import me.sebi7224.minoduel.arena.MinoDuelArena;
 import org.bukkit.entity.Player;
 
 import io.github.xxyy.lib.guava17.collect.ImmutableListMultimap;
@@ -14,6 +15,7 @@ import io.github.xxyy.lib.intellij_annotations.NotNull;
 import io.github.xxyy.lib.intellij_annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,8 +153,8 @@ public class WaitingQueueManager {
      * of them doesn't care about what arena they play in.
      * This is automatically called when a new player is added to the queue.
      */
-    public void findMatches() {
-        Map<Arena, QueueItem> arenaChoices = new HashMap<>();
+    public void findMatches() { //I don't even want to know how bad the performance of this is
+        ListMultimap<Arena, QueueItem> arenaChoices = MultimapBuilder.hashKeys().arrayListValues().build();
 
         if (queue.size() < 2) {
             return;
@@ -161,20 +163,27 @@ public class WaitingQueueManager {
         ImmutableList.copyOf(queue).stream().forEach(item -> { //Need to copy to avoid concurrent modification
             if (item.size() == Arena.SIZE) { //If we can fill this arena immediately, do it!
                 if ((item.getPreferredArena() == null || !arenaChoices.containsKey(item.getPreferredArena()))) { //If someone else is queued for that arena, let them go first since they came first actually
-                    tryPop(item.getPreferredArena(), item);
+                    if (tryPop(item).isEmpty()) {
+                        arenaChoices.put(item.getPreferredArena(), item);
+                    }
                 }
 
                 return; //No need for all that emotional match-finding
             }
 
-            QueueItem match = arenaChoices.remove(item.getPreferredArena()); //Get an item preferring the same arena
+            QueueItem match = getFitting(arenaChoices.get(item.getPreferredArena()), item); //Get an item preferring the same arena
 
             if (match == null) { //If none, get an item that doesn't care
-                match = arenaChoices.get(null); //Get player w/o arena preference
+                match = getFitting(arenaChoices.get(null), item); //Get player w/o arena preference
+            }
+
+            if (match == null && item.getPreferredArena() == null) { //No match, but this item doesn't care
+                match = getFitting(queue, item); //Let's just get any item from the queue
             }
 
             if (match != null) { //If we found someone, start a game
-                tryPop(item.getPreferredArena(), item, match); //That method gets a random arena if NULL is passed
+                tryPop(item, match)
+                        .forEach(removed -> arenaChoices.remove(removed.getPreferredArena(), removed));
             } else {
                 arenaChoices.put(item.getPreferredArena(), item); //If we found no match, queue this player to be matched
             }
@@ -289,18 +298,41 @@ public class WaitingQueueManager {
     }
 
     //Returns whether a game has been started with given arguments
-    private boolean tryPop(Arena arena, QueueItem... items) {
+    private Collection<QueueItem> tryPop(QueueItem... items) {
+        Arena arena = null;
+
+        for (QueueItem item : items) {
+            if (item.getPreferredArena() != null) {
+                arena = item.getPreferredArena();
+                break;
+            }
+        }
+
         if (arena == null) {
             arena = arenaManager.firstReady();
         }
 
         if (arena == null || !arena.isReady()) {
-            return false;
+            return ImmutableList.of();
         }
 
-        arena.scheduleGame(items).stream()
+        Collection<QueueItem> acceptedItems = arena.scheduleGame(items);
+        acceptedItems.stream()
                 .forEach(queue::remove); //Remove all items that the arena accepted
 
-        return true;
+        return acceptedItems;
+    }
+
+    /**
+     * Gets an item which can fit into an Arena with a given initial item from a provided collection
+     *
+     * @param availableItems a collection of available items to get matches from
+     * @param ourItem        the item to match against
+     * @return a matching item or NULL if none match
+     */
+    private QueueItem getFitting(Collection<QueueItem> availableItems, QueueItem ourItem) {
+        return availableItems.stream() //Gets first item that
+                .filter(other -> !MinoDuelArena.whichCanFit(ourItem, other).isEmpty()) //can fit with the parameter from a list
+                .findFirst().orElse(null);
     }
 }

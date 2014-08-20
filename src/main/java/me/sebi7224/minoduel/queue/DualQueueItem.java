@@ -70,7 +70,11 @@ public class DualQueueItem extends AbstractQueueItem {
         return players;
     }
 
-    private Player getOther(@NotNull Player plr) {
+    public Player getOther(@NotNull Player plr) {
+        if (!has(plr)) {
+            return null;
+        }
+
         return plr.equals(players.get(0)) ? players.get(1) : players.get(0);
     }
 

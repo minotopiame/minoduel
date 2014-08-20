@@ -8,6 +8,7 @@ import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.queue.DualQueueItem;
+import me.sebi7224.minoduel.queue.QueueItem;
 import mkremins.fanciful.FancyMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -182,8 +183,21 @@ public class CommandsPlayer {
                 if (opponentInGame) {
                     player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. Bitte versuche es später erneut."); //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight
                 } else {
-                    plugin.getRequestManager().remove(player, opponent);
+                    QueueItem opponentItem = plugin.getQueueManager().getQueueItem(opponent);
+                    if (opponentItem != null && opponentItem instanceof DualQueueItem) {
+                        player.sendMessage(plugin.getPrefix() + "§4" + opponent.getName() +
+                                "§c ist gerade in einem Duell mit §4" + ((DualQueueItem) opponentItem).getOther(opponent).getName() + "§c!");
+                        return;
+                    }
+
                     plugin.getQueueManager().enqueue(new DualQueueItem(plugin.getRequestManager().remove(player, opponent).get(), opponent, player));
+                    player.sendMessage(plugin.getPrefix() + "§aDu hast die Duellanfrage von §2" + opponent.getName() + "§a angenommen!");
+                    opponent.sendMessage(plugin.getPrefix() + "§2" + player.getName() + " hat deine Duellanfrage angenommen!");
+
+                    if (plugin.getQueueManager().isQueued(player)) {
+                        player.sendMessage(plugin.getPrefix() + "Ihr seid nun in der Warteschlange.");
+                        opponent.sendMessage(plugin.getPrefix() + "Ihr seid nun in der Warteschlange.");
+                    }
                 }
             } else if (plugin.getRequestManager().hasPending(opponent, player)) {
                 player.sendMessage(plugin.getPrefix() + "Du hast §e" + opponent.getName() + "§6 bereits eine Anfrage geschickt!"); //TODO: which arena?
@@ -206,9 +220,8 @@ public class CommandsPlayer {
                         .then("klick (i)") //Let's hope that users actually understand that lol
                             .color(GOLD)
                             .tooltip("Wähle eine der Optionen.",
-                                    "Du kannst die Anfrage auch jederzeit später bearbeiten,",
-                                    "die Befehle dafür siehst du, wenn du deine Maus über eine Option bewegst.",
-                                    "Wenn du oder "+player.getName()+" offline gehen, wird die ANfrag automatisch gelöscht.")
+                                    "Du kannst die Anfrage auch", "jederzeit später bearbeiten.",
+                                    "Wenn du oder " + player.getName() + " offline gehen,", "wird die Anfrage gelöscht.")
                         .then(" --> [Ablehnen]")
                             .color(DARK_RED)
                             .tooltip("/1vs1 duel -c " + player.getName())

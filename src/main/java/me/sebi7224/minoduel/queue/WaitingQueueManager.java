@@ -45,10 +45,11 @@ public class WaitingQueueManager {
      *
      * @param plr   Player to add, may not be NULL
      * @param arena Arena the player prefers or NULL if no preference was stated.
-     * @return the previous queue item for that player or NULL if none
      */
-    public QueueItem enqueue(@NotNull Player plr, @Nullable Arena arena) {
-        return enqueue(new PlayerQueueItem(plr, arena));
+    public void enqueue(@NotNull Player plr, @Nullable Arena arena) {
+        remove(plr);
+        queue.add(new PlayerQueueItem(plr, arena));
+        findMatches();
     }
 
     /**
@@ -56,13 +57,11 @@ public class WaitingQueueManager {
      * re-added to the end of the queue.
      *
      * @param item the item to add to the queue
-     * @return the added item
      */
-    public QueueItem enqueue(@NotNull QueueItem item) {
-        QueueItem previous = remove(item, true);
+    public void enqueue(@NotNull QueueItem item) {
+        item.getPlayers().forEach(this::remove);
         queue.add(item);
         findMatches();
-        return previous;
     }
 
     /**
@@ -156,7 +155,7 @@ public class WaitingQueueManager {
     public void findMatches() { //I don't even want to know how bad the performance of this is
         ListMultimap<Arena, QueueItem> arenaChoices = MultimapBuilder.hashKeys().arrayListValues().build();
 
-        if (queue.size() < 2) {
+        if (queue.size() >= 2 || (!queue.isEmpty() && queue.get(0).size() == Arena.SIZE)) {
             return;
         }
 
@@ -188,6 +187,8 @@ public class WaitingQueueManager {
                 arenaChoices.put(item.getPreferredArena(), item); //If we found no match, queue this player to be matched
             }
         });
+
+        //TODO: notify players of position
     }
 
     /**

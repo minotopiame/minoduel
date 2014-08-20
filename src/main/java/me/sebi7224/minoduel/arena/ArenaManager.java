@@ -256,6 +256,14 @@ public class ArenaManager {
         return arenaMenu;
     }
 
+    public void onReload() {
+        arenaCache.values().stream()
+                .filter(MinoDuelArena::isOccupied).forEach(arena -> {
+            arena.getPlayers().forEach(plr -> plr.getPlayer().sendMessage(plugin.getPrefix() + "Dein 1vs1 wurde aufgrund eines Reloads beendet! Wir bitten, die Unannehmlichkeiten zu entschuldigen."));
+            arena.endGame(null, false);
+        });
+    }
+
     protected void registerValidityChange(@SuppressWarnings("UnusedParameters") Arena arena) {
         arenaMenu.refresh();
     }

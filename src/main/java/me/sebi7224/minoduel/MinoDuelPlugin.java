@@ -96,6 +96,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         //Make sure we save the config and make it impossible to override by editing manually.
         saveConfig();
         queueManager.notifyReload();
+        arenaManager.onReload();
     }
 
     @Override

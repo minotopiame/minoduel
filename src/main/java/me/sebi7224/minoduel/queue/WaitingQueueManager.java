@@ -297,6 +297,18 @@ public class WaitingQueueManager {
         queue.clear();
     }
 
+    /**
+     * Gets the QueueItem currently representing a player in this queue or NULL if that player is not represented.
+     *
+     * @param plr the player to find
+     * @return the queue item currently representing the player or NULL
+     */
+    public QueueItem get(Player plr) {
+        return queue.stream()
+                .filter(item -> item.has(plr))
+                .findFirst().orElse(null);
+    }
+
     //Returns whether a game has been started with given arguments
     private Collection<QueueItem> tryPop(QueueItem... items) {
         Arena arena = null;

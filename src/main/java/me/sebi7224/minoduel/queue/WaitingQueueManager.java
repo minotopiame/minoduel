@@ -155,7 +155,7 @@ public class WaitingQueueManager {
     public void findMatches() { //I don't even want to know how bad the performance of this is
         ListMultimap<Arena, QueueItem> arenaChoices = MultimapBuilder.hashKeys().arrayListValues().build();
 
-        if (queue.size() >= 2 || (!queue.isEmpty() && queue.get(0).size() == Arena.SIZE)) {
+        if (queue.size() < 2 && (queue.isEmpty() || queue.get(0).size() != Arena.SIZE)) {
             return;
         }
 

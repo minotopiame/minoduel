@@ -160,6 +160,10 @@ public class CommandsPlayer {
                 return;
             }
 
+            if (opponent.equals(player)) {
+                throw new CommandException("Sorry, du kannst nicht gegen dich selbst kämpfen. Kauf dir Freunde ;D");
+            }
+
             boolean opponentInGame = plugin.getArenaManager().isInGame(opponent);
 
             if (args.hasFlag('c')) {

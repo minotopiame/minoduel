@@ -244,7 +244,7 @@ public class MinoDuelArena extends ConfigurableArena {
             if (items[0].size() == SIZE) {
                 return ImmutableList.copyOf(items);
             }
-        } else {
+        } else if (!items[0].equals(items[1])) {
             if (items[0].size() + items[1].size() == SIZE) {
                 return ImmutableList.copyOf(items);
             } else if (items[0].size() == SIZE) {

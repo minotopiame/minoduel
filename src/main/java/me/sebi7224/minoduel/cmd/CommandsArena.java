@@ -107,8 +107,8 @@ public class CommandsArena {
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
             Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
             player.sendMessage("§6Arena: " + (arena.isValid() ? "§a" : "§c") + arena.getName());
-            sendLocationInfo(player, arena.getFirstSpawn(), "Spawn 1: ");
-            sendLocationInfo(player, arena.getSecondSpawn(), "Spawn 2: ");
+            sendLocationInfo(player, arena.getFirstSpawn(), 1);
+            sendLocationInfo(player, arena.getSecondSpawn(), 2);
 
             arena.sendChecklist(player); //TODO click on checklist to get commands suggested
         }
@@ -256,16 +256,24 @@ public class CommandsArena {
             }
         }
 
-        private void sendLocationInfo(CommandSender player, Location location, String desc) {
+        private void sendLocationInfo(CommandSender player, Location location, int spawnId) {
+            FancyMessage message = new FancyMessage("Spawn " + spawnId + ": ").color(GOLD);
             //@formatter:off
-            String tpCommand = LocationHelper.createTpCommand(location, player.getName());
-            new FancyMessage(desc)
-                        .color(GOLD)
-                    .then(LocationHelper.prettyPrint(location))
-                        .color(YELLOW)
-                        .tooltip("Hier klicken zum Teleportieren:", tpCommand)
-                        .command(tpCommand)
+            if (location == null) {
+                message.then("nicht gesetzt! [Hier setzen]")
+                        .color(RED)
+                        .tooltip("Hier klicken für", "/mda set spawn "+spawnId)
+                        .command("/mda set spawn "+spawnId)
                     .send(player);
+                return;
+            }
+
+            String tpCommand = LocationHelper.createTpCommand(location, player.getName());
+            message.then(LocationHelper.prettyPrint(location))
+                    .color(YELLOW)
+                    .tooltip("Hier klicken zum Teleportieren:", tpCommand)
+                    .command(tpCommand)
+                .send(player);
             //@formatter:on
         }
     }

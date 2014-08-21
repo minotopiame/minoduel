@@ -67,12 +67,12 @@ public class ArenaManager {
     @SuppressWarnings("unchecked")
     public List<ItemStack> getDefaultRewards() {
         if (defaultRewards == null) {
-            defaultRewards = (List<ItemStack>) MinoDuelPlugin.inst().getConfig().getList(DEFAULT_REWARDS_PATH);
+            defaultRewards = (List<ItemStack>) plugin.getConfig().getList(DEFAULT_REWARDS_PATH);
 
             if (defaultRewards == null || defaultRewards.isEmpty()) {
                 defaultRewards = Arrays.asList(new ItemStackFactory(Material.DIAMOND).displayName("§61vs1-Belohnung!").produce());
-                MinoDuelPlugin.inst().getConfig().set(DEFAULT_REWARDS_PATH, defaultRewards);
-                MinoDuelPlugin.inst().saveConfig();
+                plugin.getConfig().set(DEFAULT_REWARDS_PATH, defaultRewards);
+                plugin.saveConfig();
             }
         }
 
@@ -173,8 +173,8 @@ public class ArenaManager {
     public Arena byName(String name) {
         Arena arena = arenaCache.get(name);
 
-        if (arena == null && MinoDuelPlugin.inst().getConfig().contains(MinoDuelArena.CONFIG_PATH + "." + name)) {
-            reloadArenas(MinoDuelPlugin.getInstance().getConfig());
+        if (arena == null && plugin.getConfig().contains(MinoDuelArena.CONFIG_PATH + "." + name)) {
+            reloadArenas(plugin.getConfig());
             arena = arenaCache.get(name);
         }
 
@@ -240,7 +240,7 @@ public class ArenaManager {
      */
     public ItemStack getAnyArenaIcon() {
         if (anyArenaIcon == null) {
-            anyArenaIcon = MinoDuelPlugin.inst().getConfig().getItemStack("any-arena-icon");
+            anyArenaIcon = plugin.getConfig().getItemStack("any-arena-icon");
 
             if (anyArenaIcon == null) {
                 anyArenaIcon = new ItemStackFactory(Material.DIRT)

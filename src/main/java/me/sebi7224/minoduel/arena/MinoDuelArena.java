@@ -232,7 +232,8 @@ public class MinoDuelArena extends ConfigurableArena {
                 });
 
         new RunnableTeleportLater(playerInfo.getPlayer(), playerInfo.getSpawnLocation(), 5, completeHandler)
-                .runTaskTimer(MinoDuelPlugin.inst(), MinoDuelPlugin.inst().getTeleportDelayTicks(), MinoDuelPlugin.inst().getTeleportDelayTicks());
+                .runTaskTimer(getArenaManager().getPlugin(), getArenaManager().getPlugin().getTeleportDelayTicks(),
+                        getArenaManager().getPlugin().getTeleportDelayTicks());
     }
 
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,7 +315,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
         public void start() {
             this.ticksLeft = TICKS_IN_A_GAME;
-            this.runTaskTimer(MinoDuelPlugin.inst(), 20L * 5L, 20L * 5L); //This task so far only announces time left and the smallest interval is 5 seconds
+            this.runTaskTimer(getArenaManager().getPlugin(), 20L * 5L, 20L * 5L); //This task so far only announces time left and the smallest interval is 5 seconds
         }
 
         public void reset() {

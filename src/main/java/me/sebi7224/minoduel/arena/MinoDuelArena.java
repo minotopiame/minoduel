@@ -10,6 +10,8 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.games.util.RunnableTeleportLater;
@@ -314,8 +316,6 @@ public class MinoDuelArena extends ConfigurableArena {
                 .toString();
     }
 
-    ///////////// BEST RUNNABLE ////////////////////////////////////////////////////////////////////////////////////////
-
     //////////// LE INNER CLASS ////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -373,6 +373,11 @@ public class MinoDuelArena extends ConfigurableArena {
          */
         protected void setInArena(boolean inArena) {
             this.inArena = inArena;
+
+            if (inArena) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 1639 * 20, 128)); //This blocks any movements and additionally zooms in
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1639 * 20, 127)); //This blocks any damage
+            }
         }
 
         /**

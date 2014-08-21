@@ -34,6 +34,9 @@ class MinoDuelArenaTaskManager {
 
         public void start() {
             secondsUntilStart = MAX_SECONDS_UNTIL_START;
+
+            arena.getPlayers().forEach(pi -> pi.getPlayer().getActivePotionEffects().clear());
+
             runTaskTimer(arena.getArenaManager().getPlugin(), 20L, 20L);
         }
 

@@ -183,6 +183,12 @@ public class CommandsPlayer {
                 player.sendMessage(plugin.getPrefix() + opponent.getName() + " ist gerade im Kampf.");
             }
 
+            if (plugin.getMtcHook().isInOtherGame(opponent.getUniqueId())) {
+                player.sendMessage(plugin.getPrefix() + opponent.getName() + " ist gerade in einem Spiel von " +
+                        plugin.getMtcHook().getBlockingPlugin(opponent.getUniqueId()).getName() + ".");
+                opponentInGame = true;
+            }
+
             if (plugin.getRequestManager().hasPending(player, opponent)) { //If this is an answer to a request
                 if (opponentInGame) {
                     player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. Bitte versuche es später erneut."); //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight

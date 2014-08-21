@@ -21,15 +21,17 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.xxyy.common.version.PluginVersion;
+import io.github.xxyy.mtc.api.PlayerGameManager;
 
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class MinoDuelPlugin extends JavaPlugin {
     private static class PlayerOnlyCommandException extends RuntimeException { //Hack to work around hasPermission(...) not declaring the checked CommandException exception
-
         public PlayerOnlyCommandException(String desc) {
             super(desc);
         }
@@ -59,6 +61,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     private CommandHelpHelper helpHelper = new CommandHelpHelper(commandsManager);
     private ArenaManager arenaManager = new ArenaManager(this);
     private WaitingQueueManager queueManager = new WaitingQueueManager(arenaManager);
+    private MTCHook mtcHook;
 
     @Override
     public void onEnable() {
@@ -87,6 +90,9 @@ public class MinoDuelPlugin extends JavaPlugin {
         //Automagically save config every 5 minutes to minimize data-loss on crash
         getServer().getScheduler().runTaskTimer(this, this::saveConfig,
                 5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
+
+        //Hook MTC
+        mtcHook = new MTCHook();
 
         getLogger().info("Enabled " + VERSION.toString() + "!");
     }
@@ -167,5 +173,38 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public ArenaManager getArenaManager() {
         return arenaManager;
+    }
+
+    public MTCHook getMtcHook() {
+        return mtcHook;
+    }
+
+    public class MTCHook {
+        private PlayerGameManager manager;
+
+        void tryHook() {
+            try {
+                manager = getServer().getServicesManager().load(PlayerGameManager.class);
+            } catch (NoClassDefFoundError e) {
+                getLogger().info("MTC hook failed: MTC not loaded.");
+            }
+        }
+
+        public boolean isInOtherGame(UUID uuid) {
+            return manager != null && MinoDuelPlugin.this.equals(manager.getProvidingPlugin(uuid));
+        }
+
+        public Plugin getBlockingPlugin(UUID uuid) {
+            if (manager == null) {
+                return null;
+            }
+            return manager.getProvidingPlugin(uuid);
+        }
+
+        public void setInGame(boolean inGame, UUID uuid) {
+            if (manager != null) {
+                manager.setInGame(inGame, uuid, MinoDuelPlugin.this);
+            }
+        }
     }
 }

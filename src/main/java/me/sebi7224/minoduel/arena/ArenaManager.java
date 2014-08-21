@@ -267,4 +267,8 @@ public class ArenaManager {
     protected void registerValidityChange(@SuppressWarnings("UnusedParameters") Arena arena) {
         arenaMenu.refresh();
     }
+
+    public MinoDuelPlugin getPlugin() {
+        return plugin;
+    }
 }

@@ -85,6 +85,19 @@ public class MinoDuelArena extends ConfigurableArena {
 
         this.players.forEach(pi -> {
             Player plr = pi.getPlayer();
+
+            if (getArenaManager().getPlugin().getMtcHook().isInOtherGame(plr.getUniqueId())) {
+                getOther(plr).getPlayer().sendMessage("§cDein Gegner hat ein Spiel in einem anderen Plugin (" +
+                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
+                        ") begonnen. 1vs1 kann daher nicht fortfahren.");
+                plr.getPlayer().sendMessage("§cDu hast ein Spiel in einem anderen Plugin (" +
+                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
+                        ") begonnen. 1vs1 kann daher nicht fortfahren.");
+                endGame(null, false);
+                return;
+            }
+
+            getArenaManager().getPlugin().getMtcHook().setInGame(true, plr.getUniqueId());
             plr.setFireTicks(0);
             plr.setHealth(plr.getMaxHealth());
             plr.setFoodLevel(20);
@@ -125,7 +138,10 @@ public class MinoDuelArena extends ConfigurableArena {
         }
 
         //Clean up players - teleport them back etc
-        players.forEach(PlayerInfo::invalidate);
+        players.forEach(plr -> {
+            getArenaManager().getPlugin().getMtcHook().setInGame(false, plr.getPlayer().getUniqueId());
+            plr.invalidate();
+        });
 
         players = null;
     }

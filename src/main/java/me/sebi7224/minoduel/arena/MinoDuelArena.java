@@ -73,7 +73,7 @@ public class MinoDuelArena extends ConfigurableArena {
                 new PlayerInfo(plr2, getSecondSpawn())
         );
 
-        players.forEach(PlayerInfo::sendTeleportMessage);
+        players.forEach(PlayerInfo::notifyTeleport);
         players.forEach(this::teleportLater);
 
         state = ArenaState.TELEPORT;
@@ -376,6 +376,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
             if (inArena) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 1639 * 20, 128)); //This blocks any movements and additionally zooms in
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 1639 * 20, 128)); //This blocks jumping - Movement is possible w/o this
                 player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1639 * 20, 127)); //This blocks any damage
             }
         }
@@ -419,18 +420,21 @@ public class MinoDuelArena extends ConfigurableArena {
             return uniqueId;
         }
 
-        protected void sendTeleportMessage() {
+        protected void notifyTeleport() {
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst jetzt gegen §a" +
                     MinoDuelArena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
         }
 
-        protected void sendStartMessage() {
+        protected void notifyGameStart() {
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eMögen die Spiele beginnen!");
             getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.94F); //note 11, F4
+
+            getPlayer().getActivePotionEffects().stream()
+                    .forEach(eff -> getPlayer().removePotionEffect(eff.getType()));
         }
 
-        protected void sendWaitMessage(int secondsLeft) {
+        protected void notifyWaitTick(int secondsLeft) {
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Das Spiel beginnt in §8" + secondsLeft + "§7 Sekunden!");
             getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
         }

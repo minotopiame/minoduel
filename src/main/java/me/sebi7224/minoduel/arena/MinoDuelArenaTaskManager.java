@@ -35,8 +35,6 @@ class MinoDuelArenaTaskManager {
         public void start() {
             secondsUntilStart = MAX_SECONDS_UNTIL_START;
 
-            arena.getPlayers().forEach(pi -> pi.getPlayer().getActivePotionEffects().clear());
-
             runTaskTimer(arena.getArenaManager().getPlugin(), 20L, 20L);
         }
 
@@ -44,11 +42,11 @@ class MinoDuelArenaTaskManager {
         public void run() {
             secondsUntilStart--;
             if (secondsUntilStart == 0) {
-                arena.getPlayers().forEach(MinoDuelArena.PlayerInfo::sendStartMessage);
+                arena.getPlayers().forEach(MinoDuelArena.PlayerInfo::notifyGameStart);
                 stop();
                 gameTask.start();
             } else {
-                arena.getPlayers().forEach(pi -> pi.sendWaitMessage(secondsUntilStart));
+                arena.getPlayers().forEach(pi -> pi.notifyWaitTick(secondsUntilStart));
             }
         }
 

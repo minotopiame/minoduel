@@ -2,7 +2,7 @@ package me.sebi7224.minoduel.listener;
 
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
-import me.sebi7224.minoduel.arena.MinoDuelArena;
+import me.sebi7224.minoduel.arena.ArenaPlayerInfo;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -47,7 +47,7 @@ public class MainListener implements Listener {
         Arena arena = plugin.getArenaManager().getPlayerArena(plr);
 
         if (arena != null) {
-            MinoDuelArena.PlayerInfo opponent = arena.getOther(plr);
+            ArenaPlayerInfo opponent = arena.getOther(plr);
             if (opponent.getPlayer() != null) {
                 opponent.getPlayer().sendMessage(plugin.getPrefix() + "Dein Gegner hat das Spiel verlassen, daher bist du der Gewinner!");
             }

@@ -16,12 +16,12 @@ import io.github.xxyy.common.games.util.RunnableTeleportLater;
 import io.github.xxyy.common.util.CommandHelper;
 import io.github.xxyy.common.util.XyValidate;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
-import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -33,10 +33,11 @@ import java.util.stream.Collectors;
 public class MinoDuelArena extends ConfigurableArena {
 
     private Couple<PlayerInfo> players = null;
-    private RunnableArenaTick tickTask = new RunnableArenaTick();
+    private MinoDuelArenaTaskManager tickManager = new MinoDuelArenaTaskManager(this);
 
     public MinoDuelArena(@NotNull ConfigurationSection storageBackend, ArenaManager arenaManager) {
         super(storageBackend, arenaManager);
+
     }
 
     @Override
@@ -59,7 +60,7 @@ public class MinoDuelArena extends ConfigurableArena {
     }
 
     public void scheduleGame(@NotNull Player plr1, @NotNull Player plr2) {
-        Validate.isTrue(isReady(), "This arena is currently not ready");
+        Validate.isTrue(getState() == ArenaState.READY, "This arena is currently not ready: ", getState());
         Validate.notNull(plr1, "Player one is null");
         Validate.notNull(plr2, "Player two is null");
         Validate.isTrue(!getArenaManager().isInGame(plr1), "Player one is currently in another game!");
@@ -72,16 +73,16 @@ public class MinoDuelArena extends ConfigurableArena {
 
         players.forEach(PlayerInfo::sendTeleportMessage);
         players.forEach(this::teleportLater);
+
+        state = ArenaState.TELEPORT;
     }
 
     @SuppressWarnings("deprecation") //updateInventory
     private void startGame() {
         XyValidate.validateState(isValid(), "This arena is currently not valid");
-        XyValidate.validateState(isOccupied(), "Cannot start game in empty arena!");
+        XyValidate.validateState(getState() == ArenaState.WAIT, "Invalid state: WAIT expected, got: ", getState());
         XyValidate.validateState(players.getLeft().isValid(), "left player is invalid: " + players.getLeft().getName());
         XyValidate.validateState(players.getRight().isValid(), "right player is invalid: " + players.getRight().getName());
-
-        this.players.forEach(PlayerInfo::sendStartMessage);
 
         this.players.forEach(pi -> {
             Player plr = pi.getPlayer();
@@ -109,17 +110,19 @@ public class MinoDuelArena extends ConfigurableArena {
             plr.setFlying(false);
             plr.playSound(plr.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
         });
+
+        tickManager.start();
     }
 
     @Override
-    public void endGame(PlayerInfo winner, boolean sendUndecidedMessage) {
+    public void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage) {
         Validate.isTrue(winner == null || winner.getArena().equals(this));
         Validate.isTrue(players != null);
 
-        tickTask.reset();
+        tickManager.stop();
 
         if (winner != null) { //A winner has been determined
-            PlayerInfo loser = players.getOther(winner);
+            PlayerInfo loser = players.getOther((PlayerInfo) winner);
 
             CommandHelper.broadcast(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7gewonnen! (§6" + this.getName() + "§7)", null);
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
@@ -145,6 +148,7 @@ public class MinoDuelArena extends ConfigurableArena {
         }
 
         players = null;
+        state = ArenaState.READY;
     }
 
     @Override
@@ -191,10 +195,8 @@ public class MinoDuelArena extends ConfigurableArena {
                 (players.getRight() == null ? "???" : players.getRight().getName());
     }
 
-    /////// SETTERS ////////////////////////////////////////////////////////////////////////////////////////////////////
-
     @Override
-    public PlayerInfo getOther(@NotNull Player plr) {
+    public ArenaPlayerInfo getOther(@NotNull Player plr) {
         XyValidate.validateState(isValid(), "Arena is invalid!");
 
         if (players.getLeft().getPlayer().equals(plr)) {
@@ -205,6 +207,12 @@ public class MinoDuelArena extends ConfigurableArena {
             return null;
         }
     }
+
+    protected void setState(ArenaState newState) {
+        state = newState;
+    }
+
+    ///////////////////////////// PRIVATE UTIL /////////////////////////////////////////////////////////////////////////
 
     private void teleportLater(@NotNull PlayerInfo playerInfo) {
         Validate.notNull(playerInfo.getPlayer(), "player is null");
@@ -218,6 +226,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
                     if (failureReason == null) {
                         playerInfo.setInArena(true);
+                        state = ArenaState.WAIT;
 
                         if (players.getOther(playerInfo).isInArena()) {
                             startGame();
@@ -307,40 +316,6 @@ public class MinoDuelArena extends ConfigurableArena {
 
     ///////////// BEST RUNNABLE ////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Runnable which ticks Arenas every 5 seconds.
-     */
-    private class RunnableArenaTick extends NonAsyncBukkitRunnable {
-        private static final int TICKS_IN_A_GAME = 60; //Ticks every 5 seconds
-        private int ticksLeft = 0;
-
-        public void start() {
-            this.ticksLeft = TICKS_IN_A_GAME;
-            this.runTaskTimer(getArenaManager().getPlugin(), 20L * 5L, 20L * 5L); //This task so far only announces time left and the smallest interval is 5 seconds
-        }
-
-        public void reset() {
-            this.ticksLeft = 0;
-            this.tryCancel();
-        }
-
-        @Override
-        public void run() {
-            ticksLeft--; //Ticks, as in 1vs1 ticks, not to be confused with game ticks
-
-            //Announce full minutes
-            if (ticksLeft % 12 == 0) { //every minute
-                getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
-            } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
-                getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
-            } else if (ticksLeft == 0) {
-                MinoDuelArena.this.endGame(null);
-            }
-        }
-    }
-
     //////////// LE INNER CLASS ////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -349,11 +324,12 @@ public class MinoDuelArena extends ConfigurableArena {
      * @author <a href="http://xxyy.github.io/">xxyy</a>
      * @since 20.7.14 // 1.0
      */
-    public class PlayerInfo {
+    public class PlayerInfo implements ArenaPlayerInfo {
         private final int previousExperience;
         private final Location previousLocation;
         private final Location spawnLocation;
         private final String name;
+        private final UUID uniqueId;
         private Player player;
         private boolean valid = true;
         private boolean inArena = false;
@@ -362,6 +338,7 @@ public class MinoDuelArena extends ConfigurableArena {
             this.spawnLocation = spawnLocation;
             this.player = plr;
             this.name = plr.getName();
+            this.uniqueId = plr.getUniqueId();
             this.previousExperience = plr.getTotalExperience();
             this.previousLocation = plr.getLocation();
 
@@ -407,44 +384,34 @@ public class MinoDuelArena extends ConfigurableArena {
             return inArena;
         }
 
-        /**
-         * This gets the Arena object associated with this PlayerInfo.
-         * This always returns NULL if {@link #isValid()} returns FALSE.
-         *
-         * @return the associated Arena or NULL if none.
-         */
+        @Override
         public Arena getArena() {
             return isValid() ? MinoDuelArena.this : null;
         }
 
+        @Override
         public Location getSpawnLocation() {
             return spawnLocation;
         }
 
-        /**
-         * Returns the Player object backing this PlayerInfo.
-         * This returns NULL if {@link #isValid()} returns FALSE.
-         *
-         * @return the associated Player object or NULL if none.
-         */
+        @Override
         public Player getPlayer() {
             return isValid() ? player : null;
         }
 
-        /**
-         * Returns the initial name of the wrapped player. Still works if {@link #isValid()} returns FALSE.
-         *
-         * @return The name of the wrapped Player.
-         */
+        @Override
         public String getName() {
             return name;
         }
 
-        /**
-         * @return whether this information is still valid, i.e. the player is still playing in that arena.
-         */
+        @Override
         public boolean isValid() {
             return valid;
+        }
+
+        @Override
+        public UUID getUniqueId() {
+            return uniqueId;
         }
 
         protected void sendTeleportMessage() {
@@ -455,6 +422,12 @@ public class MinoDuelArena extends ConfigurableArena {
 
         protected void sendStartMessage() {
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eMögen die Spiele beginnen!");
+            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.94F); //note 11, F4
+        }
+
+        protected void sendWaitMessage(int secondsLeft) {
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Das Spiel beginnt in §8" + secondsLeft + "§7 Sekunden!");
+            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
         }
 
         @Override

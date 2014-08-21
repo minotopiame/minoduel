@@ -45,6 +45,7 @@ public abstract class ConfigurableArena implements Arena {
     protected List<ItemStack> specificRewards;
 
     private final ArenaManager arenaManager;
+    protected ArenaState state = ArenaState.INVALID;
     private ItemStack[] inventoryKit;
     private ItemStack[] armorKit;
     private boolean doAllRewards = true;
@@ -68,7 +69,7 @@ public abstract class ConfigurableArena implements Arena {
     }
 
     @Override
-    public void endGame(MinoDuelArena.PlayerInfo winner) {
+    public void endGame(ArenaPlayerInfo winner) {
         endGame(winner, true);
     }
 
@@ -78,7 +79,7 @@ public abstract class ConfigurableArena implements Arena {
      * @param winner               The winner of the game or NULL if no winner could be determined.
      * @param sendUndecidedMessage whether to send the "no winner could be determined" message if {@code winner} is NULL
      */
-    public abstract void endGame(MinoDuelArena.PlayerInfo winner, boolean sendUndecidedMessage);
+    public abstract void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage);
 
     @Override
     public void remove() {
@@ -101,6 +102,11 @@ public abstract class ConfigurableArena implements Arena {
         if (valid != lastValidity) {
             lastValidity = valid;
             arenaManager.registerValidityChange(this);
+            if (valid && state == ArenaState.INVALID) {
+                state = ArenaState.READY;
+            } else if (!valid) {
+                state = ArenaState.INVALID;
+            }
         }
 
         return valid;
@@ -274,5 +280,9 @@ public abstract class ConfigurableArena implements Arena {
 
     private void validateHasConfig() {
         XyValidate.validateState(configSection != null, "The arena %s has been removed!", getName());
+    }
+
+    public ArenaState getState() {
+        return state;
     }
 }

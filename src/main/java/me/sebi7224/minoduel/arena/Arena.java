@@ -36,7 +36,7 @@ public interface Arena {
      *
      * @param winner The winner of the game or NULL if no winner could be determined.
      */
-    void endGame(MinoDuelArena.PlayerInfo winner);
+    void endGame(ArenaPlayerInfo winner);
 
     /**
      * Ends this game and hands the winner their reward (if applicable).
@@ -45,7 +45,7 @@ public interface Arena {
      * @param winner               The winner of the game or NULL if no winner could be determined.
      * @param sendUndecidedMessage whether to send a message when no winner could be determined (i.e. {@code winner == null})
      */
-    void endGame(MinoDuelArena.PlayerInfo winner, boolean sendUndecidedMessage);
+    void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage);
 
     String getValidityString();
 
@@ -77,7 +77,7 @@ public interface Arena {
 
     boolean isOccupied();
 
-    Couple<MinoDuelArena.PlayerInfo> getPlayers();
+    Couple<? extends ArenaPlayerInfo> getPlayers();
 
     String getPlayerString();
 
@@ -87,7 +87,7 @@ public interface Arena {
      * @param plr Player not to target (you get it?!!)
      * @return opposite player or NULL if the argument is not in this arena or no opposite player could be found.
      */
-    MinoDuelArena.PlayerInfo getOther(@NotNull Player plr);
+    ArenaPlayerInfo getOther(@NotNull Player plr);
 
     Location getFirstSpawn();
 
@@ -120,4 +120,6 @@ public interface Arena {
     String getName();
 
     ArenaManager getArenaManager();
+
+    ArenaState getState();
 }

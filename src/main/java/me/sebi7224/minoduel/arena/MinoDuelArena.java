@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.queue.QueueItem;
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -14,6 +13,7 @@ import org.bukkit.entity.Player;
 
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.common.games.util.RunnableTeleportLater;
+import io.github.xxyy.common.util.CommandHelper;
 import io.github.xxyy.common.util.XyValidate;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
@@ -121,7 +121,7 @@ public class MinoDuelArena extends ConfigurableArena {
         if (winner != null) { //A winner has been determined
             PlayerInfo loser = players.getOther(winner);
 
-            Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7gewonnen! (§6" + this.getName() + "§7)");
+            CommandHelper.broadcast(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7gewonnen! (§6" + this.getName() + "§7)", null);
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
             //TODO: stats in MySQL w/ fancy leaderboard on website
 
@@ -130,10 +130,10 @@ public class MinoDuelArena extends ConfigurableArena {
                     .forEach(winner.getPlayer().getInventory()::addItem);
         } else {
             if (sendUndecidedMessage) {
-                Bukkit.broadcastMessage(MinoDuelPlugin.PREFIX + "§7Der Kampf zwischen §a" +
+                CommandHelper.broadcast(MinoDuelPlugin.PREFIX + "§7Der Kampf zwischen §a" +
                         players.getLeft().getPlayer().getName() +
                         "§7 und §a" + players.getRight().getPlayer().getName() +
-                        " §7 ist unentschieden ausgegangen! (§6" + this.getName() + "§7)");
+                        " §7 ist unentschieden ausgegangen! (§6" + this.getName() + "§7)", null);
             }
         }
 

@@ -124,10 +124,6 @@ public class MinoDuelArena extends ConfigurableArena {
             CommandHelper.broadcast(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7gewonnen! (§6" + this.getName() + "§7)", null);
             // ^^^^ TODO: winners and losers could get random (fun) messages like in vanilla
             //TODO: stats in MySQL w/ fancy leaderboard on website
-
-            //Treat winner nicely
-            getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
-                    .forEach(winner.getPlayer().getInventory()::addItem);
         } else {
             if (sendUndecidedMessage) {
                 CommandHelper.broadcast(MinoDuelPlugin.PREFIX + "§7Der Kampf zwischen §a" +
@@ -142,6 +138,11 @@ public class MinoDuelArena extends ConfigurableArena {
             getArenaManager().getPlugin().getMtcHook().setInGame(false, plr.getPlayer().getUniqueId());
             plr.invalidate();
         });
+
+        if (winner != null) { //We need to do this here since inventories get cleared in invalidate()
+            getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
+                    .forEach(winner.getPlayer().getInventory()::addItem);
+        }
 
         players = null;
     }

@@ -84,7 +84,7 @@ public class CommandsArena {
                             .color(DARK_RED)
                         .then("wirklich entfernen? ")
                             .color(RED)
-                        .then("[Js (klick)]")
+                        .then("[Ja (klick)]")
                             .color(GOLD)
                             .command("/mdarena remove -y " + arenaName)
                             .tooltip("Dies entfernt die Arena und alle Optionen permanent!")

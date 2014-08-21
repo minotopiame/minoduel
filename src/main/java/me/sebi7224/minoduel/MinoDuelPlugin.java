@@ -92,7 +92,7 @@ public class MinoDuelPlugin extends JavaPlugin {
                 5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
 
         //Hook MTC
-        mtcHook = new MTCHook();
+        mtcHook = new MTCHook().tryHook();
 
         getLogger().info("Enabled " + VERSION.toString() + "!");
     }
@@ -182,12 +182,13 @@ public class MinoDuelPlugin extends JavaPlugin {
     public class MTCHook {
         private PlayerGameManager manager;
 
-        void tryHook() {
+        MTCHook tryHook() {
             try {
                 manager = getServer().getServicesManager().load(PlayerGameManager.class);
             } catch (NoClassDefFoundError e) {
                 getLogger().info("MTC hook failed: MTC not loaded.");
             }
+            return this;
         }
 
         public boolean isInOtherGame(UUID uuid) {

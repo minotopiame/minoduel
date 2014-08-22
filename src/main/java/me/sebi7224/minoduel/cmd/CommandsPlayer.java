@@ -54,7 +54,6 @@ public class CommandsPlayer {
                         "-a: Arena direkt wählen, kein Menü",
                 usage = "[-a (Arena)|egal]",
                 flags = "a:", max = 0)
-        @CommandPermissions({"minoduel.user.join"})
         public void playerJoin(CommandContext args, Player player) throws CommandException {
             if (!plugin.getArenaManager().anyExist()) {
                 player.sendMessage(MinoDuelPlugin.PREFIX + "§cKeine Arenen vorhanden =(!");

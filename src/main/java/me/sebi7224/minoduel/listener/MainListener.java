@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -68,6 +69,14 @@ public class MainListener implements Listener {
                 !evt.getMessage().toLowerCase().startsWith("/mdu leave")) {
             evt.setCancelled(true);
             evt.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu kannst im 1vs1 keine Befehle benutzen!");
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onDrop(PlayerDropItemEvent evt) {
+        if (plugin.getArenaManager().isInGame(evt.getPlayer())) {
+            evt.setCancelled(true);
+            evt.getPlayer().sendMessage(plugin.getPrefix() + "Du kannst im Kampf keine Items droppen!");
         }
     }
 }

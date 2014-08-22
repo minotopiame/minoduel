@@ -2,6 +2,7 @@ package me.sebi7224.minoduel.arena;
 
 import me.sebi7224.minoduel.MinoDuelPlugin;
 
+import io.github.xxyy.common.util.XyValidate;
 import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
 
 /**
@@ -35,12 +36,13 @@ class MinoDuelArenaTaskManager {
         public void start() {
             secondsUntilStart = MAX_SECONDS_UNTIL_START;
 
-            runTaskTimer(arena.getArenaManager().getPlugin(), 20L, 20L);
+            runTaskTimer(arena.getArenaManager().getPlugin(), 1L, 20L);
         }
 
         @Override
         public void run() {
-            secondsUntilStart--;
+            XyValidate.validateState(secondsUntilStart != -1, "Cannot run while stopped!");
+
             if (secondsUntilStart == 0) {
                 arena.getPlayers().forEach(MinoDuelArena.PlayerInfo::notifyGameStart);
                 stop();
@@ -48,6 +50,7 @@ class MinoDuelArenaTaskManager {
             } else {
                 arena.getPlayers().forEach(pi -> pi.notifyWaitTick(secondsUntilStart));
             }
+            secondsUntilStart--;
         }
 
         public void stop() {
@@ -68,16 +71,17 @@ class MinoDuelArenaTaskManager {
 
         @Override
         public void run() {
+            XyValidate.validateState(ticksLeft != -1, "Cannot run while stopped!");
+
             ticksLeft--; //Ticks, as in 1vs1 ticks, not to be confused with game ticks
 
             //Announce full minutes
             if (ticksLeft % 12 == 0) { //every minute
-                arena.getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Noch §e" + ticksLeft / 12 + " §7Minuten!"));
+                sendTimeLeft(ticksLeft / 12, "Minute");
             } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
-                arena.getPlayers().stream()
-                        .forEach(pi -> pi.getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Noch §e" + ticksLeft * 5 + " §7Sekunden!"));
+                sendTimeLeft(ticksLeft * 5, "Sekunde");
             } else if (ticksLeft == 0) {
+                arena.getArenaManager().getPlugin().getLogger().info("Arena " + arena.getName() + " w/ " + arena.getPlayerString() + " timed out.");
                 arena.endGame(null);
             }
         }
@@ -85,6 +89,13 @@ class MinoDuelArenaTaskManager {
         public void stop() {
             this.ticksLeft = -1;
             tryCancel();
+        }
+
+        private void sendTimeLeft(int amount, String unit) {
+            arena.getPlayers().stream()
+                    .forEach(pi -> pi.getPlayer().sendMessage(
+                            MinoDuelPlugin.PREFIX + "§7Das Spiel endet in §e" + amount + " §7" +
+                                    unit + (amount == 1 ? "" : "n") + "!"));
         }
     }
 }

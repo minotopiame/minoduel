@@ -30,6 +30,7 @@ public class MainListener implements Listener {
 
         if (arena != null && victim.getHealth() - evt.getDamage() <= 0) {
             arena.endGame(arena.getOther(victim));
+            evt.setCancelled(true);
         }
     }
 

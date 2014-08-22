@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -104,8 +105,8 @@ public class MinoDuelArena extends ConfigurableArena {
             plr.setFireTicks(0);
             plr.setHealth(plr.getMaxHealth());
             plr.setFoodLevel(20);
-            plr.getInventory().setContents(getInventoryKit());
-            plr.getInventory().setArmorContents(getArmorKit());
+            plr.getInventory().setContents(cloneAll(getInventoryKit()));
+            plr.getInventory().setArmorContents(cloneAll(getArmorKit()));
             plr.setGameMode(GameMode.SURVIVAL);
             plr.updateInventory();
             plr.closeInventory();
@@ -148,6 +149,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
         if (winner != null) { //We need to do this here since inventories get cleared in invalidate()
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
+                    .map(ItemStack::clone)
                     .forEach(winnerPlayer.getInventory()::addItem); //getPlayer() returns null after invalidate()
         }
 
@@ -248,6 +250,14 @@ public class MinoDuelArena extends ConfigurableArena {
         new RunnableTeleportLater(playerInfo.getPlayer(), playerInfo.getSpawnLocation(), 5, completeHandler)
                 .runTaskTimer(getArenaManager().getPlugin(), getArenaManager().getPlugin().getTeleportDelayTicks(),
                         getArenaManager().getPlugin().getTeleportDelayTicks());
+    }
+
+    private ItemStack[] cloneAll(ItemStack[] input) {
+        ItemStack[] result = new ItemStack[input.length];
+        for (int i = 0; i < input.length; i++) {
+            result[i] = input[i].clone();
+        }
+        return result;
     }
 
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////

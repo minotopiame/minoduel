@@ -84,6 +84,7 @@ public class CommandHelpHelper {
         }
 
         messages.stream().forEach(msg -> msg.send(sender));
+        sender.sendMessage("§6Tipp: §eBewege deine Maus über die Befehle! :)");
 
         return true;
     }

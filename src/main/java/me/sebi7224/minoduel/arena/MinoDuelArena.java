@@ -122,8 +122,10 @@ public class MinoDuelArena extends ConfigurableArena {
         Validate.isTrue(players != null);
 
         tickManager.stop();
+        Player winnerPlayer = null;
 
         if (winner != null) { //A winner has been determined
+            winnerPlayer = winner.getPlayer(); //Need this later
             PlayerInfo loser = players.getOther((PlayerInfo) winner);
 
             CommandHelper.broadcast(MinoDuelPlugin.PREFIX + "§a" + winner.getName() + " §7hat gegen §c" + loser.getName() + " §7gewonnen! (§6" + this.getName() + "§7)", null);
@@ -146,7 +148,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
         if (winner != null) { //We need to do this here since inventories get cleared in invalidate()
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
-                    .forEach(winner.getPlayer().getInventory()::addItem);
+                    .forEach(winnerPlayer.getInventory()::addItem); //getPlayer() returns null after invalidate()
         }
 
         players = null;

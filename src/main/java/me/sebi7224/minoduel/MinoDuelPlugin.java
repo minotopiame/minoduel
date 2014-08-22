@@ -182,7 +182,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         }
 
         public boolean isInOtherGame(UUID uuid) {
-            return manager != null && !MinoDuelPlugin.this.equals(manager.getProvidingPlugin(uuid));
+            return manager != null && manager.isInGame(uuid) && !MinoDuelPlugin.this.equals(manager.getProvidingPlugin(uuid));
         }
 
         public Plugin getBlockingPlugin(UUID uuid) {

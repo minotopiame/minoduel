@@ -255,7 +255,7 @@ public class MinoDuelArena extends ConfigurableArena {
     private ItemStack[] cloneAll(ItemStack[] input) {
         ItemStack[] result = new ItemStack[input.length];
         for (int i = 0; i < input.length; i++) {
-            result[i] = input[i].clone();
+            result[i] = input[i] == null ? null : input[i].clone();
         }
         return result;
     }

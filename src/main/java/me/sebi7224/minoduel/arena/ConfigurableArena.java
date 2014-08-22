@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import io.github.xxyy.common.checklist.Checklist;
 import io.github.xxyy.common.checklist.renderer.CommandSenderRenderer;
 import io.github.xxyy.common.util.XyValidate;
+import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
 import io.github.xxyy.lib.intellij_annotations.Nullable;
 
@@ -139,6 +140,7 @@ public abstract class ConfigurableArena implements Arena {
         validateHasConfig();
 
         specificRewards.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
+        specificRewards = InventoryHelper.cloneAll(specificRewards);
         this.configSection.set(SPECIFIC_REWARD_PATH, specificRewards);
         this.specificRewards = specificRewards;
     }
@@ -211,6 +213,8 @@ public abstract class ConfigurableArena implements Arena {
     public void setInventoryKit(ItemStack[] inventoryKit) {
         validateHasConfig();
 
+        inventoryKit = InventoryHelper.cloneAll(inventoryKit);
+
         configSection.set(INVENTORY_KIT_PATH, inventoryKit);
         this.inventoryKit = inventoryKit;
     }
@@ -223,6 +227,8 @@ public abstract class ConfigurableArena implements Arena {
     @Override
     public void setArmorKit(ItemStack[] armorKit) {
         validateHasConfig();
+
+        armorKit = InventoryHelper.cloneAll(armorKit);
 
         configSection.set(ARMOR_KIT_PATH, armorKit);
         this.armorKit = armorKit;

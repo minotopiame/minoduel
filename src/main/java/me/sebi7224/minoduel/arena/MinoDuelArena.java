@@ -105,8 +105,8 @@ public class MinoDuelArena extends ConfigurableArena {
             plr.setFireTicks(0);
             plr.setHealth(plr.getMaxHealth());
             plr.setFoodLevel(20);
-            plr.getInventory().setContents(cloneAll(getInventoryKit()));
-            plr.getInventory().setArmorContents(cloneAll(getArmorKit()));
+            plr.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit()));
+            plr.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
             plr.setGameMode(GameMode.SURVIVAL);
             plr.updateInventory();
             plr.closeInventory();
@@ -250,14 +250,6 @@ public class MinoDuelArena extends ConfigurableArena {
         new RunnableTeleportLater(playerInfo.getPlayer(), playerInfo.getSpawnLocation(), 5, completeHandler)
                 .runTaskTimer(getArenaManager().getPlugin(), getArenaManager().getPlugin().getTeleportDelayTicks(),
                         getArenaManager().getPlugin().getTeleportDelayTicks());
-    }
-
-    private ItemStack[] cloneAll(ItemStack[] input) {
-        ItemStack[] result = new ItemStack[input.length];
-        for (int i = 0; i < input.length; i++) {
-            result[i] = input[i] == null ? null : input[i].clone();
-        }
-        return result;
     }
 
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////

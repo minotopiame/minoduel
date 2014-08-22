@@ -83,7 +83,7 @@ public class MinoDuelArena extends ConfigurableArena {
     @SuppressWarnings("deprecation") //updateInventory
     private void startGame() {
         XyValidate.validateState(isValid(), "This arena is currently not valid");
-        XyValidate.validateState(getState() == ArenaState.WAIT, "Invalid state: WAIT expected, got: ", getState());
+        XyValidate.validateState(getState() == ArenaState.TELEPORT, "Invalid state: WAIT expected, got: ", getState());
         XyValidate.validateState(players.getLeft().isValid(), "left player is invalid: " + players.getLeft().getName());
         XyValidate.validateState(players.getRight().isValid(), "right player is invalid: " + players.getRight().getName());
 
@@ -114,6 +114,7 @@ public class MinoDuelArena extends ConfigurableArena {
             plr.playSound(plr.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
         });
 
+        state = ArenaState.WAIT;
         tickManager.start();
     }
 
@@ -232,7 +233,6 @@ public class MinoDuelArena extends ConfigurableArena {
 
                     if (failureReason == null) {
                         playerInfo.setInArena(true);
-                        state = ArenaState.WAIT;
 
                         if (players.getOther(playerInfo).isInArena()) {
                             startGame();

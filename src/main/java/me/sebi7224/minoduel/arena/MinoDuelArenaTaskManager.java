@@ -34,6 +34,7 @@ class MinoDuelArenaTaskManager {
         private int secondsUntilStart = -1;
 
         public void start() {
+            tryCancel();
             secondsUntilStart = MAX_SECONDS_UNTIL_START;
 
             runTaskTimer(arena.getArenaManager().getPlugin(), 1L, 20L);
@@ -66,6 +67,7 @@ class MinoDuelArenaTaskManager {
 
         public void start() {
             ticksLeft = TICKS_IN_A_GAME;
+            arena.setState(ArenaState.RUNNING);
             gameTask.runTaskTimer(arena.getArenaManager().getPlugin(), MINECRAFT_TICKS_PER_TICK, MINECRAFT_TICKS_PER_TICK);
         }
 

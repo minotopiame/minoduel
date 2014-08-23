@@ -29,7 +29,7 @@ public class MainListener implements Listener {
         Player victim = (Player) evt.getEntity();
         Arena arena = plugin.getArenaManager().getPlayerArena(victim);
 
-        if (arena != null && victim.getHealth() - evt.getDamage() <= 0) {
+        if (arena != null && victim.getHealth() - evt.getFinalDamage() <= 0) {
             arena.endGame(arena.getOther(victim));
             evt.setCancelled(true);
         }

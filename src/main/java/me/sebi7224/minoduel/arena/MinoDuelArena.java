@@ -365,6 +365,7 @@ public class MinoDuelArena extends ConfigurableArena {
             player.setFireTicks(0);
             player.setExhaustion(0.0F);
             player.setSaturation(9.6F); //Notch's Golden apple - balance between prev sat and taking away eventual golden apples consumed during the fight
+            player.getActivePotionEffects().forEach(eff -> player.removePotionEffect(eff.getType()));
             InventoryHelper.clearInventory(player);
             getArenaManager().setPlayerArena(player, null);
             this.player = null; //Don't keep Player ref in case this object is accidentally kept

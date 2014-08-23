@@ -83,9 +83,9 @@ public class MinoDuelArena extends ConfigurableArena {
     @SuppressWarnings("deprecation") //updateInventory
     private void startGame() {
         XyValidate.validateState(isValid(), "This arena is currently not valid");
-        XyValidate.validateState(getState() == ArenaState.TELEPORT, "Invalid state: WAIT expected, got: ", getState());
-        XyValidate.validateState(players.getLeft().isValid(), "left player is invalid: " + players.getLeft().getName());
-        XyValidate.validateState(players.getRight().isValid(), "right player is invalid: " + players.getRight().getName());
+        XyValidate.validateState(getState() == ArenaState.TELEPORT, "Invalid state: TELEPORT expected, got: %s", getState());
+        XyValidate.validateState(players.getLeft().isValid(), "left player is invalid: %s" + players.getLeft().getName());
+        XyValidate.validateState(players.getRight().isValid(), "right player is invalid: %s" + players.getRight().getName());
 
         this.players.forEach(pi -> {
             Player plr = pi.getPlayer();
@@ -231,7 +231,7 @@ public class MinoDuelArena extends ConfigurableArena {
                         return;
                     }
 
-                    if (failureReason == null) {
+                    if (failureReason == null && !playerInfo.isInArena() /* race condition or something */) {
                         playerInfo.setInArena(true);
 
                         if (players.getOther(playerInfo).isInArena()) {

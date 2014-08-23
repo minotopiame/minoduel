@@ -27,6 +27,8 @@ class MinoDuelArenaTaskManager {
     public void stop() {
         waitTask.stop();
         gameTask.stop();
+        waitTask = new RunnablePreGame(); //BukkitRunnable doesn't accept being re-scheduled - See https://bukkit.atlassian.net/browse/BUKKIT-3118?focusedCommentId=21399&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-21399
+        gameTask = new RunnableInGame();  //TODO: PR Spigot or make a StatelessTask in XYC.
     }
 
     private class RunnablePreGame extends NonAsyncBukkitRunnable {

@@ -40,7 +40,7 @@ public class ArenaMenu implements Listener {
     }
 
     public void refresh() {
-        this.optionArenas = new Arena[size];
+        this.optionArenas = new Arena[arenaManager.all().size()];
         this.size = InventoryHelper.validateInventorySize(optionArenas.length + 1);
 
         int i = 0;

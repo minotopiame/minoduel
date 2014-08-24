@@ -65,6 +65,11 @@ public class CommandsPlayer {
                 return;
             }
 
+            if (!InventoryHelper.isInventoryEmpty(player)) {
+                player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu musst zuerst dein Inventar leeren!");
+                return;
+            }
+
             if (args.hasFlag('a')) {
                 Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'), plugin.getArenaManager());
 
@@ -79,11 +84,7 @@ public class CommandsPlayer {
                 return;
             }
 
-            if (InventoryHelper.isInventoryEmpty(player)) {
-                plugin.getArenaManager().getArenaMenu().open(player);
-            } else {
-                player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu musst zuerst dein Inventar leeren!");
-            }
+            plugin.getArenaManager().getArenaMenu().open(player);
         }
 
         @Command(aliases = {"leave"},

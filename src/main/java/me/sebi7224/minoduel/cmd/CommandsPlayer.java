@@ -199,6 +199,17 @@ public class CommandsPlayer {
                         return;
                     }
 
+                    if (!InventoryHelper.isInventoryEmpty(player)) {
+                        player.sendMessage(plugin.getPrefix() + "§cDu musst zuerst dein Inventar leeren! :)");
+                        return;
+                    }
+
+                    if (!InventoryHelper.isInventoryEmpty(opponent)) {
+                        player.sendMessage(plugin.getPrefix() + "§4" + opponent.getName() + "§c muss zuerst sein/ihr Inventar leeren!");
+                        opponent.sendMessage(plugin.getPrefix() + "§cDu musst zuerst dein Inventar leeren, bevor §4" + player.getName() + "§c dein Duell annehmen kann!");
+                        return;
+                    }
+
                     plugin.getQueueManager().enqueue(new DualQueueItem(plugin.getRequestManager().remove(player, opponent).get(), opponent, player));
                     player.sendMessage(plugin.getPrefix() + "§aDu hast die Duellanfrage von §2" + opponent.getName() + "§a angenommen!");
                     opponent.sendMessage(plugin.getPrefix() + "§2" + player.getName() + " hat deine Duellanfrage angenommen!");

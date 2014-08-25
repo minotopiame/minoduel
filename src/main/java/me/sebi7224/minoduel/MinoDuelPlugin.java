@@ -62,6 +62,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     private ArenaManager arenaManager = new ArenaManager(this);
     private WaitingQueueManager queueManager = new WaitingQueueManager(arenaManager);
     private MTCHook mtcHook;
+    private InventorySaver inventorySaver;
 
     @Override
     public void onEnable() {
@@ -70,6 +71,8 @@ public class MinoDuelPlugin extends JavaPlugin {
         getConfig().options().header("MinoDuel config file! Any changes in here will get overridden on reload - Use the ingame config editing commands.");
         getConfig().options().copyHeader(true);
         teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
+
+        inventorySaver = new InventorySaver(this);
 
         //Load arenas
         arenaManager.initialise();
@@ -167,6 +170,10 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public MTCHook getMtcHook() {
         return mtcHook;
+    }
+
+    public InventorySaver getInventorySaver() {
+        return inventorySaver;
     }
 
     public class MTCHook {

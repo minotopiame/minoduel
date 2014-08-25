@@ -6,10 +6,12 @@ import me.sebi7224.minoduel.arena.ArenaPlayerInfo;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -18,6 +20,13 @@ public class MainListener implements Listener {
 
     public MainListener(MinoDuelPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent evt) {
+        if (plugin.getInventorySaver().loadInventory(evt.getPlayer())) {
+            evt.getPlayer().sendMessage(plugin.getPrefix() + "Du hast dein Inventar von deinem vorherigen 1vs1 zurückbekommen!");
+        }
     }
 
     @EventHandler

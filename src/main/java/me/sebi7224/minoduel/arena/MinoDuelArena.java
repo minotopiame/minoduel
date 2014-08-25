@@ -87,32 +87,7 @@ public class MinoDuelArena extends ConfigurableArena {
         XyValidate.validateState(players.getLeft().isValid(), "left player is invalid: %s" + players.getLeft().getName());
         XyValidate.validateState(players.getRight().isValid(), "right player is invalid: %s" + players.getRight().getName());
 
-        this.players.forEach(pi -> {
-            Player plr = pi.getPlayer();
-
-            if (getArenaManager().getPlugin().getMtcHook().isInOtherGame(plr.getUniqueId())) {
-                getOther(plr).getPlayer().sendMessage("§cDein Gegner hat ein Spiel in einem anderen Plugin (" +
-                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
-                        ") begonnen. 1vs1 kann daher nicht fortfahren.");
-                plr.getPlayer().sendMessage("§cDu hast ein Spiel in einem anderen Plugin (" +
-                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
-                        ") begonnen. 1vs1 kann daher nicht fortfahren.");
-                endGame(null, false);
-                return;
-            }
-
-            getArenaManager().getPlugin().getMtcHook().setInGame(true, plr.getUniqueId());
-            plr.setFireTicks(0);
-            plr.setHealth(plr.getMaxHealth());
-            plr.setFoodLevel(20);
-            plr.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit()));
-            plr.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
-            plr.setGameMode(GameMode.SURVIVAL);
-            plr.updateInventory();
-            plr.closeInventory();
-            plr.setFlying(false);
-            plr.playSound(plr.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
-        });
+        this.players.forEach(PlayerInfo::prepare);
 
         state = ArenaState.WAIT;
         tickManager.start();
@@ -368,7 +343,51 @@ public class MinoDuelArena extends ConfigurableArena {
             player.getActivePotionEffects().forEach(eff -> player.removePotionEffect(eff.getType()));
             InventoryHelper.clearInventory(player);
             getArenaManager().setPlayerArena(player, null);
+
+            if (getArenaManager().getPlugin().getInventorySaver().loadInventory(player)) {
+                player.sendMessage(MinoDuelPlugin.PREFIX + "Du hast dein Inventar von vorhin zurückerhalten!");
+            }
+
             this.player = null; //Don't keep Player ref in case this object is accidentally kept
+        }
+
+        protected boolean prepare() {
+            Player plr = getPlayer();
+
+            if (getArenaManager().getPlugin().getMtcHook().isInOtherGame(plr.getUniqueId())) {
+                getOther(plr).getPlayer().sendMessage("§cDein Gegner hat ein Spiel in einem anderen Plugin (" +
+                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
+                        ") begonnen. 1vs1 kann daher nicht fortfahren.");
+                plr.getPlayer().sendMessage("§cDu hast ein Spiel in einem anderen Plugin (" +
+                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
+                        ") begonnen. 1vs1 kann daher nicht fortfahren.");
+                endGame(null, false);
+                return false;
+            }
+
+            if (!InventoryHelper.isInventoryEmpty(plr)) {
+                if (!getArenaManager().getPlugin().getInventorySaver().saveInventory(plr)) {
+                    getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar konnte nicht gespeichert werden! Daher können wir nicht fortfahren :(");
+                    getOther(getPlayer()).getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDas Inventar deines Gegeners konnte nicht gepeichert werden," +
+                            " daher mussst das Spiel abgebrochen werden!");
+                    endGame(null, false);
+                    return false;
+                }
+                getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar wurde gespeichert. Du erhältest es nach dem Duell zurück.");
+            }
+
+            getArenaManager().getPlugin().getMtcHook().setInGame(true, plr.getUniqueId());
+            plr.setFireTicks(0);
+            plr.setHealth(plr.getMaxHealth());
+            plr.setFoodLevel(20);
+            plr.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
+            plr.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
+            plr.setGameMode(GameMode.SURVIVAL);
+            plr.updateInventory();
+            plr.closeInventory();
+            plr.setFlying(false);
+            plr.playSound(plr.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
+            return true;
         }
 
         /**
@@ -426,7 +445,8 @@ public class MinoDuelArena extends ConfigurableArena {
         }
 
         protected void notifyTeleport() {
-            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst jetzt gegen §a" +
+            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst in jetzt gegen §a" +
                     MinoDuelArena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
         }

@@ -1,7 +1,9 @@
 package me.sebi7224.minoduel.arena;
 
 import me.sebi7224.minoduel.MinoDuelPlugin;
+import mkremins.fanciful.FancyMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -82,6 +84,20 @@ public class ArenaMenu implements Listener {
             if (slot >= 0 && slot < size) {
                 Player player = (Player) event.getWhoClicked();
                 Arena arena = optionArenas[slot];
+
+                if (!InventoryHelper.isInventoryEmpty(player)) {
+                    //@formatter:off
+                    new FancyMessage("Dein Inventar ist nicht leer! ")
+                                .color(ChatColor.RED)
+                            .then("[Klicke hier, wenn du es geleert hast]")
+                                .color(ChatColor.GOLD)
+                                .tooltip("/1vs1 join -a "+arena.getName())
+                                .command("/1vs1 join -a "+arena.getName())
+                                .style(ChatColor.UNDERLINE)
+                            .send(player);
+                    //@formatter:on
+                    return;
+                }
 
                 player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
                 plugin.getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found

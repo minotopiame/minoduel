@@ -65,10 +65,7 @@ public class CommandsPlayer {
                 return;
             }
 
-            if (!InventoryHelper.isInventoryEmpty(player)) {
-                player.sendMessage(MinoDuelPlugin.PREFIX + "§eDu musst zuerst dein Inventar leeren!");
-                return;
-            }
+            CmdValidate.validateInventoryEmpty(player);
 
             if (args.hasFlag('a')) {
                 Arena arena = CmdValidate.getArenaOrNull(args.getFlag('a'), plugin.getArenaManager());
@@ -200,11 +197,7 @@ public class CommandsPlayer {
                         return;
                     }
 
-                    if (!InventoryHelper.isInventoryEmpty(player)) {
-                        player.sendMessage(plugin.getPrefix() + "§cDu musst zuerst dein Inventar leeren! :)");
-                        return;
-                    }
-
+                    CmdValidate.validateInventoryEmpty(player);
                     if (!InventoryHelper.isInventoryEmpty(opponent)) {
                         player.sendMessage(plugin.getPrefix() + "§4" + opponent.getName() + "§c muss zuerst sein/ihr Inventar leeren!");
                         opponent.sendMessage(plugin.getPrefix() + "§cDu musst zuerst dein Inventar leeren, bevor §4" + player.getName() + "§c dein Duell annehmen kann!");

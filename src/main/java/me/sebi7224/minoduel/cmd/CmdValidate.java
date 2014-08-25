@@ -5,7 +5,10 @@ import me.sebi7224.minoduel.MinoDuelPlugin;
 import me.sebi7224.minoduel.arena.Arena;
 import me.sebi7224.minoduel.arena.ArenaManager;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.util.Collection;
 
@@ -76,6 +79,12 @@ public final class CmdValidate {
                 return false;
             default:
                 throw new CommandException("Das ist kein bool'scher Wert: " + str + " Valide bool'sche Werte: true/ja und false/nein");
+        }
+    }
+
+    public static void validateInventoryEmpty(Player player) throws CommandException {
+        if (!InventoryHelper.isInventoryEmpty(player)) {
+            throw new CommandException("§eDu musst zuerst dein Inventar leeren!");
         }
     }
 }

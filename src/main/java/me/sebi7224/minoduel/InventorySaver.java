@@ -126,6 +126,10 @@ public class InventorySaver {
      * @return whether any items were returned to the player
      */
     public boolean loadInventory(Player plr) {
+        if (plr == null) {
+            return false;
+        }
+
         List<ItemStack> inventory = getSavedStacks(plr);
 
         if (inventory.isEmpty()) {

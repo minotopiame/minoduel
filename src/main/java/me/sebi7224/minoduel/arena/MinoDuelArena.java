@@ -351,6 +351,12 @@ public class MinoDuelArena extends ConfigurableArena {
                 );
             }
 
+            if (getArenaManager().getPlugin().isEnabled() && getArenaManager().getPlugin().getLocationSaver().hasLocation(player)) {
+                getArenaManager().getPlugin().getServer().getScheduler().runTask(getArenaManager().getPlugin(),
+                        () -> getArenaManager().getPlugin().getLocationSaver().loadLocation(player)
+                );
+            }
+
             this.player = null; //Don't keep Player ref in case this object is accidentally kept
         }
 

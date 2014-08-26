@@ -84,6 +84,10 @@ public class LocationSaver {
      * @return whether any items were returned to the player
      */
     public boolean loadLocation(Player plr) {
+        if (plr == null) {
+            return false;
+        }
+
         if (cache.containsKey(plr.getUniqueId())) {
             plr.teleport(cache.remove(plr.getUniqueId()));
             storage.set(plr.getUniqueId().toString(), null);

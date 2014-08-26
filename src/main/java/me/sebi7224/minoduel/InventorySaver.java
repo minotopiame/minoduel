@@ -53,6 +53,11 @@ public class InventorySaver {
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
+        } else {
+            //noinspection ConstantConditions
+            Arrays.asList(file.getParentFile().listFiles()).stream()
+                    .filter(fl -> fl.getName().endsWith(".lck"))
+                    .forEach(File::delete);
         }
 
         this.storage = YamlConfiguration.loadConfiguration(file);
@@ -80,15 +85,20 @@ public class InventorySaver {
 
         storage.set(plr.getUniqueId().toString(), inventory);
         logger.info("Saving inventory for " + plr.getUniqueId() + ": " + CommandHelper.CSCollection(inventory));
+        if (trySaveStorage()) return false;
+
+        cache.put(plr.getUniqueId(), inventory);
+        return true;
+    }
+
+    private boolean trySaveStorage() {
         try {
             storage.save(file);
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return true;
         }
-
-        cache.put(plr.getUniqueId(), inventory);
-        return true;
+        return false;
     }
 
     /**
@@ -125,6 +135,7 @@ public class InventorySaver {
 
         cache.remove(plr.getUniqueId());
         storage.set(plr.getUniqueId().toString(), null);
+        trySaveStorage();
 
         return returnInventory(plr, inventory);
     }

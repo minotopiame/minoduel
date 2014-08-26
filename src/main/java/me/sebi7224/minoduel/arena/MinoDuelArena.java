@@ -117,18 +117,18 @@ public class MinoDuelArena extends ConfigurableArena {
             }
         }
 
-        //Clean up players - teleport them back etc
-        players.forEach(plr -> {
-            getArenaManager().getPlugin().getMtcHook().setInGame(false, plr.getPlayer().getUniqueId());
-            plr.invalidate();
-            if (winner == null || teleportBack) {
-                teleportBackLater(plr.getPlayer());
-            }
-        });
-
         if (winner != null && !teleportBack) {
             teleportBackLater(getOther(winnerPlayer).getPlayer());
         }
+
+        //Clean up players - teleport them back etc
+        players.forEach(plr -> {
+            getArenaManager().getPlugin().getMtcHook().setInGame(false, plr.getPlayer().getUniqueId());
+            if (winner == null || teleportBack) {
+                teleportBackLater(plr.getPlayer());
+            }
+            plr.invalidate();
+        });
 
         if (winnerPlayer != null) { //We need to do this here since inventories get cleared in invalidate()
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)

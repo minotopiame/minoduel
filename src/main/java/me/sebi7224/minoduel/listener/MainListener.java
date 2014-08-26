@@ -25,7 +25,9 @@ public class MainListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent evt) {
         plugin.getInventorySaver().loadInventoryWithMessage(evt.getPlayer());
-        plugin.getLocationSaver().loadLocationWithMessage(evt.getPlayer());
+        if (plugin.getLocationSaver().hasLocation(evt.getPlayer())) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> plugin.getLocationSaver().loadLocationWithMessage(evt.getPlayer()), 20L); //xLogin last locations wait 10t
+        }
     }
 
     @EventHandler

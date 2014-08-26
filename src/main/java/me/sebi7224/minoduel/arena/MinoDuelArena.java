@@ -121,9 +121,16 @@ public class MinoDuelArena extends ConfigurableArena {
         players.forEach(plr -> {
             getArenaManager().getPlugin().getMtcHook().setInGame(false, plr.getPlayer().getUniqueId());
             plr.invalidate();
+            if (winner == null || teleportBack) {
+                teleportBackLater(plr.getPlayer());
+            }
         });
 
-        if (winner != null) { //We need to do this here since inventories get cleared in invalidate()
+        if (winner != null && !teleportBack) {
+            teleportBackLater(getOther(winnerPlayer).getPlayer());
+        }
+
+        if (winnerPlayer != null) { //We need to do this here since inventories get cleared in invalidate()
             getRewards().stream() //Add reward to inventory TODO: should be more random (Class RewardSet or so)
                     .map(ItemStack::clone)
                     .forEach(winnerPlayer.getInventory()::addItem); //getPlayer() returns null after invalidate()
@@ -131,6 +138,14 @@ public class MinoDuelArena extends ConfigurableArena {
 
         players = null;
         state = ArenaState.READY;
+    }
+
+    private void teleportBackLater(Player winnerPlayer) {
+        if (getArenaManager().getPlugin().isEnabled() && getArenaManager().getPlugin().getLocationSaver().hasLocation(winnerPlayer)) {
+            getArenaManager().getPlugin().getServer().getScheduler().runTask(getArenaManager().getPlugin(),
+                    () -> getArenaManager().getPlugin().getLocationSaver().loadLocation(winnerPlayer)
+            );
+        }
     }
 
     @Override
@@ -348,12 +363,6 @@ public class MinoDuelArena extends ConfigurableArena {
                                 player.sendMessage(MinoDuelPlugin.PREFIX + "Du hast dein Inventar von vorhin zurückerhalten!");
                             }
                         }
-                );
-            }
-
-            if (getArenaManager().getPlugin().isEnabled() && getArenaManager().getPlugin().getLocationSaver().hasLocation(player)) {
-                getArenaManager().getPlugin().getServer().getScheduler().runTask(getArenaManager().getPlugin(),
-                        () -> getArenaManager().getPlugin().getLocationSaver().loadLocation(player)
                 );
             }
 

@@ -115,7 +115,7 @@ public class LocationSaver {
      */
     public boolean hasLocation(Player plr) {
         return cache.containsKey(plr.getUniqueId()) ||
-                storage.isList(plr.getUniqueId().toString());
+                storage.contains(plr.getUniqueId().toString());
     }
 
     public void onReload() {

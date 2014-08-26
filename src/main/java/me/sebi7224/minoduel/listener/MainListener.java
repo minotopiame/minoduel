@@ -22,7 +22,7 @@ public class MainListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent evt) {
         plugin.getInventorySaver().loadInventoryWithMessage(evt.getPlayer());
         plugin.getLocationSaver().loadLocationWithMessage(evt.getPlayer());

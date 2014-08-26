@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 /**
@@ -132,7 +133,6 @@ public class InventorySaver {
 
         logger.info("Loaded inventory for " + plr.getName() + ": " + inventory + " @ size: " + CommandHelper.safeSize(inventory));
 
-
         cache.remove(plr.getUniqueId());
         storage.set(plr.getUniqueId().toString(), null);
         trySaveStorage();
@@ -185,5 +185,10 @@ public class InventorySaver {
     public boolean hasInventory(Player plr) {
         return cache.containsKey(plr.getUniqueId()) ||
                 storage.isList(plr.getUniqueId().toString());
+    }
+
+    public void onReload() {
+        Arrays.asList(logger.getHandlers()).forEach(Handler::close);
+        trySaveStorage();
     }
 }

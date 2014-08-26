@@ -107,6 +107,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         saveConfig();
         queueManager.notifyReload();
         arenaManager.onReload();
+        inventorySaver.onReload();
     }
 
     @Override

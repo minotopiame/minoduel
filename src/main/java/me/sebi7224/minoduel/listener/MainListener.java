@@ -24,9 +24,7 @@ public class MainListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent evt) {
-        if (plugin.getInventorySaver().loadInventory(evt.getPlayer())) {
-            evt.getPlayer().sendMessage(plugin.getPrefix() + "Du hast dein Inventar von deinem vorherigen 1vs1 zurückbekommen!");
-        }
+        plugin.getInventorySaver().loadInventoryWithMessage(evt.getPlayer());
     }
 
     @EventHandler

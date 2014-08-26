@@ -95,6 +95,9 @@ public class MinoDuelPlugin extends JavaPlugin {
         //Hook MTC
         mtcHook = new MTCHook().tryHook();
 
+        //Give players their items back if their game was killed due to a reload
+        getServer().getOnlinePlayers().forEach(getInventorySaver()::loadInventoryWithMessage);
+
         getLogger().info("Enabled " + VERSION.toString() + "!");
     }
 
@@ -158,10 +161,6 @@ public class MinoDuelPlugin extends JavaPlugin {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(e);
         }
-    }
-
-    public CommandsManager<CommandSender> getCommandsManager() { //TODO temp debug
-        return commandsManager;
     }
 
     public ArenaManager getArenaManager() {

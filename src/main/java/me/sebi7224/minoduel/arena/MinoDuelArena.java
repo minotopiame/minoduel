@@ -357,21 +357,21 @@ public class MinoDuelArena extends ConfigurableArena {
         }
 
         protected boolean prepare() {
-            Player plr = getPlayer();
+            player.showPlayer(getOther(player).getPlayer());
 
-            if (getArenaManager().getPlugin().getMtcHook().isInOtherGame(plr.getUniqueId())) {
-                getOther(plr).getPlayer().sendMessage("§cDein Gegner hat ein Spiel in einem anderen Plugin (" +
-                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
+            if (getArenaManager().getPlugin().getMtcHook().isInOtherGame(player.getUniqueId())) {
+                getOther(player).getPlayer().sendMessage("§cDein Gegner hat ein Spiel in einem anderen Plugin (" +
+                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(player.getUniqueId()) +
                         ") begonnen. 1vs1 kann daher nicht fortfahren.");
-                plr.getPlayer().sendMessage("§cDu hast ein Spiel in einem anderen Plugin (" +
-                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(plr.getUniqueId()) +
+                player.getPlayer().sendMessage("§cDu hast ein Spiel in einem anderen Plugin (" +
+                        getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(player.getUniqueId()) +
                         ") begonnen. 1vs1 kann daher nicht fortfahren.");
                 endGame(null, false);
                 return false;
             }
 
-            if (!InventoryHelper.isInventoryEmpty(plr)) {
-                if (!getArenaManager().getPlugin().getInventorySaver().saveInventory(plr)) {
+            if (!InventoryHelper.isInventoryEmpty(player)) {
+                if (!getArenaManager().getPlugin().getInventorySaver().saveInventory(player)) {
                     getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar konnte nicht gespeichert werden! Daher können wir nicht fortfahren :(");
                     getOther(getPlayer()).getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDas Inventar deines Gegeners konnte nicht gepeichert werden," +
                             " daher mussst das Spiel abgebrochen werden!");
@@ -381,17 +381,17 @@ public class MinoDuelArena extends ConfigurableArena {
                 getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar wurde gespeichert. Du erhältest es nach dem Duell zurück.");
             }
 
-            getArenaManager().getPlugin().getMtcHook().setInGame(true, plr.getUniqueId());
-            plr.setFireTicks(0);
-            plr.setHealth(plr.getMaxHealth());
-            plr.setFoodLevel(20);
-            plr.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
-            plr.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
-            plr.setGameMode(GameMode.SURVIVAL);
-            plr.updateInventory();
-            plr.closeInventory();
-            plr.setFlying(false);
-            plr.playSound(plr.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
+            getArenaManager().getPlugin().getMtcHook().setInGame(true, player.getUniqueId());
+            player.setFireTicks(0);
+            player.setHealth(player.getMaxHealth());
+            player.setFoodLevel(20);
+            player.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
+            player.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
+            player.setGameMode(GameMode.SURVIVAL);
+            player.updateInventory();
+            player.closeInventory();
+            player.setFlying(false);
+            player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
             return true;
         }
 

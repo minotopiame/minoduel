@@ -344,8 +344,13 @@ public class MinoDuelArena extends ConfigurableArena {
             InventoryHelper.clearInventory(player);
             getArenaManager().setPlayerArena(player, null);
 
-            if (getArenaManager().getPlugin().getInventorySaver().loadInventory(player)) {
-                player.sendMessage(MinoDuelPlugin.PREFIX + "Du hast dein Inventar von vorhin zurückerhalten!");
+            if (getArenaManager().getPlugin().isEnabled() && getArenaManager().getPlugin().getInventorySaver().hasInventory(player)) {
+                getArenaManager().getPlugin().getServer().getScheduler().runTask(getArenaManager().getPlugin(), () -> {
+                            if (getArenaManager().getPlugin().getInventorySaver().loadInventory(player)) {
+                                player.sendMessage(MinoDuelPlugin.PREFIX + "Du hast dein Inventar von vorhin zurückerhalten!");
+                            }
+                        }
+                );
             }
 
             this.player = null; //Don't keep Player ref in case this object is accidentally kept

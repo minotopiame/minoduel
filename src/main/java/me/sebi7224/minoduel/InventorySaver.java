@@ -149,4 +149,15 @@ public class InventorySaver {
 
         return rejected.size() < inventory.size();
     }
+
+    /**
+     * Checks if a given player has an inventory saved.
+     *
+     * @param plr the player whose inventory to check
+     * @return whether any items are saved for given player
+     */
+    public boolean hasInventory(Player plr) {
+        return cache.containsKey(plr.getUniqueId()) ||
+                storage.isList(plr.getUniqueId().toString());
+    }
 }

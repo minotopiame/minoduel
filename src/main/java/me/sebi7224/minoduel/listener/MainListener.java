@@ -25,6 +25,7 @@ public class MainListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent evt) {
         plugin.getInventorySaver().loadInventoryWithMessage(evt.getPlayer());
+        plugin.getLocationSaver().loadLocationWithMessage(evt.getPlayer());
     }
 
     @EventHandler
@@ -60,7 +61,7 @@ public class MainListener implements Listener {
             if (opponent.getPlayer() != null) {
                 opponent.getPlayer().sendMessage(plugin.getPrefix() + "Dein Gegner hat das Spiel verlassen, daher bist du der Gewinner!");
             }
-            arena.endGame(opponent);
+            arena.endGame(opponent, false, false);
         } else {
             plugin.getQueueManager().remove(plr);
         }

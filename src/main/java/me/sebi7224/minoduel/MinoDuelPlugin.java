@@ -63,6 +63,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     private WaitingQueueManager queueManager = new WaitingQueueManager(arenaManager);
     private MTCHook mtcHook;
     private InventorySaver inventorySaver;
+    private LocationSaver locationSaver;
 
     @Override
     public void onEnable() {
@@ -73,6 +74,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
 
         inventorySaver = new InventorySaver(this);
+        locationSaver = new LocationSaver(this);
 
         //Load arenas
         arenaManager.initialise();
@@ -97,6 +99,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         //Give players their items back if their game was killed due to a reload
         getServer().getOnlinePlayers().forEach(getInventorySaver()::loadInventoryWithMessage);
+        getServer().getOnlinePlayers().forEach(getLocationSaver()::loadLocationWithMessage);
 
         getLogger().info("Enabled " + VERSION.toString() + "!");
     }
@@ -108,6 +111,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         queueManager.notifyReload();
         arenaManager.onReload();
         inventorySaver.onReload();
+        locationSaver.onReload();
     }
 
     @Override
@@ -174,6 +178,10 @@ public class MinoDuelPlugin extends JavaPlugin {
 
     public InventorySaver getInventorySaver() {
         return inventorySaver;
+    }
+
+    public LocationSaver getLocationSaver() {
+        return locationSaver;
     }
 
     public class MTCHook {

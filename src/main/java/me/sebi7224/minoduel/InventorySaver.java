@@ -38,13 +38,6 @@ public class InventorySaver {
 
 
     public InventorySaver(Plugin plugin) {
-        this.logger = Logger.getLogger(getClass().getName());
-        logger.setUseParentHandlers(false);
-        try {
-            logger.addHandler(new FileHandler(plugin.getDataFolder().getAbsolutePath() + "/inventories.log"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         this.file = new File(plugin.getDataFolder(), "inventories.persist.yml");
 
         if (!file.exists()) {
@@ -62,6 +55,14 @@ public class InventorySaver {
         }
 
         this.storage = YamlConfiguration.loadConfiguration(file);
+
+        this.logger = Logger.getLogger(getClass().getName());
+        logger.setUseParentHandlers(false);
+        try {
+            logger.addHandler(new FileHandler(plugin.getDataFolder().getAbsolutePath() + "/inventories.log"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -94,7 +94,7 @@ public class MinoDuelArena extends ConfigurableArena {
     }
 
     @Override
-    public void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage) {
+    public void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage, boolean teleportBack) {
         Validate.isTrue(winner == null || winner.getArena().equals(this));
         Validate.isTrue(players != null);
 
@@ -218,7 +218,7 @@ public class MinoDuelArena extends ConfigurableArena {
                         playerInfo.getPlayer().sendMessage("§cWir haben es bereits oft genug probiert, die Teleportation wird jetzt abgebrochen.");
                         players.getOther(playerInfo).getPlayer()
                                 .sendMessage("§4" + playerInfo.getName() + "§c konnte nicht stillhalten, daher kann das Spiel nicht beginnen. Bitte versuche es erneut.");
-                        endGame(null, false);
+                        endGame(null, false, true);
                     }
                 });
 
@@ -305,7 +305,6 @@ public class MinoDuelArena extends ConfigurableArena {
      */
     public class PlayerInfo implements ArenaPlayerInfo {
         private final int previousExperience;
-        private final Location previousLocation;
         private final Location spawnLocation;
         private final String name;
         private final UUID uniqueId;
@@ -319,7 +318,7 @@ public class MinoDuelArena extends ConfigurableArena {
             this.name = plr.getName();
             this.uniqueId = plr.getUniqueId();
             this.previousExperience = plr.getTotalExperience();
-            this.previousLocation = plr.getLocation();
+            getArenaManager().getPlugin().getLocationSaver().saveLocation(player);
 
             getArenaManager().setPlayerArena(player, MinoDuelArena.this);
         }
@@ -334,7 +333,6 @@ public class MinoDuelArena extends ConfigurableArena {
             this.valid = false;
             this.inArena = false;
             player.setTotalExperience(previousExperience);
-            player.teleport(previousLocation);
             player.setFoodLevel(20);
             player.setHealth(player.getMaxHealth());
             player.setFireTicks(0);
@@ -366,7 +364,7 @@ public class MinoDuelArena extends ConfigurableArena {
                 player.getPlayer().sendMessage("§cDu hast ein Spiel in einem anderen Plugin (" +
                         getArenaManager().getPlugin().getMtcHook().getBlockingPlugin(player.getUniqueId()) +
                         ") begonnen. 1vs1 kann daher nicht fortfahren.");
-                endGame(null, false);
+                endGame(null, false, true);
                 return false;
             }
 
@@ -375,7 +373,7 @@ public class MinoDuelArena extends ConfigurableArena {
                     getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar konnte nicht gespeichert werden! Daher können wir nicht fortfahren :(");
                     getOther(getPlayer()).getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDas Inventar deines Gegeners konnte nicht gepeichert werden," +
                             " daher mussst das Spiel abgebrochen werden!");
-                    endGame(null, false);
+                    endGame(null, false, true);
                     return false;
                 }
                 getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar wurde gespeichert. Du erhältest es nach dem Duell zurück.");

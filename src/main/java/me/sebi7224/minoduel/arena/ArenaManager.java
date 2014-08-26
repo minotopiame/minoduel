@@ -26,6 +26,7 @@ import java.util.UUID;
 
 /**
  * Static utility methods for managing MinoDuel arenas.
+ *
  * @since 1.0
  */
 public class ArenaManager {
@@ -138,6 +139,7 @@ public class ArenaManager {
 
     /**
      * Gets the first ready arena.
+     *
      * @return a ready arena or NULL if no arenas are ready.
      */
     public Arena firstReady() {
@@ -228,7 +230,7 @@ public class ArenaManager {
         for (Arena removedArena : existingArenas.values()) {
             removedArena.getPlayers()
                     .forEach(pi -> pi.getPlayer().sendMessage("§cDeine Arena wurde entfernt. Bitte entschuldige die Unannehmlichkeiten!"));
-            removedArena.endGame(null, false);
+            removedArena.endGame(null, false, true);
         }
 
         arenaMenu.refresh();
@@ -236,6 +238,7 @@ public class ArenaManager {
 
     /**
      * Gets the "any arena" icon for display in the arena menu.
+     *
      * @return the global "any arena" icon
      */
     public ItemStack getAnyArenaIcon() {
@@ -260,7 +263,7 @@ public class ArenaManager {
         arenaCache.values().stream()
                 .filter(MinoDuelArena::isOccupied).forEach(arena -> {
             arena.getPlayers().forEach(plr -> plr.getPlayer().sendMessage(plugin.getPrefix() + "Dein 1vs1 wurde aufgrund eines Reloads beendet! Wir bitten, die Unannehmlichkeiten zu entschuldigen."));
-            arena.endGame(null, false);
+            arena.endGame(null, false, true);
         });
     }
 

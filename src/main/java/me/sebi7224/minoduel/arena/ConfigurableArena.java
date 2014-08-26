@@ -71,16 +71,8 @@ public abstract class ConfigurableArena implements Arena {
 
     @Override
     public void endGame(ArenaPlayerInfo winner) {
-        endGame(winner, true);
+        endGame(winner, true, true);
     }
-
-    /**
-     * Ends this game, gives the winner their reward (if applicable)
-     *
-     * @param winner               The winner of the game or NULL if no winner could be determined.
-     * @param sendUndecidedMessage whether to send the "no winner could be determined" message if {@code winner} is NULL
-     */
-    public abstract void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage);
 
     @Override
     public void remove() {

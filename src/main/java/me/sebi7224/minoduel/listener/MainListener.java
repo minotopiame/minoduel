@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -32,7 +33,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent evt) {
-        if (evt.getEntityType() != EntityType.PLAYER) {
+        if (evt instanceof EntityDamageByEntityEvent || evt.getEntityType() != EntityType.PLAYER) {
             return;
         }
 
@@ -42,6 +43,31 @@ public class MainListener implements Listener {
         if (arena != null && victim.getHealth() - evt.getFinalDamage() <= 0) {
             arena.endGame(arena.getOther(victim));
             evt.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent evt) {
+        if (evt.getEntityType() != EntityType.PLAYER || evt.getDamager().getType() != EntityType.PLAYER) {
+            return;
+        }
+
+        Player victim = (Player) evt.getEntity();
+        Arena arena = plugin.getArenaManager().getPlayerArena(victim);
+
+        if (arena != null) {
+            if (evt.getDamager() instanceof Player) {
+                Player damager = (Player) evt.getDamager();
+                if (!arena.equals(plugin.getArenaManager().getPlayerArena(damager))) {
+                    evt.setCancelled(true);
+                    damager.sendMessage(plugin.getPrefix() + "Du darfst fremde 1vs1-Kämpfe nicht beeinflussen!");
+                }
+            }
+
+            if (victim.getHealth() - evt.getFinalDamage() <= 0) { //Handle death
+                arena.endGame(arena.getOther(victim));
+                evt.setCancelled(true);
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import io.github.xxyy.common.collections.Couple;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
+import io.github.xxyy.lib.intellij_annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +37,7 @@ public interface Arena {
      *
      * @param winner The winner of the game or NULL if no winner could be determined.
      */
-    void endGame(ArenaPlayerInfo winner);
+    void endGame(@Nullable ArenaPlayerInfo winner);
 
     /**
      * Ends this game and hands the winner their reward (if applicable).

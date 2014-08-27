@@ -15,6 +15,8 @@ import me.sebi7224.minoduel.cmd.CommandsArena;
 import me.sebi7224.minoduel.cmd.CommandsPlayer;
 import me.sebi7224.minoduel.hook.EssentialsHook;
 import me.sebi7224.minoduel.hook.MTCHook;
+import me.sebi7224.minoduel.hook.XLoginHook;
+import me.sebi7224.minoduel.listener.DefaultLocationListener;
 import me.sebi7224.minoduel.listener.MainListener;
 import me.sebi7224.minoduel.queue.WaitingQueueManager;
 import mkremins.fanciful.FancyMessage;
@@ -97,6 +99,10 @@ public class MinoDuelPlugin extends JavaPlugin {
         //Hook stuffs
         mtcHook = new MTCHook(this).tryHook();
         essentialsHook = new EssentialsHook(this).tryHook();
+
+        if (!new XLoginHook(this).tryHook().isHooked()) {
+            getServer().getPluginManager().registerEvents(new DefaultLocationListener(this), this);
+        }
 
         //Give players their items back if their game was killed due to a reload
         getServer().getOnlinePlayers().forEach(getInventorySaver()::loadInventoryWithMessage);

@@ -42,11 +42,11 @@ public interface Arena {
     /**
      * Ends this game and hands the winner their reward (if applicable).
      * This also broadcasts a message stating the game result.
-     *  @param winner               The winner of the game or NULL if no winner could be determined.
+     *
+     * @param winner               The winner of the game or NULL if no winner could be determined.
      * @param sendUndecidedMessage whether to send a message when no winner could be determined (i.e. {@code winner == null})
-     * @param teleportBack whether to teleport the loser back to their previous location (Winner is always teleported)
      */ //teleportBack is a bad design choice. Refactor if anyone has time.
-    void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage, boolean teleportBack);
+    void endGame(ArenaPlayerInfo winner, boolean sendUndecidedMessage);
 
     String getValidityString();
 

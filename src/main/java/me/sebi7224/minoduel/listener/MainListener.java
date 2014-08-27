@@ -89,7 +89,7 @@ public class MainListener implements Listener {
             if (opponent.getPlayer() != null) {
                 opponent.getPlayer().sendMessage(plugin.getPrefix() + "Dein Gegner hat das Spiel verlassen, daher bist du der Gewinner!");
             }
-            arena.endGame(opponent, false, false);
+            arena.endGame(opponent, false);
         } else {
             plugin.getQueueManager().remove(plr);
         }

@@ -230,7 +230,7 @@ public class ArenaManager {
         for (Arena removedArena : existingArenas.values()) {
             removedArena.getPlayers()
                     .forEach(pi -> pi.getPlayer().sendMessage("§cDeine Arena wurde entfernt. Bitte entschuldige die Unannehmlichkeiten!"));
-            removedArena.endGame(null, false, true);
+            removedArena.endGame(null, false);
         }
 
         arenaMenu.refresh();
@@ -263,7 +263,7 @@ public class ArenaManager {
         arenaCache.values().stream()
                 .filter(MinoDuelArena::isOccupied).forEach(arena -> {
             arena.getPlayers().forEach(plr -> plr.getPlayer().sendMessage(plugin.getPrefix() + "Dein 1vs1 wurde aufgrund eines Reloads beendet! Wir bitten, die Unannehmlichkeiten zu entschuldigen."));
-            arena.endGame(null, false, true);
+            arena.endGame(null, false);
         });
     }
 

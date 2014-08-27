@@ -71,7 +71,7 @@ public abstract class ConfigurableArena implements Arena {
 
     @Override
     public void endGame(@Nullable ArenaPlayerInfo winner) {
-        endGame(winner, true, true);
+        endGame(winner, true);
     }
 
     @Override

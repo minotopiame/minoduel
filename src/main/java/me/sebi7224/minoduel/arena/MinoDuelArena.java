@@ -382,6 +382,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
             player.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
             player.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
+            getArenaManager().getPlugin().getEssentialsHook().disableGodMode(player);
 
             return true;
         }

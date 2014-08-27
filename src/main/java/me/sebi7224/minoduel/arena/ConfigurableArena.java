@@ -80,7 +80,7 @@ public abstract class ConfigurableArena implements Arena {
 
         if (isOccupied()) {
             getPlayers().forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
-            endGame(null);
+            endGame(null, false);
         }
 
         configSection.getParent().set(configSection.getName(), null);

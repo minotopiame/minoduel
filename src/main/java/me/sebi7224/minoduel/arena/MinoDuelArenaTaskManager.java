@@ -84,7 +84,7 @@ class MinoDuelArenaTaskManager {
                 sendTimeLeft(ticksLeft / 12, "Minute");
             } else if (ticksLeft == 6 || ticksLeft < 4) { //30, 15, 10 & 5 seconds before end
                 sendTimeLeft(ticksLeft * 5, "Sekunde");
-            } else if (ticksLeft == 0) {
+            } else if (ticksLeft <= 0) {
                 arena.getArenaManager().getPlugin().getLogger().info("Arena " + arena.getName() + " w/ " + arena.getPlayerString() + " timed out.");
                 arena.endGame(null);
             }

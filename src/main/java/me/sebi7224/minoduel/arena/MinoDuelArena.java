@@ -235,7 +235,7 @@ public class MinoDuelArena extends ConfigurableArena {
                 });
 
         new RunnableTeleportLater(playerInfo.getPlayer(), playerInfo.getSpawnLocation(), 5, completeHandler)
-                .runTaskTimer(getArenaManager().getPlugin(), getArenaManager().getPlugin().getTeleportDelayTicks(),
+                .runTaskTimer(getArenaManager().getPlugin(), 20L,
                         getArenaManager().getPlugin().getTeleportDelayTicks());
     }
 

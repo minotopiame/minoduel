@@ -78,7 +78,7 @@ public class MinoDuelArena extends ConfigurableArena {
         getArenaManager().getPlugin().getServer().getScheduler().runTaskLater(getArenaManager().getPlugin(),
                 () -> teleportLater(players.getLeft()), 3L * 20L); //Teleport 3s delayed to allow players to prepare
         getArenaManager().getPlugin().getServer().getScheduler().runTaskLater(getArenaManager().getPlugin(),
-                () -> teleportLater(players.getLeft()), (3L * 20L) + 1L); //Teleport a tick later to fix players not seeing each other
+                () -> teleportLater(players.getRight()), (3L * 20L) + 1L); //Teleport a tick later to fix players not seeing each other
 
         state = ArenaState.TELEPORT;
     }

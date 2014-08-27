@@ -48,7 +48,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent evt) {
-        if (evt.getEntityType() != EntityType.PLAYER || evt.getDamager().getType() != EntityType.PLAYER) {
+        if (evt.getEntityType() != EntityType.PLAYER) {
             return;
         }
 

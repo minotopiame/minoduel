@@ -401,7 +401,7 @@ public class MinoDuelArena extends ConfigurableArena {
                     endGame(null, false, true);
                     return;
                 }
-                getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar wurde gespeichert. Du erhältest es nach dem Duell zurück.");
+                getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar wurde gespeichert. Du erhältst es nach dem Duell zurück.");
             }
 
             getArenaManager().getPlugin().getMtcHook().setInGame(true, player.getUniqueId());

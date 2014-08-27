@@ -475,7 +475,7 @@ public class MinoDuelArena extends ConfigurableArena {
             getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst in 3 Sekunden gegen §a" +
                     MinoDuelArena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
-            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst gleich in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst gleich teleportiert! (§7" + MinoDuelArena.this.getName() + "§8)");
         }
 
         protected void notifyGameStart() {

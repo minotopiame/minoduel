@@ -101,6 +101,7 @@ public class LocationSaver {
                 plr.teleport((XyLocation) input);
             }
             storage.set(plr.getUniqueId().toString(), null);
+            trySaveStorage();
             return true;
         }
 

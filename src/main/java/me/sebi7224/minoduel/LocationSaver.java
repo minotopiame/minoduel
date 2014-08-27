@@ -84,7 +84,7 @@ public class LocationSaver {
      * @return whether any items were returned to the player
      */
     public boolean loadLocation(Player plr) {
-        if (plr == null) {
+        if (plr == null || !plr.isOnline()) {
             return false;
         }
 

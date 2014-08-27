@@ -142,8 +142,9 @@ public class MinoDuelArena extends ConfigurableArena {
 
     private void teleportBackLater(Player player) {
         if (getArenaManager().getPlugin().isEnabled() && getArenaManager().getPlugin().getLocationSaver().hasLocation(player)) {
-            getArenaManager().getPlugin().getServer().getScheduler().runTask(getArenaManager().getPlugin(),
-                    () -> getArenaManager().getPlugin().getLocationSaver().loadLocation(player)
+            getArenaManager().getPlugin().getServer().getScheduler().runTaskLater(getArenaManager().getPlugin(),
+                    () -> getArenaManager().getPlugin().getLocationSaver().loadLocation(player),
+                    2L
             );
         }
     }

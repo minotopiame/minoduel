@@ -75,12 +75,14 @@ public class MinoDuelArena extends ConfigurableArena {
         );
 
         players.forEach(PlayerInfo::notifyTeleport);
-        players.forEach(this::teleportLater);
+        getArenaManager().getPlugin().getServer().getScheduler().runTaskLater(getArenaManager().getPlugin(),
+                () -> teleportLater(players.getLeft()), 3L * 20L); //Teleport 3s delayed to allow players to prepare
+        getArenaManager().getPlugin().getServer().getScheduler().runTaskLater(getArenaManager().getPlugin(),
+                () -> teleportLater(players.getLeft()), (3L * 20L) + 1L); //Teleport a tick later to fix players not seeing each other
 
         state = ArenaState.TELEPORT;
     }
 
-    @SuppressWarnings("deprecation") //updateInventory
     private void startGame() {
         XyValidate.validateState(isValid(), "This arena is currently not valid");
         XyValidate.validateState(getState() == ArenaState.TELEPORT, "Invalid state: TELEPORT expected, got: %s", getState());
@@ -223,7 +225,7 @@ public class MinoDuelArena extends ConfigurableArena {
                     }
 
                     if (failureReason == null && !playerInfo.isInArena() /* race condition or something */) {
-                        playerInfo.setInArena(true);
+                        playerInfo.onArrival();
 
                         if (players.getOther(playerInfo).isInArena()) {
                             startGame();
@@ -384,29 +386,35 @@ public class MinoDuelArena extends ConfigurableArena {
                 return false;
             }
 
+            player.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
+            player.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
+
+            return true;
+        }
+
+        protected void onArrival() {
             if (!InventoryHelper.isInventoryEmpty(player)) {
                 if (!getArenaManager().getPlugin().getInventorySaver().saveInventory(player)) {
                     getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar konnte nicht gespeichert werden! Daher können wir nicht fortfahren :(");
-                    getOther(getPlayer()).getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDas Inventar deines Gegeners konnte nicht gepeichert werden," +
-                            " daher mussst das Spiel abgebrochen werden!");
+                    getOther(getPlayer()).getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDas Inventar deines Gegners konnte nicht gepeichert werden," +
+                            " daher musste das Spiel abgebrochen werden!");
                     endGame(null, false, true);
-                    return false;
+                    return;
                 }
                 getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§cDein Inventar wurde gespeichert. Du erhältest es nach dem Duell zurück.");
             }
 
             getArenaManager().getPlugin().getMtcHook().setInGame(true, player.getUniqueId());
+            setInArena(true);
             player.setFireTicks(0);
             player.setHealth(player.getMaxHealth());
             player.setFoodLevel(20);
-            player.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
-            player.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
             player.setGameMode(GameMode.SURVIVAL);
-            player.updateInventory();
             player.closeInventory();
+            player.getInventory().clear();
+            player.updateInventory();
             player.setFlying(false);
             player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
-            return true;
         }
 
         /**
@@ -465,9 +473,9 @@ public class MinoDuelArena extends ConfigurableArena {
 
         protected void notifyTeleport() {
             getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
-            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst in jetzt gegen §a" +
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst in 3 Sekunden gegen §a" +
                     MinoDuelArena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
-            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
+            getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst gleich in die Arena §7" + MinoDuelArena.this.getName() + "§8 teleportiert!");
         }
 
         protected void notifyGameStart() {

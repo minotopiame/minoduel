@@ -11,6 +11,7 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -21,6 +22,7 @@ import io.github.xxyy.common.util.XyValidate;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -239,6 +241,21 @@ public class MinoDuelArena extends ConfigurableArena {
                         getArenaManager().getPlugin().getTeleportDelayTicks());
     }
 
+    private ItemStack[] cloneAndMarkKit(ItemStack[] stacks, String playerName) {
+        ItemStack[] cleaned = InventoryHelper.cloneAll(stacks);
+
+        for (ItemStack stack : cleaned) {
+            ItemMeta meta = stack.getItemMeta();
+            List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+            lore.add("§71vs1-Kit von §8" + playerName);
+            lore.add("§7Besitz dieses Items außerhalb von 1vs1 ist verboten!");
+            meta.setLore(lore);
+            stack.setItemMeta(meta);
+        }
+
+        return cleaned;
+    }
+
     /////////// STATIC UTIL ////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -380,8 +397,8 @@ public class MinoDuelArena extends ConfigurableArena {
                 return false;
             }
 
-            player.getInventory().setContents(InventoryHelper.cloneAll(getInventoryKit())); //This removes any items that were there before
-            player.getInventory().setArmorContents(InventoryHelper.cloneAll(getArmorKit()));
+            player.getInventory().setContents(cloneAndMarkKit(getInventoryKit(), name)); //This removes any items that were there before
+            player.getInventory().setArmorContents(cloneAndMarkKit(getArmorKit(), name));
             getArenaManager().getPlugin().getEssentialsHook().disableGodMode(player);
 
             return true;

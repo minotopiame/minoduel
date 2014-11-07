@@ -245,6 +245,10 @@ public class MinoDuelArena extends ConfigurableArena {
         ItemStack[] cleaned = InventoryHelper.cloneAll(stacks);
 
         for (ItemStack stack : cleaned) {
+            if(stack == null) {
+                continue;
+            }
+
             ItemMeta meta = stack.getItemMeta();
             List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
             lore.add("§71vs1-Kit von §8" + playerName);

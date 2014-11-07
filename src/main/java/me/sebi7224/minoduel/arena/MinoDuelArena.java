@@ -249,6 +249,7 @@ public class MinoDuelArena extends ConfigurableArena {
                 continue;
             }
 
+            System.out.println(stack+" "+stack.getItemMeta());
             ItemMeta meta = stack.getItemMeta();
             List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
             lore.add("§71vs1-Kit von §8" + playerName);

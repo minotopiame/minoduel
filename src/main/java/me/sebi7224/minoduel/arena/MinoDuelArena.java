@@ -7,6 +7,7 @@ import me.sebi7224.minoduel.queue.QueueItem;
 import org.apache.commons.lang.Validate;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -245,11 +246,10 @@ public class MinoDuelArena extends ConfigurableArena {
         ItemStack[] cleaned = InventoryHelper.cloneAll(stacks);
 
         for (ItemStack stack : cleaned) {
-            if(stack == null) {
+            if(stack == null || stack.getType().equals(Material.AIR)) {
                 continue;
             }
 
-            System.out.println(stack+" "+stack.getItemMeta());
             ItemMeta meta = stack.getItemMeta();
             List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
             lore.add("§71vs1-Kit von §8" + playerName);

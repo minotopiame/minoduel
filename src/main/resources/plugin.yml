@@ -1,7 +1,7 @@
 name: MinoDuel
 version: ${project.version}
-authors: [sebi7224, xxyy98]
-website: http://minotopia.me/
+authors: [Literallie, sebi7224]
+website: https://minotopia.me/
 softdepend: [MinoTopiaCore, Essentials]
 
-main: me.sebi7224.minoduel.MinoDuelPlugin
+main: me.minotopia.minoduel.MinoDuelPlugin

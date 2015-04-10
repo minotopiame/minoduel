@@ -4,16 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.sebi7224</groupId>
+    <groupId>me.minotopia</groupId>
     <artifactId>minoduel</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2.0.0-SNAPSHOT</version>
 
     <name>MinoDuel for Spigot</name>
 
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <xyc.version>3.0.3.1-SNAPSHOT</xyc.version>
+        <xyc.version>3.2.0.0-SNAPSHOT</xyc.version>
     </properties>
 
     <scm>
@@ -26,16 +26,13 @@
             <url>http://repo.md-5.net/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>xxyy-lib</id>
-            <url>http://server.nowak-at.net/repo/xxyy-lib/</url>
-        </repository>
-        <repository>
             <id>overcast-repo</id>
             <url>http://repo.oc.tc/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>xxyy-libs-snapshots</id>
-            <url>http://server.nowak-at.net/repo/libs-snapshot/</url>
+            <id>fanciful-repo</id>
+            <!-- Fanciful -->
+            <url>http://repo.franga2000.com/artifactory/public/</url>
         </repository>
     </repositories>
 
@@ -43,7 +40,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.7.10-R0.1-SNAPSHOT</version>
+            <version>1.8.3-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -70,12 +67,12 @@
         <dependency>
             <groupId>mkremins</groupId>
             <artifactId>fanciful</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>0.3.1</version>
         </dependency>
         <dependency>
             <groupId>io.github.xxyy.mtc</groupId>
             <artifactId>mtc-api</artifactId>
-            <version>1.6.3-SNAPSHOT</version>
+            <version>1.6.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.ess3</groupId>
@@ -168,19 +165,19 @@
                     <relocations>
                         <relocation>
                             <pattern>io.github.xxyy.common</pattern>
-                            <shadedPattern>me.sebi7224.lib.xyc</shadedPattern>
+                            <shadedPattern>me.minotopia.minoduel.lib.xyc</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>com.sk89q</pattern>
-                            <shadedPattern>me.sebi7224.lib.com.sk89q</shadedPattern>
+                            <shadedPattern>me.minotopia.minoduel.lib.com.sk89q</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>mkremins.fanciful</pattern>
-                            <shadedPattern>me.sebi7224.lib.mkremins.fanciful</shadedPattern>
+                            <shadedPattern>me.minotopia.minoduel.lib.mkremins.fanciful</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.apache.commons.lang3</pattern>
-                            <shadedPattern>me.sebi7224.lib.commons_lang3</shadedPattern>
+                            <shadedPattern>me.minotopia.minoduel.lib.commons_lang3</shadedPattern>
                         </relocation>
                     </relocations>
                     <!--<minimizeJar>true</minimizeJar>--> <!-- Not working due to this: http://jira.codehaus.org/browse/MSHADE-174 https://stackoverflow.com/questions/24415677/unable-to-shade-jar-with-maven-invokespecial-static/24417179 -->

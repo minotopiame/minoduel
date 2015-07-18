@@ -107,8 +107,8 @@ public class CommandsArena {
         public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
             Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
             player.sendMessage("§6Arena: " + (arena.isValid() ? "§a" : "§c") + arena.getName());
-            sendLocationInfo(player, arena.getFirstSpawn(), 1);
-            sendLocationInfo(player, arena.getSecondSpawn(), 2);
+            sendLocationInfo(player, arena.getFirstSpawn(), arena, 1);
+            sendLocationInfo(player, arena.getSecondSpawn(), arena, 2);
 
             arena.sendChecklist(player); //TODO click on checklist to get commands suggested
         }
@@ -256,14 +256,14 @@ public class CommandsArena {
             }
         }
 
-        private void sendLocationInfo(CommandSender player, Location location, int spawnId) {
+        private void sendLocationInfo(CommandSender player, Location location, Arena arena, int spawnId) {
             FancyMessage message = new FancyMessage("Spawn " + spawnId + ": ").color(GOLD);
             //@formatter:off
             if (location == null) {
                 message.then("nicht gesetzt! [Hier setzen]")
                         .color(RED)
-                        .tooltip("Hier klicken für", "/mda set spawn "+spawnId)
-                        .command("/mda set spawn "+spawnId)
+                        .tooltip("Hier klicken für", String.format("/mda set spawn %s %d", arena.getName(), spawnId))
+                        .command("/mda set spawn " + spawnId)
                     .send(player);
                 return;
             }

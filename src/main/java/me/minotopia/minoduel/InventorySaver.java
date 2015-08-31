@@ -106,6 +106,7 @@ public class InventorySaver {
     /**
      * Attempts to load the saved inventory of given player, if any. If the saved inventory does not fit, parts which didn't
      * will be saved back. This will send a message to the player informing them if they got anything back.
+     *
      * @param plr the player whose inventory to load
      * @return whether any items were returned to the player
      * @see #loadInventory(org.bukkit.entity.Player)

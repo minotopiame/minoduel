@@ -246,7 +246,7 @@ public class MinoDuelArena extends ConfigurableArena {
         ItemStack[] cleaned = InventoryHelper.cloneAll(stacks);
 
         for (ItemStack stack : cleaned) {
-            if(stack == null || stack.getType().equals(Material.AIR)) {
+            if (stack == null || stack.getType().equals(Material.AIR)) {
                 continue;
             }
 

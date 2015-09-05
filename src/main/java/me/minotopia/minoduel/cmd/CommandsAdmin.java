@@ -134,7 +134,7 @@ public class CommandsAdmin {
         @Console
         public void adminConfig(CommandContext args, CommandSender sender) {
             plugin.reloadConfig();
-
+            sender.sendMessage("This might have worked, but don't rely on it");
         }
     }
 }

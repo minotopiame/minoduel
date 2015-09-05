@@ -17,6 +17,7 @@ import me.minotopia.minoduel.hook.EssentialsHook;
 import me.minotopia.minoduel.hook.MTCHook;
 import me.minotopia.minoduel.hook.XLoginHook;
 import me.minotopia.minoduel.listener.DefaultLocationListener;
+import me.minotopia.minoduel.listener.IllegalItemListener;
 import me.minotopia.minoduel.listener.MainListener;
 import me.minotopia.minoduel.queue.WaitingQueueManager;
 import net.md_5.bungee.api.ChatColor;
@@ -93,6 +94,9 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         //Register Bukkit API stuffs
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
+        if(getConfig().getBoolean("find-item-markers", false)) {
+            getServer().getPluginManager().registerEvents(new IllegalItemListener(this), this);
+        }
 
         //Automagically save config every 5 minutes to minimize data-loss on crash
         getServer().getScheduler().runTaskTimer(this, this::saveConfig,

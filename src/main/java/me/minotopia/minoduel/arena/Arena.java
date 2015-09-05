@@ -19,6 +19,11 @@ import java.util.List;
  */
 public interface Arena {
     int SIZE = 2;
+    /**
+     * A static string that gets appended to MinoDuel kit items so that they can be
+     * identified if somehow removed from the game environment.
+     */
+    String KIT_LORE_MARKER = "§7Besitz dieses Items außerhalb von 1vs1 ist verboten!";
 
     /**
      * Tries to schedule a game from two queue items.

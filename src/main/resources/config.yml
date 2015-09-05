@@ -4,3 +4,9 @@
 
 # Teleport delay in seconds
 tp-delay-seconds: 3
+
+# Check all dropped items for MinoDuel kit markers and remove found items
+# Do not enable this if you are absolutely certain that items have been
+# leaked from the closed arena environment.
+# Please, do not forget to disable it once you're done.
+find-item-markers: false

@@ -254,7 +254,7 @@ public class MinoDuelArena extends ConfigurableArena {
             ItemMeta meta = stack.getItemMeta();
             List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
             lore.add("§71vs1-Kit von §8" + playerName);
-            lore.add("§7Besitz dieses Items außerhalb von 1vs1 ist verboten!");
+            lore.add(KIT_LORE_MARKER);
             meta.setLore(lore);
             stack.setItemMeta(meta);
         }

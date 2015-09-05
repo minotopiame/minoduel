@@ -96,7 +96,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         }
 
         //Automagically save config every 5 minutes to minimize data-loss on crash
-        getServer().getScheduler().runTaskTimer(this, this::saveConfig,
+        getServer().getScheduler().runTaskTimerAsynchronously(this, this::saveConfig,
                 5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
 
         //Hook stuffs

@@ -375,10 +375,8 @@ public class MinoDuelArena extends ConfigurableArena {
             player.setSaturation(9.6F); //Notch's Golden apple - balance between prev sat and taking away eventual golden apples consumed during the fight
             player.getActivePotionEffects().forEach(eff -> player.removePotionEffect(eff.getType()));
             InventoryHelper.clearInventory(player);
-            getArenaManager().getPlugin().getLogger().info("md->" + player.getOpenInventory());
             if (player.getOpenInventory() != null) {
-                getArenaManager().getPlugin().getLogger().info(player.getOpenInventory().getType().name());
-                if (player.getOpenInventory().getType().equals(InventoryType.PLAYER)) {
+                if (player.getOpenInventory().getType().equals(InventoryType.CRAFTING)) { //yes this is what having your own inventory open is, idk either
                     for (ItemStack stk : player.getOpenInventory().getTopInventory().getContents()) {
                         getArenaManager().getPlugin().getLogger().info(stk == null ? "null" : stk.getType().name());
                     }

@@ -376,8 +376,16 @@ public class MinoDuelArena extends ConfigurableArena {
             player.getActivePotionEffects().forEach(eff -> player.removePotionEffect(eff.getType()));
             InventoryHelper.clearInventory(player);
             if (player.getOpenInventory() != null) {
-                if(player.getOpenInventory().getType().equals(InventoryType.PLAYER)) {
+                if (player.getOpenInventory().getType().equals(InventoryType.PLAYER)) {
+                    for (ItemStack stk : player.getOpenInventory().getTopInventory().getContents()) {
+                        getArenaManager().getPlugin().getLogger().info(stk == null ? "null" : stk.getType().name());
+                    }
                     player.getOpenInventory().getTopInventory().clear();
+                    getArenaManager().getPlugin().getLogger().info("~~ cleared top");
+                    for (ItemStack stk : player.getOpenInventory().getTopInventory().getContents()) {
+                        getArenaManager().getPlugin().getLogger().info(stk == null ? "null" : stk.getType().name());
+                    }
+                    getArenaManager().getPlugin().getLogger().info("finished " + name);
                 }
                 player.getOpenInventory().setCursor(new ItemStack(Material.AIR));
                 player.closeInventory();

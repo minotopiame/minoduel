@@ -2,12 +2,15 @@ package me.minotopia.minoduel;
 
 import com.sk89q.minecraft.util.commands.CommandsManager;
 import com.sk89q.minecraft.util.commands.NestedCommand;
-import mkremins.fanciful.FancyMessage;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import io.github.xxyy.common.chat.XyComponentBuilder;
 import io.github.xxyy.lib.guava17.collect.ListMultimap;
 import io.github.xxyy.lib.guava17.collect.MultimapBuilder;
 
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class CommandHelpHelper {
     private final CommandsManager<CommandSender> commandsManager;
-    private ListMultimap<String, FancyMessage> messageCache = MultimapBuilder.hashKeys().arrayListValues().build();
+    private ListMultimap<String, BaseComponent[]> messageCache = MultimapBuilder.hashKeys().arrayListValues().build();
 
     public CommandHelpHelper(CommandsManager<CommandSender> commandsManager) {
         this.commandsManager = commandsManager;
@@ -68,7 +71,7 @@ public class CommandHelpHelper {
         }
 
         Map<String, Method> subCommands = commandsManager.getMethods().get(method);
-        List<FancyMessage> messages;
+        List<BaseComponent[]> messages;
 
         String commandKey = StringUtils.join(args, ' ').toLowerCase();
         if (messageCache.containsKey(commandKey)) {
@@ -83,34 +86,42 @@ public class CommandHelpHelper {
             messageCache.putAll(commandKey, messages);
         }
 
-        messages.stream().forEach(msg -> msg.send(sender));
+        messages.stream().forEach(msg -> {
+            if(sender instanceof Player) {
+                ((Player) sender).spigot().sendMessage(msg);
+            } else {
+                sender.sendMessage(BaseComponent.toLegacyText(msg));
+            }
+        });
         sender.sendMessage("§6Tipp: §eBewege deine Maus über die Befehle! :)");
 
         return true;
     }
 
-    private FancyMessage buildHelpLine(String commandKey, Method method) {
+    private BaseComponent[] buildHelpLine(String commandKey, Method method) {
         com.sk89q.minecraft.util.commands.Command cmd = method.getAnnotation(com.sk89q.minecraft.util.commands.Command.class);
         String usage = getUsage(commandKey, cmd);
 
-        FancyMessage message = new FancyMessage(usage)
+        XyComponentBuilder message = new XyComponentBuilder(usage)
                 .color(ChatColor.GOLD)
-                .tooltip("Hier klicken, um folgenden Befehl zu kopieren:", usage)
+                .tooltip("Hier klicken, um folgenden Befehl zu kopieren:\n" + usage)
                 .suggest(usage);
 
         String help = cmd.help().isEmpty() ? cmd.desc() : cmd.help();
 
         if (!help.isEmpty()) { //Append help if we have some
             String[] helpLines = help.split("\n");
-            message.then(helpLines[0] + (helpLines.length > 1 ? " [Mehr...]" : ""))
-                    .color(ChatColor.YELLOW);
-
+            String helpMessage = helpLines[0];
+            if(helpLines.length > 1) {
+                helpMessage += " [Mehr...]";
+            }
+            message.append(helpMessage, ChatColor.YELLOW, ComponentBuilder.FormatRetention.NONE);
             if (helpLines.length > 1) { //If we have multiple lines, make them available as tooltip
-                message.tooltip(helpLines);
+                message.tooltip(help);
             }
         }
 
-        return message;
+        return message.create();
     }
 
     private String getUsage(String commandKey, com.sk89q.minecraft.util.commands.Command cmd) {

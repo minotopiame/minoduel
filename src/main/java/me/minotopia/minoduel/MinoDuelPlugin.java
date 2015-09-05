@@ -19,14 +19,14 @@ import me.minotopia.minoduel.hook.XLoginHook;
 import me.minotopia.minoduel.listener.DefaultLocationListener;
 import me.minotopia.minoduel.listener.MainListener;
 import me.minotopia.minoduel.queue.WaitingQueueManager;
-import mkremins.fanciful.FancyMessage;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import io.github.xxyy.common.chat.XyComponentBuilder;
 import io.github.xxyy.common.version.PluginVersion;
 
 import java.lang.reflect.Method;
@@ -40,7 +40,9 @@ public class MinoDuelPlugin extends JavaPlugin {
     }
 
     public static final String PREFIX = "§6[§a1vs1§6] ";
-    private static final FancyMessage FANCIFUL_PREFIX = new FancyMessage("[").color(ChatColor.GOLD).then("1vs1").color(ChatColor.GREEN).then("] ").color(ChatColor.GOLD);
+    private static final XyComponentBuilder PREFIX_BUILDER = new XyComponentBuilder("[").color(ChatColor.GOLD)
+            .append("1vs1", ChatColor.GREEN)
+            .append("] ", ChatColor.GOLD);
     public static final PluginVersion VERSION = PluginVersion.ofClass(MinoDuelPlugin.class);
     private long teleportDelayTicks;
     private CommandsManager<CommandSender> commandsManager = new CommandsManager<CommandSender>() {
@@ -167,12 +169,8 @@ public class MinoDuelPlugin extends JavaPlugin {
         return queueManager;
     }
 
-    public FancyMessage getFancifulPrefix() {
-        try {
-            return FANCIFUL_PREFIX.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
-        }
+    public XyComponentBuilder getPrefixBuilder() {
+        return new XyComponentBuilder(PREFIX_BUILDER);
     }
 
     public ArenaManager getArenaManager() {

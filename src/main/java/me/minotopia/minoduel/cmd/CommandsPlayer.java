@@ -9,19 +9,19 @@ import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.arena.Arena;
 import me.minotopia.minoduel.queue.DualQueueItem;
 import me.minotopia.minoduel.queue.QueueItem;
-import mkremins.fanciful.FancyMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import io.github.xxyy.common.chat.XyComponentBuilder;
 import io.github.xxyy.common.util.inventory.InventoryHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.bukkit.ChatColor.DARK_GREEN;
-import static org.bukkit.ChatColor.DARK_RED;
-import static org.bukkit.ChatColor.GOLD;
-import static org.bukkit.ChatColor.YELLOW;
+import static net.md_5.bungee.api.ChatColor.DARK_GREEN;
+import static net.md_5.bungee.api.ChatColor.DARK_RED;
+import static net.md_5.bungee.api.ChatColor.GOLD;
+import static net.md_5.bungee.api.ChatColor.YELLOW;
 
 /**
  * Handles MinoDuel player commands.
@@ -128,15 +128,13 @@ public class CommandsPlayer {
         @CommandPermissions({"minoduel.user.arenas"})
         public void playerPosition(CommandContext args, Player player) {
             if (!plugin.getQueueManager().notifyPosition(player)) {
-                //@formatter:off
-                new FancyMessage("Du bist nicht in der Warteschlange! ")
-                         .color(YELLOW)
-                        .then("[Beitreten]")
-                            .color(GOLD)
-                            .tooltip("/1vs1 join")
-                            .suggest("/1vs1 join")
-                        .send(player);
-                //@formatter:on
+                player.spigot().sendMessage(
+                        new XyComponentBuilder("Du bist nicht in der Warteschlange! ").color(YELLOW)
+                                .append("[Beitreten]", GOLD)
+                                .tooltip("/1vs1 join")
+                                .suggest("/1vs1 join")
+                                .create()
+                );
             }
         }
 
@@ -188,7 +186,9 @@ public class CommandsPlayer {
 
             if (plugin.getRequestManager().hasPending(player, opponent)) { //If this is an answer to a request
                 if (opponentInGame) {
-                    player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. Bitte versuche es später erneut."); //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight
+                    player.sendMessage(plugin.getPrefix() + "§cDu kannst dieses Duell daher momentan nicht akzeptieren. " +
+                            "Bitte versuche es später erneut.");
+                    //TODO: Do we notify them when the opponent is done? TODO: Send players list of pending requests when they finish a fight
                 } else {
                     QueueItem opponentItem = plugin.getQueueManager().getQueueItem(opponent);
                     if (opponentItem != null && opponentItem instanceof DualQueueItem) {
@@ -200,7 +200,8 @@ public class CommandsPlayer {
                     CmdValidate.validateInventoryEmpty(player);
                     if (!InventoryHelper.isInventoryEmpty(opponent)) {
                         player.sendMessage(plugin.getPrefix() + "§4" + opponent.getName() + "§c muss zuerst sein/ihr Inventar leeren!");
-                        opponent.sendMessage(plugin.getPrefix() + "§cDu musst zuerst dein Inventar leeren, bevor §4" + player.getName() + "§c dein Duell annehmen kann!");
+                        opponent.sendMessage(plugin.getPrefix() + "§cDu musst zuerst dein Inventar leeren, bevor §4" +
+                                player.getName() + "§c dein Duell annehmen kann!");
                         return;
                     }
 
@@ -214,12 +215,14 @@ public class CommandsPlayer {
                     }
                 }
             } else if (plugin.getRequestManager().hasPending(opponent, player)) {
-                player.sendMessage(plugin.getPrefix() + "Du hast §e" + opponent.getName() + "§6 bereits eine Anfrage geschickt!"); //TODO: which arena?
-                new FancyMessage("Möchtest du diese zurückziehen? (hier klicken)")
-                        .color(GOLD)
-                        .tooltip("/1vs1 duel -c " + opponent.getName())
-                        .command("/1vs1 duel -c " + opponent.getName())
-                        .send(player);
+                player.sendMessage(plugin.getPrefix() + "Du hast §e" + opponent.getName() +
+                        "§6 bereits eine Anfrage geschickt!"); //TODO: which arena?
+                player.spigot().sendMessage(
+                        new XyComponentBuilder("Möchtest du diese zurückziehen? (hier klicken)").color(GOLD)
+                                .tooltip("/1vs1 duel -c " + opponent.getName())
+                                .command("/1vs1 duel -c " + opponent.getName())
+                                .create()
+                );
             } else {
                 Arena arena = CmdValidate.getArenaOrNull(args.getString(1, null), plugin.getArenaManager());
                 plugin.getRequestManager().request(opponent, player, arena);
@@ -227,22 +230,22 @@ public class CommandsPlayer {
                 opponent.sendMessage(plugin.getPrefix() + "§1§l" + player.getName() + "§9§l möchte sich mit dir" +
                         (arena == null ? "" : " in der Arena §1§l" + arena.getName() + "§9§l") +
                         " duellieren!");
-                plugin.getFancifulPrefix().then("[Annehmen] <-- ")
-                            .color(DARK_GREEN)
-                            .tooltip("/1vs1 duel " + player.getName())
+                opponent.spigot().sendMessage(
+                        plugin.getPrefixBuilder()
+                        .append("[Annehmen] <-- ", DARK_GREEN)
+                        .tooltip("/1vs1 duel " + player.getName())
                             .command("/1vs1 duel " + player.getName())
-                        .then("klick (i)") //Let's hope that users actually understand that lol
-                            .color(GOLD)
-                            .tooltip("Wähle eine der Optionen.",
-                                    "Du kannst die Anfrage auch", "jederzeit später bearbeiten.",
-                                    "Wenn du oder " + player.getName() + " offline gehen,", "wird die Anfrage gelöscht.")
-                        .then(" --> [Ablehnen]")
-                            .color(DARK_RED)
-                            .tooltip("/1vs1 duel -c " + player.getName())
+                        .append("klick (i)", GOLD) //Let's hope that users actually understand that lol
+                        .tooltip("Wähle eine der Optionen durch Anklicken.",  "Du kannst die Anfrage auch",
+                                "jederzeit später bearbeiten.", "Wenn du oder " + player.getName() + " offline gehen,",
+                                "wird die Anfrage gelöscht.")
+                        .append(" --> [Ablehnen]", DARK_RED)
+                        .tooltip("/1vs1 duel -c " + player.getName())
                             .command("/1vs1 duel -c " + player.getName())
-                        .send(opponent);
-                //@formatter:on
-                player.sendMessage(plugin.getPrefix() + "§e" + opponent.getName() + "§6 hat deine Anfrage erhalten. Bitte warte nun, bis er/sie diese annimmt.");
+                        .create()
+                );
+                player.sendMessage(plugin.getPrefix() + "§e" + opponent.getName() + "§6 hat deine Anfrage erhalten. " +
+                        "Bitte warte nun, bis er/sie diese annimmt.");
             }
         }
     }

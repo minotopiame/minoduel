@@ -13,7 +13,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <xyc.version>3.2.0.0-SNAPSHOT</xyc.version>
+        <xyc.version>3.3.2.0-SNAPSHOT</xyc.version>
     </properties>
 
     <scm>
@@ -28,11 +28,6 @@
         <repository>
             <id>overcast-repo</id>
             <url>http://repo.oc.tc/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>fanciful-repo</id>
-            <!-- Fanciful -->
-            <url>http://repo.franga2000.com/artifactory/public/</url>
         </repository>
     </repositories>
 
@@ -63,11 +58,6 @@
             <groupId>com.sk89q</groupId>
             <artifactId>command-framework-bukkit</artifactId>
             <version>0.5-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>mkremins</groupId>
-            <artifactId>fanciful</artifactId>
-            <version>0.3.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.github.xxyy.mtc</groupId>

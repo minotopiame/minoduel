@@ -9,23 +9,22 @@ import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.arena.Arena;
-import mkremins.fanciful.FancyMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import io.github.xxyy.common.chat.XyComponentBuilder;
 import io.github.xxyy.common.util.LocationHelper;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.bukkit.ChatColor.DARK_BLUE;
-import static org.bukkit.ChatColor.DARK_RED;
-import static org.bukkit.ChatColor.GOLD;
-import static org.bukkit.ChatColor.RED;
-import static org.bukkit.ChatColor.YELLOW;
+import static net.md_5.bungee.api.ChatColor.DARK_BLUE;
+import static net.md_5.bungee.api.ChatColor.DARK_RED;
+import static net.md_5.bungee.api.ChatColor.GOLD;
+import static net.md_5.bungee.api.ChatColor.RED;
+import static net.md_5.bungee.api.ChatColor.YELLOW;
 
 /**
  * Provides commands for managing arenas.
@@ -77,20 +76,15 @@ public class CommandsArena {
             String arenaName = args.getString(0);
 
             if (!args.hasFlag('y')) {
-                //@formatter:off
-                new FancyMessage("Möchtest du die Arena ")
-                            .color(RED)
-                        .then(arenaName)
-                            .color(DARK_RED)
-                        .then("wirklich entfernen? ")
-                            .color(RED)
-                        .then("[Ja (klick)]")
-                            .color(GOLD)
-                            .command("/mdarena remove -y " + arenaName)
-                            .tooltip("Dies entfernt die Arena und alle Optionen permanent!")
-                        .send(player);
-                return;
-                //@formatter:on
+                player.spigot().sendMessage(
+                        new XyComponentBuilder("Möchtest du die Arena ").color(RED)
+                                .append(arenaName, DARK_RED)
+                                .append(" wirklich entfernen? ", RED)
+                                .append("[Ja (klick)]", GOLD)
+                                .tooltip("Dies entfernt die Arena und alle Optionen permanent!")
+                                .command("/mdarena remove -y " + arenaName)
+                                .create()
+                );
             }
 
             Arena arena = CmdValidate.getArenaChecked(arenaName, plugin.getArenaManager());
@@ -104,7 +98,7 @@ public class CommandsArena {
                 usage = "<Arena>", min = 1)
         @CommandPermissions({"minoduel.arena.status"})
         @Console
-        public void arenaChecklist(CommandContext args, CommandSender player) throws CommandException {
+        public void arenaChecklist(CommandContext args, Player player) throws CommandException {
             Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
             player.sendMessage("§6Arena: " + (arena.isValid() ? "§a" : "§c") + arena.getName());
             sendLocationInfo(player, arena.getFirstSpawn(), arena, 1);
@@ -142,23 +136,21 @@ public class CommandsArena {
                         arena.setSecondSpawn(player.getLocation());
                         break;
                     default:
-                        //@formatter:off
-                        new FancyMessage("Unbekannte Spawnzahl! ")
-                                    .color(RED)
-                                .then("Wolltest du vielleicht: ")
-                                    .color(YELLOW)
-                                .send(player);
-                        new FancyMessage("[Spawn 1 setzen] ")
-                                    .color(DARK_BLUE)
-                                    .tooltip("/mda set spawn " + arena.getName() + " 1")
-                                    .command("/mda set spawn " + arena.getName() + " 1")
-                                .then("[Spawn 2 setzen] ")
-                                    .color(DARK_RED)
-                                    .tooltip("/mda set spawn " + arena.getName() + " 2")
-                                    .command("/mda set spawn " + arena.getName() + " 2")
-                                .send(player);
+                        player.spigot().sendMessage(
+                                new XyComponentBuilder("Unbekannte Spawnzahl! ").color(RED)
+                                        .append("Wolltest du vielleicht: ", YELLOW)
+                                        .create()
+                        );
+                        player.spigot().sendMessage(
+                                new XyComponentBuilder("[Spawn 1 setzen] ").color(DARK_BLUE)
+                                        .tooltip("/mda set spawn " + arena.getName() + " 1")
+                                        .command("/mda set spawn " + arena.getName() + " 1")
+                                        .append("[Spawn 2 setzen] ", DARK_RED)
+                                        .tooltip("/mda set spawn " + arena.getName() + " 2")
+                                        .command("/mda set spawn " + arena.getName() + " 2")
+                                        .create()
+                        );
                         return;
-                    //@formatter:on
                 }
 
                 player.sendMessage(plugin.getPrefix() + "§aSpawn §2" + args.getString(1) + " §afür §2" + arena.getName() + " §agesetzt.");
@@ -256,25 +248,20 @@ public class CommandsArena {
             }
         }
 
-        private void sendLocationInfo(CommandSender player, Location location, Arena arena, int spawnId) {
-            FancyMessage message = new FancyMessage("Spawn " + spawnId + ": ").color(GOLD);
-            //@formatter:off
-            if (location == null) {
-                message.then("nicht gesetzt! [Hier setzen]")
-                        .color(RED)
+        private void sendLocationInfo(Player player, Location location, Arena arena, int spawnId) {
+            XyComponentBuilder msg = new XyComponentBuilder("Spawn " + spawnId + ": ").color(GOLD);
+            if(location == null) {
+                msg.append("nicht gesetzt! [Hier setzen]").color(RED)
                         .tooltip("Hier klicken für", String.format("/mda set spawn %s %d", arena.getName(), spawnId))
-                        .command("/mda set spawn " + spawnId)
-                    .send(player);
-                return;
+                        .command("/mda set spawn " + spawnId);
+            } else {
+                String tpCommand = LocationHelper.createTpCommand(location, player.getName());
+                msg.append(LocationHelper.prettyPrint(location), YELLOW)
+                        .tooltip("Hier klicken zum Teleportieren:", tpCommand)
+                        .command(tpCommand);
             }
 
-            String tpCommand = LocationHelper.createTpCommand(location, player.getName());
-            message.then(LocationHelper.prettyPrint(location))
-                    .color(YELLOW)
-                    .tooltip("Hier klicken zum Teleportieren:", tpCommand)
-                    .command(tpCommand)
-                .send(player);
-            //@formatter:on
+            player.spigot().sendMessage(msg.create());
         }
     }
 }

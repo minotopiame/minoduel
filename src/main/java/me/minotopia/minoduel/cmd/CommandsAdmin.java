@@ -9,19 +9,20 @@ import com.sk89q.minecraft.util.commands.Console;
 import com.sk89q.minecraft.util.commands.NestedCommand;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.arena.Arena;
-import mkremins.fanciful.FancyMessage;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import io.github.xxyy.common.chat.XyComponentBuilder;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.bukkit.ChatColor.GOLD;
-import static org.bukkit.ChatColor.GRAY;
-import static org.bukkit.ChatColor.YELLOW;
+import static net.md_5.bungee.api.ChatColor.GOLD;
+import static net.md_5.bungee.api.ChatColor.GRAY;
+import static net.md_5.bungee.api.ChatColor.YELLOW;
 
 /**
  * Command for administering 1vs1.
@@ -105,17 +106,16 @@ public class CommandsAdmin {
 
             player.sendMessage("§6========> §eMinoTopia §6| §e1vs1 §6<========");
             for (Arena arena : arenas) {
-                //@formatter:off
-                new FancyMessage(arena.getName())
-                            .color(GOLD)
-                        .then(" -> ")
-                            .color(YELLOW)
-                        .then(arena.getValidityString())
-                            .color(GRAY)
-                            .command("/mda info " + arena.getName())
-                            .tooltip("Hier klicken für mehr Info")
-                        .send(player);
-                //@formatter:on
+                player.spigot().sendMessage(
+                        new XyComponentBuilder(arena.getName())
+                                .color(GOLD)
+                                .append(" -> ", YELLOW)
+                                .append(arena.getValidityString(), GRAY)
+                                .command("/mda info " + arena.getName())
+                                .tooltip("Hier klicken für mehr Info")
+                                .create()
+
+                );
             }
         }
 

@@ -74,9 +74,12 @@ public class MinoDuelPlugin extends JavaPlugin {
     public void onEnable() {
         //Initialize config
         saveDefaultConfig(); //Doesn't save if exists
-        getConfig().options().header("MinoDuel config file! Any changes in here will get overridden on reload - Use the ingame config editing commands.");
-        getConfig().options().copyHeader(true);
+        getConfig().options().header("MinoDuel config file! Any changes in here will get overridden on reload - Use the ingame config editing commands.")
+                .copyHeader(true)
+                .copyDefaults(true);
+
         teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
+        getConfig().addDefault("find-item-markers", false);
 
         inventorySaver = new InventorySaver(this);
         locationSaver = new LocationSaver(this);
@@ -94,7 +97,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         //Register Bukkit API stuffs
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
-        if(getConfig().getBoolean("find-item-markers", false)) {
+        if (getConfig().getBoolean("find-item-markers", false)) {
             getServer().getPluginManager().registerEvents(new IllegalItemListener(this), this);
         }
 

@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -374,7 +375,13 @@ public class MinoDuelArena extends ConfigurableArena {
             player.setSaturation(9.6F); //Notch's Golden apple - balance between prev sat and taking away eventual golden apples consumed during the fight
             player.getActivePotionEffects().forEach(eff -> player.removePotionEffect(eff.getType()));
             InventoryHelper.clearInventory(player);
-            player.closeInventory();
+            if (player.getOpenInventory() != null) {
+                if(player.getOpenInventory().getType().equals(InventoryType.PLAYER)) {
+                    player.getOpenInventory().getTopInventory().clear();
+                }
+                player.getOpenInventory().setCursor(new ItemStack(Material.AIR));
+                player.closeInventory();
+            }
             getArenaManager().setPlayerArena(player, null);
 
             if (getArenaManager().getPlugin().isEnabled() && getArenaManager().getPlugin().getInventorySaver().hasInventory(player)) {

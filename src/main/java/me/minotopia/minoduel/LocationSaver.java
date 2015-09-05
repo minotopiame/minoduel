@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Helps persisting previous locations if players leave etc
@@ -24,6 +25,7 @@ public class LocationSaver {
     private final Map<UUID, Location> cache = new HashMap<>();
     private final File file;
     private final YamlConfiguration storage;
+    private final AtomicBoolean storageDirty = new AtomicBoolean(false);
 
     public LocationSaver(Plugin plugin) {
         this.file = new File(plugin.getDataFolder(), "locations.persist.yml");
@@ -38,6 +40,7 @@ public class LocationSaver {
         }
 
         this.storage = YamlConfiguration.loadConfiguration(file);
+        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::trySaveStorage, 20L, 20L);
     }
 
     /**
@@ -49,16 +52,11 @@ public class LocationSaver {
         XyLocation location = new XyLocation(plr.getLocation());
         cache.put(plr.getUniqueId(), location);
         storage.set(plr.getUniqueId().toString(), location);
+        markStorageDirty();
     }
 
-    private boolean trySaveStorage() {
-        try {
-            storage.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return true;
-        }
-        return false;
+    private void markStorageDirty() {
+        storageDirty.compareAndSet(false, true);
     }
 
     /**
@@ -76,6 +74,16 @@ public class LocationSaver {
         return false;
     }
 
+    private void trySaveStorage() {
+        if(storageDirty.getAndSet(false)) {
+            try {
+                storage.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Attempts to load the saved inventory of given player, if any. If the saved inventory does not fit, parts which didn't
      * will be saved back.
@@ -91,7 +99,7 @@ public class LocationSaver {
         if (cache.containsKey(plr.getUniqueId())) {
             plr.teleport(cache.remove(plr.getUniqueId()));
             storage.set(plr.getUniqueId().toString(), null);
-            trySaveStorage();
+            markStorageDirty();
             return true;
         }
 
@@ -101,7 +109,7 @@ public class LocationSaver {
                 plr.teleport((XyLocation) input);
             }
             storage.set(plr.getUniqueId().toString(), null);
-            trySaveStorage();
+            markStorageDirty();
             return true;
         }
 
@@ -120,6 +128,7 @@ public class LocationSaver {
     }
 
     public void onReload() {
+        markStorageDirty();
         trySaveStorage();
     }
 }

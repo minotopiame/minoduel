@@ -124,8 +124,17 @@ public class CommandsAdmin {
         @CommandPermissions({"minoduel.admin.version"})
         @Console
         public void adminVersion(CommandContext args, CommandSender sender) {
-            sender.sendMessage("§eMinoDuel Copyright (C) 2014 sebi7224, xxyy98. All rights reserved.");
+            sender.sendMessage("§eMinoDuel Copyright (C) 2014-2015 sebi7224, Literallie. All rights reserved.");
             sender.sendMessage("§eVersion " + MinoDuelPlugin.VERSION.toString());
+        }
+
+        @Command(aliases = {"rldcfg"},
+                desc = "Lädt die Konfigurationsdatei neu (nicht empfohlen!)")
+        @CommandPermissions({"minoduel.admin.rldcfg"})
+        @Console
+        public void adminConfig(CommandContext args, CommandSender sender) {
+            plugin.reloadConfig();
+
         }
     }
 }

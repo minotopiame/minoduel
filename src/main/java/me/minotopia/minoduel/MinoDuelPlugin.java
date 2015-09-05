@@ -73,13 +73,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         //Initialize config
-        saveDefaultConfig(); //Doesn't save if exists
-        getConfig().options().header("MinoDuel config file! Any changes in here will get overridden on reload - Use the ingame config editing commands.")
-                .copyHeader(true)
-                .copyDefaults(true);
-
-        teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
-        getConfig().addDefault("find-item-markers", false);
+        loadConfig();
 
         inventorySaver = new InventorySaver(this);
         locationSaver = new LocationSaver(this);
@@ -128,6 +122,22 @@ public class MinoDuelPlugin extends JavaPlugin {
         arenaManager.onReload();
         inventorySaver.onReload();
         locationSaver.onReload();
+    }
+
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
+        this.loadConfig();
+    }
+
+    private void loadConfig() {
+        saveDefaultConfig(); //Doesn't save if exists
+        getConfig().options().header("MinoDuel config file! Any changes in here will get overridden on reload - Use the ingame config editing commands.")
+                .copyHeader(true)
+                .copyDefaults(true);
+
+        teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
+        getConfig().addDefault("find-item-markers", false);
     }
 
     @Override

@@ -64,7 +64,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     };
     private DuelRequestManager requestManager = new DuelRequestManager();
     private CommandHelpHelper helpHelper = new CommandHelpHelper(commandsManager);
-    private ArenaManager arenaManager = new ArenaManager(this);
+    private ArenaManager arenaManager;
     private WaitingQueueManager queueManager = new WaitingQueueManager(arenaManager);
     private MTCHook mtcHook;
     private EssentialsHook essentialsHook;
@@ -81,6 +81,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         locationSaver = new LocationSaver(this);
 
         //Load arenas
+        arenaManager = new ArenaManager(this);
         arenaManager.initialise();
         arenaManager.reloadArenas();
 

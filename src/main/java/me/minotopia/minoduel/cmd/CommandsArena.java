@@ -58,7 +58,7 @@ public class CommandsArena {
         public void arenaCreate(CommandContext args, Player player) throws CommandException {
             String arenaName = args.getString(0);
 
-            if (plugin.getArenaManager().existsByName(arenaName)) {
+            if (plugin.getArenaManager().existsByName(arenaName)){
                 player.sendMessage(MinoDuelPlugin.PREFIX + "§cDie Arena §4" + arenaName + " §cexistiert bereits!");
                 return;
             }
@@ -75,7 +75,7 @@ public class CommandsArena {
         public void arenaRemove(CommandContext args, Player player) throws CommandException {
             String arenaName = args.getString(0);
 
-            if (!args.hasFlag('y')) {
+            if (!args.hasFlag('y')){
                 player.spigot().sendMessage(
                         new XyComponentBuilder("Möchtest du die Arena ").color(RED)
                                 .append(arenaName, DARK_RED)
@@ -180,12 +180,12 @@ public class CommandsArena {
             public void arenaSetKit(CommandContext args, Player player) throws CommandException {
                 Arena arena = CmdValidate.getArenaChecked(args.getString(0), plugin.getArenaManager());
 
-                if (args.hasFlag('a') || !args.hasFlag('i')) {
+                if (args.hasFlag('a') || !args.hasFlag('i')){
                     arena.setArmorKit(player.getInventory().getArmorContents());
                     player.sendMessage(MinoDuelPlugin.PREFIX + "§aRüstung für §2" + arena.getName() + "§a gesetzt!");
                 }
 
-                if (args.hasFlag('i') || !args.hasFlag('a')) {
+                if (args.hasFlag('i') || !args.hasFlag('a')){
                     arena.setInventoryKit(player.getInventory().getContents());
                     player.sendMessage(MinoDuelPlugin.PREFIX + "§aHauptkit für §2" + arena.getName() + "§a gesetzt!");
                 }
@@ -250,10 +250,10 @@ public class CommandsArena {
 
         private void sendLocationInfo(Player player, Location location, Arena arena, int spawnId) {
             XyComponentBuilder msg = new XyComponentBuilder("Spawn " + spawnId + ": ").color(GOLD);
-            if(location == null) {
+            if (location == null){
                 msg.append("nicht gesetzt! [Hier setzen]").color(RED)
                         .tooltip("Hier klicken für", String.format("/mda set spawn %s %d", arena.getName(), spawnId))
-                        .command("/mda set spawn " + spawnId);
+                        .command(String.format("/mda set spawn %s %d", arena.getName(), spawnId));
             } else {
                 String tpCommand = LocationHelper.createTpCommand(location, player.getName());
                 msg.append(LocationHelper.prettyPrint(location), YELLOW)

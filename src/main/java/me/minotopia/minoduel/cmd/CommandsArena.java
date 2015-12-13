@@ -63,7 +63,7 @@ public class CommandsArena {
                 return;
             }
 
-            plugin.getArenaManager().createArena(arenaName, plugin.getConfig());
+            plugin.getArenaManager().createArena(arenaName);
             player.sendMessage(MinoDuelPlugin.PREFIX + "§aDu hast die Arena §2" + arenaName + " §aerfolgreich erstellt!");
         }
 

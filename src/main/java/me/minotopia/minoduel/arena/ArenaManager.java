@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,12 +17,16 @@ import io.github.xxyy.common.util.inventory.ItemStackFactory;
 import io.github.xxyy.lib.intellij_annotations.NotNull;
 import io.github.xxyy.lib.intellij_annotations.Nullable;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * Static utility methods for managing MinoDuel arenas.
@@ -33,6 +37,8 @@ public class ArenaManager {
 
     public static final String DEFAULT_REWARDS_PATH = "default-rewards";
 
+    private final File arenaConfigFile;
+    private final YamlConfiguration arenaConfig;
     protected final Map<String, MinoDuelArena> arenaCache = new CaseInsensitiveMap<>();
     private final Map<UUID, Arena> playersInGame = new HashMap<>();
     private final MinoDuelPlugin plugin;
@@ -42,6 +48,23 @@ public class ArenaManager {
 
     public ArenaManager(MinoDuelPlugin plugin) {
         this.plugin = plugin;
+        arenaConfigFile = new File(plugin.getDataFolder(), "arenas.yml");
+        if(!arenaConfigFile.exists()) {
+            try {
+                Files.createFile(arenaConfigFile.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException("Couldn't create arena config", e);
+            }
+        }
+        arenaConfig = YamlConfiguration.loadConfiguration(arenaConfigFile);
+
+        if (plugin.getConfig().contains(MinoDuelArena.CONFIG_PATH)){
+            arenaConfig.createSection(MinoDuelArena.CONFIG_PATH,
+                    plugin.getConfig().getConfigurationSection(MinoDuelArena.CONFIG_PATH).getValues(true));
+            plugin.getConfig().set(MinoDuelArena.CONFIG_PATH, null);
+            saveArena(null);
+            plugin.saveConfig();
+        }
     }
 
     public void initialise() {
@@ -58,7 +81,7 @@ public class ArenaManager {
     }
 
     protected void setPlayerArena(@NotNull Player plr, @Nullable Arena arena) {
-        if (arena == null) {
+        if (arena == null){
             playersInGame.remove(plr.getUniqueId());
         } else {
             playersInGame.put(plr.getUniqueId(), arena);
@@ -67,11 +90,11 @@ public class ArenaManager {
 
     @SuppressWarnings("unchecked")
     public List<ItemStack> getDefaultRewards() {
-        if (defaultRewards == null) {
+        if (defaultRewards == null){
             defaultRewards = (List<ItemStack>) plugin.getConfig().getList(DEFAULT_REWARDS_PATH);
 
-            if (defaultRewards == null || defaultRewards.isEmpty()) {
-                defaultRewards = Arrays.asList(new ItemStackFactory(Material.DIAMOND).displayName("§61vs1-Belohnung!").produce());
+            if (defaultRewards == null || defaultRewards.isEmpty()){
+                defaultRewards = Collections.singletonList(new ItemStackFactory(Material.DIAMOND).displayName("§61vs1-Belohnung!").produce());
                 plugin.getConfig().set(DEFAULT_REWARDS_PATH, defaultRewards);
                 plugin.saveConfig();
             }
@@ -99,7 +122,7 @@ public class ArenaManager {
     }
 
     public Location getLocation(ConfigurationSection section) {
-        if (section == null) {
+        if (section == null){
             return null;
         }
 
@@ -114,7 +137,7 @@ public class ArenaManager {
     }
 
     private float getFloat(String floatString) {
-        if (floatString == null) {
+        if (floatString == null){
             return 0F;
         }
 
@@ -176,8 +199,8 @@ public class ArenaManager {
     public Arena byName(String name) {
         Arena arena = arenaCache.get(name);
 
-        if (arena == null && plugin.getConfig().contains(MinoDuelArena.CONFIG_PATH + "." + name)) {
-            reloadArenas(plugin.getConfig());
+        if (arena == null && arenaConfig.contains(MinoDuelArena.CONFIG_PATH + "." + name)){
+            reloadArenas();
             arena = arenaCache.get(name);
         }
 
@@ -187,18 +210,21 @@ public class ArenaManager {
     /**
      * Creates a new Arena with empty properties. Replaces existing ones.
      *
-     * @param name   Name of the new Arena.
-     * @param config Configuration backend to use to persist arena information
+     * @param name   the name of the new Arena
      * @return the created Arena
      */
-    public Arena createArena(String name, FileConfiguration config) {
-        if (!config.contains(MinoDuelArena.CONFIG_PATH)) {
-            config.createSection(MinoDuelArena.CONFIG_PATH);
+    public Arena createArena(String name) {
+        if (!arenaConfig.contains(MinoDuelArena.CONFIG_PATH)){
+            arenaConfig.createSection(MinoDuelArena.CONFIG_PATH);
         }
 
-        MinoDuelArena arena = new MinoDuelArena(config.getConfigurationSection(MinoDuelArena.CONFIG_PATH).createSection(name), this);
+        MinoDuelArena arena = new MinoDuelArena(
+                arenaConfig.getConfigurationSection(MinoDuelArena.CONFIG_PATH).createSection(name),
+                this
+        );
+
         arenaCache.put(name, arena);
-        plugin.saveConfig();
+        saveArena(arena);
 
         return arena;
     }
@@ -206,20 +232,18 @@ public class ArenaManager {
     /**
      * Reloads arenas from a given {@link org.bukkit.configuration.file.FileConfiguration}. Loads from path {@link MinoDuelArena#CONFIG_PATH}.
      * Existing objects are modified.
-     *
-     * @param source Where to get data from
      */
-    public void reloadArenas(FileConfiguration source) {
+    public void reloadArenas() {
         Map<String, MinoDuelArena> existingArenas = new HashMap<>(arenaCache);
         arenaCache.clear();
 
-        if (source.contains(MinoDuelArena.CONFIG_PATH)) {
-            ConfigurationSection arenaSection = source.getConfigurationSection(MinoDuelArena.CONFIG_PATH);
+        if (arenaConfig.contains(MinoDuelArena.CONFIG_PATH)){
+            ConfigurationSection arenaSection = arenaConfig.getConfigurationSection(MinoDuelArena.CONFIG_PATH);
             for (String key : arenaSection.getKeys(false)) {
                 MinoDuelArena existingArena = existingArenas.get(key);
                 ConfigurationSection section = arenaSection.getConfigurationSection(key);
 
-                if (existingArena == null) {
+                if (existingArena == null){
                     arenaCache.put(key, MinoDuelArena.fromConfigSection(section, this));
                 } else {
                     existingArena.updateFrom(section);
@@ -244,10 +268,10 @@ public class ArenaManager {
      * @return the global "any arena" icon
      */
     public ItemStack getAnyArenaIcon() {
-        if (anyArenaIcon == null) {
+        if (anyArenaIcon == null){
             anyArenaIcon = plugin.getConfig().getItemStack("any-arena-icon");
 
-            if (anyArenaIcon == null) {
+            if (anyArenaIcon == null){
                 anyArenaIcon = new ItemStackFactory(Material.DIRT)
                         .displayName("§eArena egal")
                         .produce();
@@ -273,11 +297,21 @@ public class ArenaManager {
         arenaMenu.refresh();
     }
 
-    public void saveArena(@SuppressWarnings("UnusedParameters") Arena arena) {
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, plugin::saveConfig);
+    public void saveArena(@SuppressWarnings("UnusedParameters") @Nullable Arena arena) { //null saves all
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                arenaConfig.save(arenaConfigFile);
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "Failed to save arena config: ", e);
+            }
+        });
     }
 
     public MinoDuelPlugin getPlugin() {
         return plugin;
+    }
+
+    public YamlConfiguration getArenaConfig() {
+        return arenaConfig;
     }
 }

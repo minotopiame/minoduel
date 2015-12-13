@@ -55,7 +55,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         @Override
         protected boolean hasPermission(Method method, CommandSender player) { //sneaky hack bcuz @Console has no effect by default
-            if (method.isAnnotationPresent(Console.class) && !(player instanceof Player)) {
+            if (method.isAnnotationPresent(Console.class) && !(player instanceof Player)){
                 throw new PlayerOnlyCommandException("Du kannst diesen Befehl nur als Spieler ausführen!");
             }
 
@@ -82,7 +82,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         //Load arenas
         arenaManager.initialise();
-        arenaManager.reloadArenas(getConfig());
+        arenaManager.reloadArenas();
 
         //Register dem commands
         commandsManager.setInjector(new SimpleInjector(this));
@@ -93,19 +93,20 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         //Register Bukkit API stuffs
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
-        if (getConfig().getBoolean("find-item-markers", false)) {
+        if (getConfig().getBoolean("find-item-markers", false)){
             getServer().getPluginManager().registerEvents(new IllegalItemListener(this), this);
         }
 
 //        //Automagically save config every 5 minutes to minimize data-loss on crash
 //        getServer().getScheduler().runTaskTimerAsynchronously(this, this::saveConfig,
 //                5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
+        //now done on-demand
 
         //Hook stuffs
         mtcHook = new MTCHook(this).tryHook();
         essentialsHook = new EssentialsHook(this).tryHook();
 
-        if (!new XLoginHook(this).tryHook().isHooked()) {
+        if (!new XLoginHook(this).tryHook().isHooked()){
             getServer().getPluginManager().registerEvents(new DefaultLocationListener(this), this);
         }
 
@@ -150,6 +151,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         teleportDelayTicks = getConfig().getLong("tp-delay-seconds") * 20L;
         getConfig().addDefault("find-item-markers", false);
+        saveConfig();
     }
 
     @Override
@@ -163,7 +165,7 @@ public class MinoDuelPlugin extends JavaPlugin {
             sender.sendMessage("§c" + cue.getMessage());
             sender.sendMessage("§c" + cue.getUsage());
         } catch (WrappedCommandException wce) {
-            if (wce.getCause() instanceof NumberFormatException) {
+            if (wce.getCause() instanceof NumberFormatException){
                 sender.sendMessage("§cZahl benötigt, Zeichenkette übergeben.");
             } else {
                 sender.sendMessage("§cEin Fehler ist aufgetreten, wir bitten um Verzeihung. " +

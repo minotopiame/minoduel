@@ -31,6 +31,7 @@ import io.github.xxyy.common.chat.XyComponentBuilder;
 import io.github.xxyy.common.version.PluginVersion;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MinoDuelPlugin extends JavaPlugin {
     private static class PlayerOnlyCommandException extends RuntimeException { //Hack to work around hasPermission(...) not declaring the checked CommandException exception
@@ -69,6 +70,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     private EssentialsHook essentialsHook;
     private InventorySaver inventorySaver;
     private LocationSaver locationSaver;
+    private ReentrantLock configLock = new ReentrantLock();
 
     @Override
     public void onEnable() {
@@ -95,9 +97,9 @@ public class MinoDuelPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new IllegalItemListener(this), this);
         }
 
-        //Automagically save config every 5 minutes to minimize data-loss on crash
-        getServer().getScheduler().runTaskTimerAsynchronously(this, this::saveConfig,
-                5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
+//        //Automagically save config every 5 minutes to minimize data-loss on crash
+//        getServer().getScheduler().runTaskTimerAsynchronously(this, this::saveConfig,
+//                5L * 60L * 20L, 5L * 60L * 20L); //And yes, the compiler does actually optimize that calculation away so quit complaining kthnx
 
         //Hook stuffs
         mtcHook = new MTCHook(this).tryHook();
@@ -117,7 +119,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         //Make sure we save the config and make it impossible to override by editing manually.
-        saveConfig();
+        super.saveConfig();
         queueManager.notifyReload();
         arenaManager.onReload();
         inventorySaver.onReload();
@@ -128,6 +130,16 @@ public class MinoDuelPlugin extends JavaPlugin {
     public void reloadConfig() {
         super.reloadConfig();
         this.loadConfig();
+    }
+
+    @Override
+    public void saveConfig() {
+        configLock.lock();
+        try {
+            super.saveConfig();
+        } finally {
+            configLock.unlock();
+        }
     }
 
     private void loadConfig() {

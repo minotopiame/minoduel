@@ -78,7 +78,7 @@ public abstract class ConfigurableArena implements Arena {
     public void remove() {
         XyValidate.validateState(configSection != null, "Can't remove already removed arena!");
 
-        if (isOccupied()) {
+        if (isOccupied()){
             getPlayers().forEach(plr -> plr.getPlayer().sendMessage("§cDie Arena, in der du warst, wurde entfernt. Bitte entschuldige die Unannehmlichkeiten."));
             endGame(null, false);
         }
@@ -86,18 +86,19 @@ public abstract class ConfigurableArena implements Arena {
         configSection.getParent().set(configSection.getName(), null);
         arenaManager.arenaCache.remove(getName());
         configSection = null;
+        saveConfig();
     }
 
     @Override
     public boolean isValid() {
         boolean valid = validityChecklist.isDone(); //Overhead is probably not that bad
 
-        if (valid != lastValidity) {
+        if (valid != lastValidity){
             lastValidity = valid;
             arenaManager.registerValidityChange(this);
-            if (valid && state == ArenaState.INVALID) {
+            if (valid && state == ArenaState.INVALID){
                 state = ArenaState.READY;
-            } else if (!valid) {
+            } else if (!valid){
                 state = ArenaState.INVALID;
             }
         }
@@ -107,10 +108,10 @@ public abstract class ConfigurableArena implements Arena {
 
     @Override
     public void sendChecklist(CommandSender sender) {
-        if (isOccupied()) {
+        if (isOccupied()){
             sender.sendMessage("§7Die Arena ist momentan besetzt: " + getPlayerString());
         }
-        if (configSection == null) {
+        if (configSection == null){
             sender.sendMessage("§cDiese Arena wurde gelöscht!");
             return;
         }
@@ -120,7 +121,7 @@ public abstract class ConfigurableArena implements Arena {
 
     @Override
     public List<ItemStack> getRewards() {
-        if (specificRewards == null || specificRewards.isEmpty()) {
+        if (specificRewards == null || specificRewards.isEmpty()){
             return arenaManager.getDefaultRewards();
         }
 
@@ -135,6 +136,7 @@ public abstract class ConfigurableArena implements Arena {
         specificRewards = InventoryHelper.cloneAll(specificRewards);
         this.configSection.set(SPECIFIC_REWARD_PATH, specificRewards);
         this.specificRewards = specificRewards;
+        saveConfig();
     }
 
     public abstract boolean isOccupied();
@@ -155,6 +157,7 @@ public abstract class ConfigurableArena implements Arena {
 
         arenaManager.saveLocation(configSection.createSection(FIRST_SPAWN_PATH), firstSpawn);
         this.firstSpawn = firstSpawn;
+        saveConfig();
     }
 
     @Override
@@ -168,6 +171,7 @@ public abstract class ConfigurableArena implements Arena {
 
         arenaManager.saveLocation(configSection.createSection(SECOND_SPAWN_PATH), secondSpawn);
         this.secondSpawn = secondSpawn;
+        saveConfig();
     }
 
     @Override
@@ -181,6 +185,7 @@ public abstract class ConfigurableArena implements Arena {
 
         configSection.set(ICON_STACK_PATH, iconStack);
         this.iconStack = iconStack;
+        saveConfig();
     }
 
     @Override
@@ -189,6 +194,7 @@ public abstract class ConfigurableArena implements Arena {
 
         configSection.set(ENABLED_PATH, enabled);
         this.enabled = enabled;
+        saveConfig();
     }
 
     @Override
@@ -209,6 +215,7 @@ public abstract class ConfigurableArena implements Arena {
 
         configSection.set(INVENTORY_KIT_PATH, inventoryKit);
         this.inventoryKit = inventoryKit;
+        saveConfig();
     }
 
     @Override
@@ -224,6 +231,7 @@ public abstract class ConfigurableArena implements Arena {
 
         configSection.set(ARMOR_KIT_PATH, armorKit);
         this.armorKit = armorKit;
+        saveConfig();
     }
 
     protected ConfigurationSection getConfigSection() {
@@ -236,6 +244,7 @@ public abstract class ConfigurableArena implements Arena {
 
         this.configSection.set(REWARD_ALL_PATH, doAllRewards);
         this.doAllRewards = doAllRewards;
+        saveConfig();
     }
 
     @Override
@@ -265,15 +274,19 @@ public abstract class ConfigurableArena implements Arena {
         this.doAllRewards = configSection.getBoolean(REWARD_ALL_PATH, doAllRewards);
         this.enabled = configSection.getBoolean(ENABLED_PATH, enabled);
 
-        if (configSection.contains(INVENTORY_KIT_PATH)) {
+        if (configSection.contains(INVENTORY_KIT_PATH)){
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(INVENTORY_KIT_PATH);
             this.inventoryKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[InventoryType.PLAYER.getDefaultSize()]);
         }
 
-        if (configSection.contains(ARMOR_KIT_PATH)) {
+        if (configSection.contains(ARMOR_KIT_PATH)){
             List<ItemStack> tempInvKit = (List<ItemStack>) configSection.getList(ARMOR_KIT_PATH);
             this.armorKit = tempInvKit == null ? null : tempInvKit.toArray(new ItemStack[4]);
         }
+    }
+
+    private void saveConfig() {
+        arenaManager.saveArena(this);
     }
 
     private void validateHasConfig() {

@@ -86,6 +86,7 @@ public class ArenaManager {
 
         plugin.getConfig().set(DEFAULT_REWARDS_PATH, defaultRewards);
         this.defaultRewards = defaultRewards;
+        plugin.saveConfig();
     }
 
     public void saveLocation(ConfigurationSection section, Location loc) {
@@ -197,6 +198,7 @@ public class ArenaManager {
 
         MinoDuelArena arena = new MinoDuelArena(config.getConfigurationSection(MinoDuelArena.CONFIG_PATH).createSection(name), this);
         arenaCache.put(name, arena);
+        plugin.saveConfig();
 
         return arena;
     }
@@ -269,6 +271,10 @@ public class ArenaManager {
 
     protected void registerValidityChange(@SuppressWarnings("UnusedParameters") Arena arena) {
         arenaMenu.refresh();
+    }
+
+    public void saveArena(@SuppressWarnings("UnusedParameters") Arena arena) {
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, plugin::saveConfig);
     }
 
     public MinoDuelPlugin getPlugin() {

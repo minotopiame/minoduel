@@ -1,5 +1,6 @@
 package me.minotopia.minoduel.queue;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.arena.Arena;
@@ -299,11 +300,13 @@ public class WaitingQueueManager {
     }
 
     //Returns whether a game has been started with given arguments
-    private Collection<QueueItem> tryPop(QueueItem... items) {
+    private Collection<QueueItem> tryPop(QueueItem... items) { //additional validation because of weird NPE; https://bugs.nowak-at.net/view.php?id=496
+        Preconditions.checkNotNull(items, "items");
+        Preconditions.checkNotNull(arenaManager, "arenaManager");
         Arena arena = null;
 
         for (QueueItem item : items) {
-            if (item.getPreferredArena() != null) {
+            if (item != null && item.getPreferredArena() != null) {
                 arena = item.getPreferredArena();
                 break;
             }

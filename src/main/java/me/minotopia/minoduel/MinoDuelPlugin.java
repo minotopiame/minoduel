@@ -55,7 +55,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         @Override
         protected boolean hasPermission(Method method, CommandSender player) { //sneaky hack bcuz @Console has no effect by default
-            if (method.isAnnotationPresent(Console.class) && !(player instanceof Player)){
+            if (method.isAnnotationPresent(Console.class) && !(player instanceof Player)) {
                 throw new PlayerOnlyCommandException("Du kannst diesen Befehl nur als Spieler ausführen!");
             }
 
@@ -65,7 +65,7 @@ public class MinoDuelPlugin extends JavaPlugin {
     private DuelRequestManager requestManager = new DuelRequestManager();
     private CommandHelpHelper helpHelper = new CommandHelpHelper(commandsManager);
     private ArenaManager arenaManager;
-    private WaitingQueueManager queueManager = new WaitingQueueManager(arenaManager);
+    private WaitingQueueManager queueManager;
     private MTCHook mtcHook;
     private EssentialsHook essentialsHook;
     private InventorySaver inventorySaver;
@@ -84,6 +84,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         arenaManager = new ArenaManager(this);
         arenaManager.initialise();
         arenaManager.reloadArenas();
+        queueManager = new WaitingQueueManager(arenaManager);
 
         //Register dem commands
         commandsManager.setInjector(new SimpleInjector(this));
@@ -94,7 +95,7 @@ public class MinoDuelPlugin extends JavaPlugin {
 
         //Register Bukkit API stuffs
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
-        if (getConfig().getBoolean("find-item-markers", false)){
+        if (getConfig().getBoolean("find-item-markers", false)) {
             getServer().getPluginManager().registerEvents(new IllegalItemListener(this), this);
         }
 
@@ -107,7 +108,7 @@ public class MinoDuelPlugin extends JavaPlugin {
         mtcHook = new MTCHook(this).tryHook();
         essentialsHook = new EssentialsHook(this).tryHook();
 
-        if (!new XLoginHook(this).tryHook().isHooked()){
+        if (!new XLoginHook(this).tryHook().isHooked()) {
             getServer().getPluginManager().registerEvents(new DefaultLocationListener(this), this);
         }
 
@@ -166,7 +167,7 @@ public class MinoDuelPlugin extends JavaPlugin {
             sender.sendMessage("§c" + cue.getMessage());
             sender.sendMessage("§c" + cue.getUsage());
         } catch (WrappedCommandException wce) {
-            if (wce.getCause() instanceof NumberFormatException){
+            if (wce.getCause() instanceof NumberFormatException) {
                 sender.sendMessage("§cZahl benötigt, Zeichenkette übergeben.");
             } else {
                 sender.sendMessage("§cEin Fehler ist aufgetreten, wir bitten um Verzeihung. " +

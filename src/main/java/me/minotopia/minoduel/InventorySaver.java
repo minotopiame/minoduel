@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-import io.github.xxyy.common.util.CommandHelper;
-import io.github.xxyy.common.util.inventory.InventoryHelper;
+import li.l1t.common.util.CommandHelper;
+import li.l1t.common.util.inventory.InventoryHelper;
 
 import java.io.File;
 import java.io.IOException;

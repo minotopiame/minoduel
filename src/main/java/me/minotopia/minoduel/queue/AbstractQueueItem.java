@@ -3,8 +3,7 @@ package me.minotopia.minoduel.queue;
 import me.minotopia.minoduel.arena.Arena;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**

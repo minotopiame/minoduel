@@ -12,8 +12,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.util.inventory.InventoryHelper;
-import io.github.xxyy.common.util.inventory.ItemStackFactory;
+import li.l1t.common.util.inventory.InventoryHelper;
+import li.l1t.common.util.inventory.ItemStackFactory;
 
 /**
  * A simple icon menu framework, adapted to MinoDuel.

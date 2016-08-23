@@ -2,6 +2,11 @@ package me.minotopia.minoduel.arena;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import li.l1t.common.collections.Couple;
+import li.l1t.common.games.util.RunnableTeleportLater;
+import li.l1t.common.util.CommandHelper;
+import li.l1t.common.util.XyValidate;
+import li.l1t.common.util.inventory.InventoryHelper;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.queue.QueueItem;
 import org.apache.commons.lang.Validate;
@@ -17,13 +22,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import io.github.xxyy.common.collections.Couple;
-import io.github.xxyy.common.games.util.RunnableTeleportLater;
-import io.github.xxyy.common.util.CommandHelper;
-import io.github.xxyy.common.util.XyValidate;
-import io.github.xxyy.common.util.inventory.InventoryHelper;
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,13 +41,13 @@ public class MinoDuelArena extends ConfigurableArena {
     private Couple<PlayerInfo> players = null;
     private MinoDuelArenaTaskManager tickManager = new MinoDuelArenaTaskManager(this);
 
-    public MinoDuelArena(@NotNull ConfigurationSection storageBackend, ArenaManager arenaManager) {
+    public MinoDuelArena(@Nonnull ConfigurationSection storageBackend, ArenaManager arenaManager) {
         super(storageBackend, arenaManager);
 
     }
 
     @Override
-    public Collection<QueueItem> scheduleGame(@NotNull QueueItem... items) {
+    public Collection<QueueItem> scheduleGame(@Nonnull QueueItem... items) {
         Validate.isTrue(items.length <= SIZE, "Expected maximum of SIZE queue items, given: ", items.length);
 
         Collection<QueueItem> fitItems = whichCanFit(items);
@@ -62,11 +61,11 @@ public class MinoDuelArena extends ConfigurableArena {
         return fitItems;
     }
 
-    private void scheduleGame(@NotNull List<Player> players) {
+    private void scheduleGame(@Nonnull List<Player> players) {
         scheduleGame(players.get(0), players.get(1));
     }
 
-    public void scheduleGame(@NotNull Player plr1, @NotNull Player plr2) {
+    public void scheduleGame(@Nonnull Player plr1, @Nonnull Player plr2) {
         Validate.isTrue(getState() == ArenaState.READY, "This arena is currently not ready: ", getState());
         Validate.notNull(plr1, "Player one is null");
         Validate.notNull(plr2, "Player two is null");
@@ -194,7 +193,7 @@ public class MinoDuelArena extends ConfigurableArena {
     }
 
     @Override
-    public ArenaPlayerInfo getOther(@NotNull Player plr) {
+    public ArenaPlayerInfo getOther(@Nonnull Player plr) {
         XyValidate.validateState(isValid(), "Arena is invalid!");
 
         if (players.getLeft().getPlayer().equals(plr)) {
@@ -212,7 +211,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
     ///////////////////////////// PRIVATE UTIL /////////////////////////////////////////////////////////////////////////
 
-    private void teleportLater(@NotNull PlayerInfo playerInfo) {
+    private void teleportLater(@Nonnull PlayerInfo playerInfo) {
         Validate.notNull(playerInfo.getPlayer(), "player is null");
 
         RunnableTeleportLater.TeleportCompleteHandler completeHandler =
@@ -278,7 +277,7 @@ public class MinoDuelArena extends ConfigurableArena {
         return arena;
     }
 
-    public static Collection<QueueItem> whichCanFit(@NotNull QueueItem... items) {
+    public static Collection<QueueItem> whichCanFit(@Nonnull QueueItem... items) {
         if (items.length > SIZE) {
             throw new UnsupportedOperationException("Cannot fit more than " + SIZE + " items: " + items.length);
         }

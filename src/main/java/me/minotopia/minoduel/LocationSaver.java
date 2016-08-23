@@ -6,7 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import io.github.xxyy.common.misc.XyLocation;
+import li.l1t.common.misc.XyLocation;
 
 import java.io.File;
 import java.io.IOException;

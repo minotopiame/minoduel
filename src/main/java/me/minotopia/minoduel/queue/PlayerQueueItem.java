@@ -6,9 +6,8 @@ import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.arena.Arena;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -21,13 +20,13 @@ public class PlayerQueueItem extends AbstractQueueItem {
     public static final int SIZE = 1;
     private final Player player;
 
-    public PlayerQueueItem(@NotNull Player player, @Nullable Arena preferredArena) {
+    public PlayerQueueItem(@Nonnull Player player, @Nullable Arena preferredArena) {
         super(SIZE, preferredArena);
         this.player = player;
     }
 
     @Override
-    public void sendMessage(@NotNull QueueMessage message, Object... args) {
+    public void sendMessage(@Nonnull QueueMessage message, Object... args) {
         player.sendMessage(getMessage(message, args));
     }
 

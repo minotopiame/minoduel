@@ -2,8 +2,8 @@ package me.minotopia.minoduel.arena;
 
 import me.minotopia.minoduel.MinoDuelPlugin;
 
-import io.github.xxyy.common.util.XyValidate;
-import io.github.xxyy.common.util.task.NonAsyncBukkitRunnable;
+import li.l1t.common.util.XyValidate;
+import li.l1t.common.util.task.NonAsyncBukkitRunnable;
 
 /**
  * Manages repeating tasks for {@link me.minotopia.minoduel.arena.MinoDuelArena}, i.e. takes care of pre-game countdown and

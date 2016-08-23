@@ -4,8 +4,8 @@ import me.minotopia.minoduel.MinoDuelPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import io.github.xxyy.xlogin.common.PreferencesHolder;
-import io.github.xxyy.xlogin.common.api.spigot.event.AuthenticationEvent;
+import li.l1t.xlogin.common.PreferencesHolder;
+import li.l1t.xlogin.common.api.spigot.event.AuthenticationEvent;
 
 /**
  * Hooks into xLogin to properly delay teleporting players back.

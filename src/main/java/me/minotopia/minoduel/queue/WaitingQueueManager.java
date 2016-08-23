@@ -2,19 +2,18 @@ package me.minotopia.minoduel.queue;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import me.minotopia.minoduel.arena.Arena;
 import me.minotopia.minoduel.arena.ArenaManager;
 import me.minotopia.minoduel.arena.MinoDuelArena;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.lib.guava17.collect.ImmutableListMultimap;
-import io.github.xxyy.lib.guava17.collect.ListMultimap;
-import io.github.xxyy.lib.guava17.collect.Multimap;
-import io.github.xxyy.lib.guava17.collect.MultimapBuilder;
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public class WaitingQueueManager {
      * @param plr   Player to add, may not be NULL
      * @param arena Arena the player prefers or NULL if no preference was stated.
      */
-    public void enqueue(@NotNull Player plr, @Nullable Arena arena) {
+    public void enqueue(@Nonnull Player plr, @Nullable Arena arena) {
         remove(plr);
         queue.add(new PlayerQueueItem(plr, arena));
         findMatches();
@@ -59,7 +58,7 @@ public class WaitingQueueManager {
      *
      * @param item the item to add to the queue
      */
-    public void enqueue(@NotNull QueueItem item) {
+    public void enqueue(@Nonnull QueueItem item) {
         item.getPlayers().forEach(this::remove);
         queue.add(item);
         findMatches();
@@ -71,7 +70,7 @@ public class WaitingQueueManager {
      * @param plr Player to check for
      * @return whether given player is queued
      */
-    public boolean isQueued(@NotNull Player plr) {
+    public boolean isQueued(@Nonnull Player plr) {
         return getQueueItem(plr) != null;
     }
 
@@ -82,7 +81,7 @@ public class WaitingQueueManager {
      * @return the queue item representing that player or NULL if none
      */
     @Nullable
-    public QueueItem getQueueItem(@NotNull Player plr) {
+    public QueueItem getQueueItem(@Nonnull Player plr) {
         return queue.stream()
                 .filter(item -> item.has(plr))
                 .findAny().orElse(null);
@@ -95,7 +94,7 @@ public class WaitingQueueManager {
      * @param plr the player to remove
      * @return the {@link QueueItem} which held the player or NULL if the player wasn't in the queue.
      */
-    public QueueItem remove(@NotNull Player plr) {
+    public QueueItem remove(@Nonnull Player plr) {
         QueueItem previous = queue.stream()
                 .filter(item -> item.has(plr))
                 .findFirst().orElse(null);
@@ -261,7 +260,7 @@ public class WaitingQueueManager {
      * @param strict Whether or not to include NULL choices ("don't care about which arena) into the result
      * @return Ordered waiting queue for {@code arena}
      */
-    public List<Player> queueFor(@NotNull Arena arena, boolean strict) {
+    public List<Player> queueFor(@Nonnull Arena arena, boolean strict) {
         Predicate<QueueItem> predicate;
         if (strict) {
             predicate = item -> arena.equals(item.getPreferredArena()); //Match same arena

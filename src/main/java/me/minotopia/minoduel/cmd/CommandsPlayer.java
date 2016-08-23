@@ -12,8 +12,8 @@ import me.minotopia.minoduel.queue.QueueItem;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.common.chat.XyComponentBuilder;
-import io.github.xxyy.common.util.inventory.InventoryHelper;
+import li.l1t.common.chat.XyComponentBuilder;
+import li.l1t.common.util.inventory.InventoryHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.util.inventory.InventoryHelper;
+import li.l1t.common.util.inventory.InventoryHelper;
 
 import java.util.Collection;
 

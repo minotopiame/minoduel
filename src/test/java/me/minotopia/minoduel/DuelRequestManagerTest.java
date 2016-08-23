@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.github.xxyy.common.misc.NullableOptional;
-import io.github.xxyy.common.test.util.MockHelper;
+import li.l1t.common.misc.NullableOptional;
+import li.l1t.common.test.util.MockHelper;
 
 import java.util.UUID;
 

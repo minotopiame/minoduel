@@ -1,6 +1,8 @@
 package me.minotopia.minoduel.arena;
 
 import com.google.common.collect.ImmutableList;
+import li.l1t.common.collections.CaseInsensitiveMap;
+import li.l1t.common.util.inventory.ItemStackFactory;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
@@ -12,11 +14,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.collections.CaseInsensitiveMap;
-import io.github.xxyy.common.util.inventory.ItemStackFactory;
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -71,16 +70,16 @@ public class ArenaManager {
         this.arenaMenu = new ArenaMenu(this, plugin);
     }
 
-    public boolean isInGame(@NotNull Player plr) {
+    public boolean isInGame(@Nonnull Player plr) {
         return getPlayerArena(plr) != null;
     }
 
     @Nullable
-    public Arena getPlayerArena(@NotNull Player plr) {
+    public Arena getPlayerArena(@Nonnull Player plr) {
         return playersInGame.get(plr.getUniqueId());
     }
 
-    protected void setPlayerArena(@NotNull Player plr, @Nullable Arena arena) {
+    protected void setPlayerArena(@Nonnull Player plr, @Nullable Arena arena) {
         if (arena == null){
             playersInGame.remove(plr.getUniqueId());
         } else {

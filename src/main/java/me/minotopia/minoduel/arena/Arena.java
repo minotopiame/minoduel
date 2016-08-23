@@ -1,15 +1,14 @@
 package me.minotopia.minoduel.arena;
 
+import li.l1t.common.collections.Couple;
 import me.minotopia.minoduel.queue.QueueItem;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.collections.Couple;
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public interface Arena {
      * @param items the items to try (checked in encountering order)
      * @return a collection of all items that are participating in the game. If no game was started, this is empty.
      */
-    Collection<QueueItem> scheduleGame(@NotNull QueueItem... items);
+    Collection<QueueItem> scheduleGame(@Nonnull QueueItem... items);
 
     /**
      * Ends this game and hands the winner their reward (if applicable).
@@ -93,7 +92,7 @@ public interface Arena {
      * @param plr Player not to target (you get it?!!)
      * @return opposite player or NULL if the argument is not in this arena or no opposite player could be found.
      */
-    ArenaPlayerInfo getOther(@NotNull Player plr);
+    ArenaPlayerInfo getOther(@Nonnull Player plr);
 
     Location getFirstSpawn();
 

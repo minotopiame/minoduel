@@ -13,7 +13,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <xyc.version>3.3.2.0-SNAPSHOT</xyc.version>
+        <xyc.version>4.0.4.2</xyc.version>
     </properties>
 
     <scm>
@@ -45,12 +45,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.github.xxyy.common</groupId>
+            <groupId>li.l1t.common</groupId>
             <artifactId>xyc-bukkit</artifactId>
             <version>${xyc.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.xxyy.common</groupId>
+            <groupId>li.l1t.common</groupId>
             <artifactId>xyc-games</artifactId>
             <version>${xyc.version}</version>
         </dependency>
@@ -60,9 +60,9 @@
             <version>0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>io.github.xxyy.mtc</groupId>
+            <groupId>li.l1t.mtc</groupId>
             <artifactId>mtc-api</artifactId>
-            <version>1.6.5-SNAPSHOT</version>
+            <version>1.7.0</version>
         </dependency>
         <dependency>
             <groupId>net.ess3</groupId>
@@ -70,9 +70,9 @@
             <version>2.13.1</version>
         </dependency>
         <dependency>
-            <groupId>io.github.xxyy.xlogin</groupId>
+            <groupId>li.l1t.xlogin</groupId>
             <artifactId>xlogin-api</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>2.4.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -146,17 +146,11 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>io.github.xxyy.common:xyc-bukkit</include>
-                            <include>io.github.xxyy.common:xyc-games</include>
                             <include>mkremins:fanciful</include>
                             <include>com.sk89q:command-framework-bukkit</include>
                         </includes>
                     </artifactSet>
                     <relocations>
-                        <relocation>
-                            <pattern>io.github.xxyy.common</pattern>
-                            <shadedPattern>me.minotopia.minoduel.lib.xyc</shadedPattern>
-                        </relocation>
                         <relocation>
                             <pattern>com.sk89q</pattern>
                             <shadedPattern>me.minotopia.minoduel.lib.com.sk89q</shadedPattern>

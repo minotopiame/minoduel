@@ -3,7 +3,7 @@ package me.minotopia.minoduel.hook;
 import me.minotopia.minoduel.MinoDuelPlugin;
 import org.bukkit.plugin.Plugin;
 
-import io.github.xxyy.mtc.api.PlayerGameManager;
+import li.l1t.mtc.api.PlayerGameManager;
 
 import java.util.UUID;
 

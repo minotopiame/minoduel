@@ -7,9 +7,8 @@ import me.minotopia.minoduel.arena.Arena;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -23,18 +22,18 @@ public class DualQueueItem extends AbstractQueueItem {
     public static int SIZE = 2;
     private final List<Player> players;
 
-    public DualQueueItem(@Nullable Arena preferredArena, @NotNull Player... players) {
+    public DualQueueItem(@Nullable Arena preferredArena, @Nonnull Player... players) {
         this(preferredArena, Lists.newArrayList(players));
     }
 
-    public DualQueueItem(@Nullable Arena preferredArena, @NotNull List<Player> players) {
+    public DualQueueItem(@Nullable Arena preferredArena, @Nonnull List<Player> players) {
         super(SIZE, preferredArena);
         Validate.isTrue(players.size() == SIZE, "Size of players must be 2! (Given: %s)", players.size());
         this.players = ImmutableList.copyOf(players);
     }
 
     @Override
-    public void sendMessage(@NotNull QueueMessage type, @NotNull Object... args) {
+    public void sendMessage(@Nonnull QueueMessage type, @Nonnull Object... args) {
         String result = MinoDuelPlugin.PREFIX;
 
         switch (type) {
@@ -70,7 +69,7 @@ public class DualQueueItem extends AbstractQueueItem {
         return players;
     }
 
-    public Player getOther(@NotNull Player plr) {
+    public Player getOther(@Nonnull Player plr) {
         if (!has(plr)) {
             return null;
         }

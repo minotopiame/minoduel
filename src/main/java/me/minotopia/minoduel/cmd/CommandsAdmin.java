@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.chat.XyComponentBuilder;
+import li.l1t.common.chat.XyComponentBuilder;
 
 import java.util.Collection;
 import java.util.List;

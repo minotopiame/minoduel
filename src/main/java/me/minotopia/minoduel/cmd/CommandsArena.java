@@ -14,8 +14,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.chat.XyComponentBuilder;
-import io.github.xxyy.common.util.LocationHelper;
+import li.l1t.common.chat.XyComponentBuilder;
+import li.l1t.common.util.LocationHelper;
 
 import java.util.List;
 import java.util.stream.Collectors;

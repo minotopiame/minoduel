@@ -1,6 +1,10 @@
 package me.minotopia.minoduel.arena;
 
 import com.google.common.collect.ImmutableList;
+import li.l1t.common.checklist.Checklist;
+import li.l1t.common.checklist.renderer.CommandSenderRenderer;
+import li.l1t.common.util.XyValidate;
+import li.l1t.common.util.inventory.InventoryHelper;
 import org.apache.commons.lang.math.RandomUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -9,13 +13,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.xxyy.common.checklist.Checklist;
-import io.github.xxyy.common.checklist.renderer.CommandSenderRenderer;
-import io.github.xxyy.common.util.XyValidate;
-import io.github.xxyy.common.util.inventory.InventoryHelper;
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +61,7 @@ public abstract class ConfigurableArena implements Arena {
             .append("Arena aktiviert", () -> enabled);
     private boolean lastValidity = false;
 
-    public ConfigurableArena(@NotNull ConfigurationSection storageBackend, ArenaManager arenaManager) {
+    public ConfigurableArena(@Nonnull ConfigurationSection storageBackend, ArenaManager arenaManager) {
         this.configSection = storageBackend;
         this.arenaManager = arenaManager;
         this.name = storageBackend.getName();

@@ -27,8 +27,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import io.github.xxyy.common.chat.XyComponentBuilder;
-import io.github.xxyy.common.version.PluginVersion;
+import li.l1t.common.chat.XyComponentBuilder;
+import li.l1t.common.version.PluginVersion;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.locks.ReentrantLock;

@@ -1,15 +1,14 @@
 package me.minotopia.minoduel;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import li.l1t.common.misc.NullableOptional;
 import me.minotopia.minoduel.arena.Arena;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 
-import io.github.xxyy.common.misc.NullableOptional;
-import io.github.xxyy.lib.guava17.collect.Multimap;
-import io.github.xxyy.lib.guava17.collect.MultimapBuilder;
-import io.github.xxyy.lib.intellij_annotations.NotNull;
-import io.github.xxyy.lib.intellij_annotations.Nullable;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
@@ -28,7 +27,7 @@ public class DuelRequestManager {
      * @param requester the requester to search for
      * @return whether there is a request matching the parameters
      */
-    public boolean hasPending(@NotNull Player target, @NotNull Player requester) {
+    public boolean hasPending(@Nonnull Player target, @Nonnull Player requester) {
         return pendingDuelRequests.get(target.getUniqueId()).stream()
                 .anyMatch(rq -> rq.from.equals(requester.getUniqueId()));
     }
@@ -40,7 +39,7 @@ public class DuelRequestManager {
      * @param requester the player who initially requested the duel
      * @return an Optional containing the preferred arena if such request was found
      */
-    public NullableOptional<Arena> remove(@NotNull Player target, @NotNull Player requester) {
+    public NullableOptional<Arena> remove(@Nonnull Player target, @Nonnull Player requester) {
         DuelRequest duelRequest = pendingDuelRequests.get(target.getUniqueId()).stream()
                 .filter(rq -> rq.from.equals(requester.getUniqueId()))
                 .findFirst().orElse(null);
@@ -60,7 +59,7 @@ public class DuelRequestManager {
      * @param requester      the player who requested the duel
      * @param preferredArena the preferred arena or null if none
      */
-    public void request(@NotNull Player target, @NotNull Player requester, @Nullable Arena preferredArena) {
+    public void request(@Nonnull Player target, @Nonnull Player requester, @Nullable Arena preferredArena) {
         Validate.isTrue(!target.equals(requester), "Cannot request a duel with self. Get friends :P");
         Validate.isTrue(!hasPending(requester, target), "This request was already issued the other way round!");
         Validate.isTrue(!hasPending(target, requester), "This request was already issued!");
@@ -72,7 +71,7 @@ public class DuelRequestManager {
      *
      * @param player the player to target
      */
-    public void removeAll(@NotNull Player player) {
+    public void removeAll(@Nonnull Player player) {
         pendingDuelRequests.removeAll(player.getUniqueId());
         pendingDuelRequests.values().removeIf(rq -> rq.from.equals(player.getUniqueId()));
     }

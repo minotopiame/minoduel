@@ -1,7 +1,10 @@
 package me.minotopia.minoduel;
 
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import com.sk89q.minecraft.util.commands.CommandsManager;
 import com.sk89q.minecraft.util.commands.NestedCommand;
+import li.l1t.common.chat.XyComponentBuilder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -9,10 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import io.github.xxyy.common.chat.XyComponentBuilder;
-import io.github.xxyy.lib.guava17.collect.ListMultimap;
-import io.github.xxyy.lib.guava17.collect.MultimapBuilder;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

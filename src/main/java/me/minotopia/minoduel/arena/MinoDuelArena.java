@@ -438,7 +438,7 @@ public class MinoDuelArena extends ConfigurableArena {
             player.getInventory().clear();
             player.updateInventory();
             player.setFlying(false);
-            player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 0);
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 0);
         }
 
         /**
@@ -496,7 +496,7 @@ public class MinoDuelArena extends ConfigurableArena {
         }
 
         protected void notifyTeleport() {
-            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
+            getPlayer().playSound(getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1, 0.76F); //note 7, C#4
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eDu wirst in 3 Sekunden gegen §a" +
                     MinoDuelArena.this.getPlayers().getOther(this).getName() + "§e kämpfen!");
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§8Bitte stillhalten, du wirst gleich teleportiert! (§7" + MinoDuelArena.this.getName() + "§8)");
@@ -504,7 +504,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
         protected void notifyGameStart() {
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§eMögen die Spiele beginnen!");
-            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.94F); //note 11, F4
+            getPlayer().playSound(getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1, 0.94F); //note 11, F4
 
             getPlayer().getActivePotionEffects().stream()
                     .forEach(eff -> getPlayer().removePotionEffect(eff.getType()));
@@ -512,7 +512,7 @@ public class MinoDuelArena extends ConfigurableArena {
 
         protected void notifyWaitTick(int secondsLeft) {
             getPlayer().sendMessage(MinoDuelPlugin.PREFIX + "§7Das Spiel beginnt in §8" + secondsLeft + "§7 Sekunden!");
-            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_PIANO, 1, 0.76F); //note 7, C#4
+            getPlayer().playSound(getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, 1, 0.76F); //note 7, C#4
         }
 
         @Override

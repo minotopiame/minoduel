@@ -83,7 +83,7 @@ public class ArenaMenu implements Listener {
                 Player player = (Player) event.getWhoClicked();
                 Arena arena = optionArenas[slot];
 
-                player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 1, 1);
                 plugin.getQueueManager().enqueue(player, arena); //This takes care of teleportation etc if a match is found
 
                 if (plugin.getQueueManager().isQueued(player)) {

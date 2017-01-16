@@ -137,7 +137,7 @@ public class InventorySaver {
             return false;
         }
 
-        logger.info("Loaded inventory for " + plr.getName() + ": " + inventory + " @ size: " + CommandHelper.safeSize(inventory));
+        logger.info("Loaded inventory for " + plr.getName() + ": " + inventory + " @ size: " + inventory.size());
 
         cache.remove(plr.getUniqueId());
         storage.set(plr.getUniqueId().toString(), null);

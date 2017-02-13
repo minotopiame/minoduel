@@ -50,22 +50,23 @@ public class MainListener implements Listener {
         if (evt.getEntityType() != EntityType.PLAYER) {
             return;
         }
-
         Player victim = (Player) evt.getEntity();
-        Arena arena = plugin.getArenaManager().getPlayerArena(victim);
-
-        if (arena != null) {
-            if (evt.getDamager() instanceof Player) {
-                Player damager = (Player) evt.getDamager();
-                if (!arena.equals(plugin.getArenaManager().getPlayerArena(damager))) {
-                    evt.setCancelled(true);
-                    damager.sendMessage(plugin.getPrefix() + "Du darfst fremde 1vs1-Kämpfe nicht beeinflussen!");
-                }
+        Arena victimArena = plugin.getArenaManager().getPlayerArena(victim);
+        Player damager = evt.getDamager() instanceof Player ? (Player) evt.getDamager() : null;
+        if (victimArena != null) {
+            if (damager != null && !victimArena.equals(plugin.getArenaManager().getPlayerArena(damager))) {
+                evt.setCancelled(true);
+                damager.sendMessage(plugin.getPrefix() + "Du darfst fremde 1vs1-Kämpfe nicht beeinflussen.");
             }
 
             if (victim.getHealth() - evt.getFinalDamage() <= 0) { //Handle death
-                arena.endGame(arena.getOther(victim));
+                victimArena.endGame(victimArena.getOther(victim));
                 evt.setCancelled(true);
+            }
+        } else {
+            if (damager != null && plugin.getArenaManager().getPlayerArena(damager) != null) {
+                evt.setCancelled(true);
+                damager.sendMessage(plugin.getPrefix() + "Du darfst im 1vs1 keine anderen Leute schlagen.");
             }
         }
     }
